@@ -14,18 +14,10 @@ import_impact_estimate_recipes <- function(con, path,
   group <- paste0(impact$touchstone, impact$disease, impact$modelling_group,
                   sep = "\r")
   message("Importing impact estimate calculations")
-  if (transaction || dry_run) {
-    DBI::dbBegin(con)
-    on.exit(DBI::dbRollback(con))
-  }
-  dat <- lapply(split(impact, group), import_impact_estimate_recipes1,
-                con = con)
-  if (dry_run) {
-    DBI::dbRollback(con)
-  } else if (transaction) {
-    DBI::dbCommit(con)
-  }
-  on.exit()
+  dat <- with_transaction(con, transaction, dry_run, {
+    lapply(split(impact, group), import_impact_estimate_recipes1,
+           con = con)
+  })
   impact$impact_estimate_recipe <- unlist(dat, use.names = FALSE)
   invisible(impact)
 }
@@ -129,4 +121,134 @@ import_impact_estimate_recipes1 <- function(con, impact) {
   }
 
   invisible(impact_estimate_recipe)
+}
+
+impact_estimate_data <- function(con, impact_estimate_recipe_id) {
+  sql <- c(
+    "SELECT",
+    "  impact_estimate_ingredient.id",
+    "    AS impact_estimate_ingredient,",
+    "  impact_estimate_ingredient.impact_estimate_recipe",
+    "    AS impact_estimate_recipe,",
+    "  burden_estimate_set.id",
+    "    AS burden_estimate_set,",
+    ## We need to know these for the translation
+    "  impact_estimate_ingredient.name,",
+    "  impact_estimate_ingredient.burden_outcome,",
+    ## This needs expanding as version information
+    "  burden_estimate_set.uploaded_on",
+    ## Then a nasty join to get the *current set of responsibilities*
+    "FROM impact_estimate_ingredient",
+    "  JOIN responsibility",
+    "    ON impact_estimate_ingredient.responsibility = responsibility.id",
+    "  JOIN burden_estimate_set",
+    "    ON responsibility.current_burden_estimate_set = ",
+    "       burden_estimate_set.id",
+    "WHERE impact_estimate_ingredient.impact_estimate_recipe = $1")
+  cols <- DBI::dbGetQuery(con, paste(sql, collapse = " "),
+                          impact_estimate_recipe_id)
+
+  ## Similar query to work out what the focal bits are:
+  sql <- paste("SELECT impact_estimate_recipe.id AS impact_estimate_recipe,",
+               "       responsibility.current_burden_estimate_set AS",
+               "         focal_burden_estimate_set,",
+               "       scenario.focal_coverage_set",
+               "  FROM impact_estimate_recipe",
+               "  JOIN impact_estimate_ingredient",
+               "    ON impact_estimate_ingredient.id =",
+               "       impact_estimate_recipe.focal_ingredient",
+               "  JOIN responsibility",
+               "    ON responsibility.id =",
+               "       impact_estimate_ingredient.responsibility",
+               "  JOIN scenario",
+               "    ON scenario.id = responsibility.scenario",
+               " WHERE impact_estimate_recipe = $1",
+               sep = "\n")
+  info <- DBI::dbGetQuery(con, sql, impact_estimate_recipe_id)
+  stopifnot(nrow(info) == 1L)
+
+  ## Data for the calculation:
+  rename <- paste(sprintf("value%d AS %s", seq_along(cols$name), cols$name),
+                  collapse = ", ")
+  n <- nrow(cols)
+  args <- paste0("$", seq_len(n + 1), collapse = ", ")
+  sql <- sprintf(
+    "SELECT country, year, age, %s from select_burden_data%d(%s)",
+    rename, n, args)
+  pars <- as.list(c(cols$burden_outcome[[1L]], cols$burden_estimate_set))
+  data <- DBI::dbGetQuery(con, sql, pars)
+
+  list(cols = cols, info = info, data = data)
+}
+
+impact_estimate_compute1 <- function(con, impact_estimate_recipe_id) {
+  sql <- c("SELECT",
+           "    impact_estimate_recipe.*,",
+           "    responsibility_set.touchstone,",
+           "    responsibility_set.modelling_group",
+           "  FROM impact_estimate_recipe",
+           "  JOIN responsibility_set",
+           "    ON responsibility_set.id =",
+           "         impact_estimate_recipe.responsibility_set",
+           " WHERE impact_estimate_recipe.id = $1")
+  info <- DBI::dbGetQuery(con, paste(sql, collapse = "\n"),
+                          impact_estimate_recipe_id)
+  message(sprintf(" - %s / %s / %s / %s",
+                  info$touchstone, info$modelling_group, info$disease,
+                  info$name))
+
+  res <- impact_estimate_data(con, impact_estimate_recipe_id)
+  browser()
+  dat <- res$data
+  cols <- res$cols
+  value <- eval(parse(text = info$script), dat, .GlobalEnv)
+
+  if (length(value) != nrow(dat)) {
+    stop(sprintf("Expected %d values but recieved %d", nrow(res), length(value)))
+  }
+  res$value <- value
+
+  ## impact_estimate_set
+  d <- data.frame(
+    impact_estimate_recipe = impact_estimate_recipe_id,
+    recipe_touchstone = info$touchstone,
+    ## TODO: this needs to be configurable to run the
+    ## modified update
+    coverage_touchstone = info$touchstone,
+    focal_coverage_set = res$info$focal_coverage_set,
+    focal_burden_estimate_set = res$info$focal_burden_estimate_set)
+  impact_estimate_set <- insert_values_into(con, "impact_estimate_set", d)
+
+  ## impact_estimate_set_ingredient
+  d <- data.frame(impact_estimate_set = impact_estimate_set,
+                  impact_estimate_ingredient = cols$impact_estimate_ingredient,
+                  burden_estimate_set = cols$burden_estimate_set)
+  DBI::dbWriteTable(con, "impact_estimate_set_ingredient", d, append = TRUE)
+
+  ## impact_estimate
+  d <- data.frame(impact_estimate_set = impact_estimate_set,
+                  year = dat$year,
+                  age = dat$age,
+                  country = dat$country,
+                  value = res$value)
+  DBI::dbWriteTable(con, "impact_estimate", d, append = TRUE)
+
+  sql <- paste("UPDATE impact_estimate_recipe",
+               "   SET current_impact_estimate_set = $2",
+               " WHERE id = $1",
+               paste = "\n")
+  DBI::dbExecute(con, sql, list(impact_estimate_recipe_id, impact_estimate_set))
+
+  invisible(res)
+}
+
+impact_estimate_compute <- function(con, impact_estimate_recipe_ids,
+                                    transaction = TRUE, dry_run = FALSE) {
+  message(sprintf("Computing %d impact estimate sets",
+                  length(impact_estimate_recipe_ids)))
+  with_transaction(con, transaction, dry_run, {
+    for (id in impact_estimate_recipe_ids) {
+      impact_estimate_compute1(con, id)
+    }
+  })
 }

@@ -55,3 +55,18 @@ insert_values_into <- function(con, table, d, key = NULL,
   tmp <- lapply(seq_len(nrow(d)), insert1)
   vapply(tmp, identity, if (text_key) character(1) else integer(1))
 }
+
+with_transaction <- function(con, transaction, dry_run, expr) {
+  if (transaction || dry_run) {
+    DBI::dbBegin(con)
+    on.exit(DBI::dbRollback(con))
+  }
+  res <- force(expr)
+  if (dry_run) {
+    DBI::dbRollback(con)
+  } else if (transaction) {
+    DBI::dbCommit(con)
+  }
+  on.exit()
+  res
+}
