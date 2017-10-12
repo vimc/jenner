@@ -7,4 +7,6 @@ Author: Rich FitzJohn
 Maintainer: Rich FitzJohn <rich.fitzjohn@gmail.com>
 Imports:
     RPostgres,
-    vaultr
+    vaultr,
+    yaml
+RoxygenNote: 6.0.1
