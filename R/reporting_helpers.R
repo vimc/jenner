@@ -51,3 +51,20 @@ report_figure_with_metadata <- function(object, filename, meta, ...,
 
   invisible(object)
 }
+
+##' Helper function for automagically creating a named list the way
+##' that cbind and data.frame do.
+##' @title Create a named list
+##' @param ... Things to put in the list
+##' @export
+report_variable_list <- function(...) {
+  x <- as.list(substitute(list(...)))[-1L]
+  data <- list(...)
+  nms <- names(data) %||% character(length(data))
+  i <- !nzchar(nms)
+  if (any(i)) {
+    nms[i] <- vapply(x[i], function(x) if (is.name(x)) deparse(x) else "", "")
+  }
+  names(data) <- nms
+  data
+}
