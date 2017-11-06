@@ -8,4 +8,7 @@ Maintainer: Rich FitzJohn <rich.fitzjohn@gmail.com>
 Imports:
     RcppRoll,
     RPostgres,
-    vaultr
+    vaultr,
+    whisker,
+    yaml
+RoxygenNote: 6.0.1

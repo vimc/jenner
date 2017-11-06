@@ -21,7 +21,7 @@ modified_update_calculate <- function(con, touchstone_name_mod, touchstone_use) 
   touchstone_mod <- DBI::dbGetQuery(con, sql, touchstone_name_mod)
   touchstone_mod <- touchstone_mod[which.max(touchstone_mod$version), ]
 
-  meta <- mu_prepare(con)
+  meta <- mu_prepare(con, touchstone_mod$id)
   meta <- mu_impact_metadata(meta, touchstone_use)
 
   meta$touchstone_mod <-
@@ -190,7 +190,7 @@ modified_update_summary_output <- function(con, res, path_meta) {
   ret
 }
 
-mu_prepare <- function(con) {
+mu_prepare <- function(con, touchstone_new) {
   ## NOTE: duplicated from orderly - could pull out there and remove
   ## this duplication later.
   temporary_view <- function(name, sql) {
@@ -198,14 +198,18 @@ mu_prepare <- function(con) {
   }
   path_sql <- system.file("sql/modified_update", package = "jenner",
                           mustWork = TRUE)
+  read_sql <- function(name) {
+    txt <- read_file(file.path(path_sql, paste0(name, ".sql")))
+    whisker::whisker.render(txt, list(touchstone_new = touchstone_new))
+  }
+
   views <- c("migrate_coverage", "burden_fvps", "impact", "coverage",
              "target_pop_total", "target_pop_routine")
   for (v in views) {
-    sql <- read_file(file.path(path_sql, paste0(v, ".sql")))
-    DBI::dbExecute(con, temporary_view(v, sql))
+    DBI::dbExecute(con, temporary_view(v, read_sql(v)))
   }
 
-  DBI::dbGetQuery(con, read_file(file.path(path_sql, "query_metadata.sql")))
+  DBI::dbGetQuery(con, read_sql("query_metadata"))
 }
 
 mu_build_data <- function(con, index, meta, pop) {
