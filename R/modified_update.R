@@ -194,7 +194,7 @@ mu_prepare <- function(con) {
   ## NOTE: duplicated from orderly - could pull out there and remove
   ## this duplication later.
   temporary_view <- function(name, sql) {
-    sprintf("CREATE TEMPORARY VIEW %s AS\n%s", name, sql)
+    sprintf("CREATE TEMPORARY VIEW v_%s AS\n%s", name, sql)
   }
   path_sql <- system.file("sql/modified_update", package = "jenner",
                           mustWork = TRUE)
@@ -205,7 +205,7 @@ mu_prepare <- function(con) {
     DBI::dbExecute(con, temporary_view(v, sql))
   }
 
-  DBI::dbGetQuery(con, file.path(path_sql, "query_metadata.sql"))
+  DBI::dbGetQuery(con, read_file(file.path(path_sql, "query_metadata.sql")))
 }
 
 mu_build_data <- function(con, index, meta, pop) {
