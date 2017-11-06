@@ -70,3 +70,20 @@ with_transaction <- function(con, transaction, dry_run, expr) {
   on.exit()
   res
 }
+
+## Deal with data quality issues
+is_blank <- function(x) {
+  is.na(x) | x == 0
+}
+
+rbind_simple <- function(x) {
+  nms <- names(x[[1]])
+  ok <- vapply(x[-1], function(el) setequal(names(el), nms), logical(1))
+  if (!all(ok)) {
+    stop("Names do not agree")
+  }
+  cols <- lapply(nms, function(nm)
+    unlist(lapply(x, "[[", nm), use.names = FALSE))
+  names(cols) <- nms
+  as.data.frame(cols, stringsAsFactors = FALSE)
+}
