@@ -2,5 +2,3 @@
 
 export(modified_update_calculate)
 export(modified_update_summary_output)
-export(report_figure_with_metadata)
-export(report_variable_list)
