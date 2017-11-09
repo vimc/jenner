@@ -157,10 +157,12 @@ modified_update_summary_output <- function(con, res, path_meta) {
   dat_updated[names(cols_update)] <- res$data[cols_update]
 
   group_out_updated <- group_out
-  ## TODO: use data$touchststone_mod$name here for the suffix
+  ## Makeup the suffix from res$touchstone_mod$touchstone_name
+  name_suffix <- unlist(strsplit(res$touchstone_mod$touchstone_name, "-"))
+  name_suffix <- name_suffix[length(name_suffix)]
   group_out_updated$touchstone <-
-    paste0(sub("-[0-9]{6}.*", "", group_out$touchstone),
-            "-201710gavi")
+    paste0(sub("-[0-9]{6}.*", "", group_out$touchstone),"-",
+           name_suffix )
   stopifnot(all(group_out_updated$touchstone %in%
                 tr_touchstone$montagu))
   group_out_updated$touchstone_short <-
