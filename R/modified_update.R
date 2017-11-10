@@ -19,8 +19,8 @@ modified_update_calculate <- function(con, touchstone_name_mod, touchstone_use) 
                " WHERE touchstone_name = $1",
                sep = "\n")
   touchstone_mod <- DBI::dbGetQuery(con, sql, touchstone_name_mod)
-  touchstone_mod <- touchstone_mod[which.max(touchstone_mod$version), ]
-
+    i <- touchstone_mod$id != '201510gavi-42' # Thanks Tini
+    touchstone_mod <- touchstone_mod[which.max(touchstone_mod$version[i]), ]
   meta <- mu_prepare(con, touchstone_mod$id)
   meta <- mu_impact_metadata(meta, touchstone_use)
 
@@ -307,11 +307,17 @@ mu_build_data <- function(con, index, meta, pop) {
   if (is.na(x$coverage_set_new)) {
     stop("Import error: no new coverage found")
   } else {
-    d_cov_new <- DBI::dbGetQuery(con, sql, list(x$coverage_set_new, year_max2))
+    if(touchstone_name_mod == touchstone_use)  {
+      d_cov_new <- d_cov_old
+    } else {
+      d_cov_new <- DBI::dbGetQuery(con, sql, list(x$coverage_set_new, year_max2))
+    }
     dat <- merge_in(dat, mu_fix_coverage(d_cov_new),
                     c(coverage_new = "coverage",
                       coverage_target_new = "target"))
   }
+  
+
 
   ## 5. population estimates
   pop_total <- pop$total[pop$total$demographic_source == x$demographic_source, ]
@@ -382,7 +388,7 @@ mu_build_data <- function(con, index, meta, pop) {
     "coverage_target_new" else "pop_routine"
   dat$fvps_new <- dat$coverage_new * dat[[v]]
   i <- !is_blank(dat$coverage_new) & is_blank(dat$fvps_new)
-  if (any(i)) {
+  if (any(i) & touchstone_name_mod != touchstone_use) {
     ## For routine these should only be MHL
     if (x$activity_type == "routine" &&
         all(dat$country[i] %in% c("MHL", "TUV"))) {
@@ -393,7 +399,7 @@ mu_build_data <- function(con, index, meta, pop) {
       # xl need to investigate HPVGoldie by Harvard-Sweet, index 79 and 80 which triggered the error
     }
   }
-  #dat$fvps_new <- dat$fvps #xl only use this line of code if u want to update any touchstone by itself
+  if(touchstone_name_mod == touchstone_use) dat$fvps_new <- dat$fvps #xl only use this line of code if u want to update any touchstone by itself
 
   ## drop excess temporary things
   dat$.code <- NULL
