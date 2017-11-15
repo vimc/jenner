@@ -5,15 +5,6 @@
 [4] step 1-3 interactively until good
 
 # problems solved
--- summary_output script: the suffix issue
--- migrate_coverage.sql: due to the bestminus activity_type in SDF7
-NOTE:: to make the modified update capable of running all possible modups,
-I am using RIGHT JOIN at the moment.
-
-# problem to solve
--- migrate_coverage.sql: LEFT/RIGHT JOIN issue
-    
-    Left Join makes most of the sense for a modified update, because we do not intend to loss any 'old' impacts. However, there are this possibility that 'no new coverage found' is not an error, but an warning - eg. the MR_Measles.
-
-  I tend to use RIGHT JOIN for mock modup, while LEFT JOIN for real modup. How can we deal with it?
-
+-- output of XXX_averted_rate corrected
+-- one correction for update one touchstone by itself
+-- increase to version 0.0.4
