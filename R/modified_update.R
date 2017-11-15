@@ -316,7 +316,7 @@ mu_build_data <- function(con, index, meta, pop) {
                     c(coverage_new = "coverage",
                       coverage_target_new = "target"))
   }
-  
+
 
 
   ## 5. population estimates
@@ -438,6 +438,14 @@ mu_impact_metadata <- function(meta, touchstone_use) {
   list(group = group, impacts = impacts)
 }
 
+##' Calculate updated impact
+##' @title Calculate updated impact
+##'
+##' @param name Impact type: deaths_averted or cases_averted
+##'
+##' @param d Data: use impact_rate_tot (method 2)
+##'
+##' @export
 mu_scale <- function(name, d) {
   value_old <- d[[name]]
   rate_avg_old <- d[[paste0(name, "_rate_avg")]]
@@ -446,9 +454,9 @@ mu_scale <- function(name, d) {
   coverage_new <- d$coverage_new
   target_pop_avg <- d$target_pop_estimated_avg
 
-  i <- is_blank(coverage_old) &
-    !is_blank(coverage_new) &
-    !is_blank(rate_tot_old)
+  # i <- is_blank(coverage_old) &
+  #   !is_blank(coverage_new) &
+  #   !is_blank(rate_tot_old)
 
   #ret <- value_old * coverage_new / coverage_old
   #ret[i] <- coverage_new[i] * target_pop_avg[i] * rate_avg_old[i]
