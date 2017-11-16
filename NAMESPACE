@@ -2,3 +2,4 @@
 
 export(modified_update_calculate)
 export(modified_update_summary_output)
+export(mu_scale)

@@ -19,7 +19,7 @@ modified_update_calculate <- function(con, touchstone_name_mod, touchstone_use) 
                " WHERE touchstone_name = $1",
                sep = "\n")
   touchstone_mod <- DBI::dbGetQuery(con, sql, touchstone_name_mod)
-    i <- touchstone_mod$id != '201510gavi-42' # Thanks Tini
+    i <- touchstone_mod$id != '201510gavi-42'
     touchstone_mod <- touchstone_mod[which.max(touchstone_mod$version[i]), ]
   meta <- mu_prepare(con, touchstone_mod$id)
   meta <- mu_impact_metadata(meta, touchstone_use)
@@ -307,7 +307,7 @@ mu_build_data <- function(con, index, meta, pop) {
   if (is.na(x$coverage_set_new)) {
     stop("Import error: no new coverage found")
   } else {
-    if(meta$touchstone_mod$touchstone_name == meta$touchstone_use)  {
+    if(meta$touchstone_mod$touchstone_name == meta$group$touchstone_name[meta$group$index == index])  {
       d_cov_new <- d_cov_old
     } else {
       d_cov_new <- DBI::dbGetQuery(con, sql, list(x$coverage_set_new, year_max2))
@@ -316,7 +316,7 @@ mu_build_data <- function(con, index, meta, pop) {
                     c(coverage_new = "coverage",
                       coverage_target_new = "target"))
   }
-  
+
 
 
   ## 5. population estimates
@@ -344,11 +344,7 @@ mu_build_data <- function(con, index, meta, pop) {
   ## few unfortunate cases though where the coverage is nonzero but
   ## the coverage_target is not known; those cases I've opted to just
   ## zero the rate calculation but leave the impact in.
-  # below is Rich's original code
-  # for (col in c("fvps", "deaths_averted", "cases_averted")) {
-  #   i <- is_blank(dat$coverage_old) & !is_blank(dat[[col]])
-  #   dat[[col]][i] <- dat$coverage_old[i]
-  # }
+
 
   i <- is_blank(dat$fvps) &
     !(is_blank(dat$deaths_averted) & is_blank(dat$cases_averted)) &
@@ -388,7 +384,7 @@ mu_build_data <- function(con, index, meta, pop) {
     "coverage_target_new" else "pop_routine"
   dat$fvps_new <- dat$coverage_new * dat[[v]]
   i <- !is_blank(dat$coverage_new) & is_blank(dat$fvps_new)
-  if (any(i) & meta$touchstone_mod$touchstone_name != meta$touchstone_use) {
+  if (any(i) & meta$touchstone_mod$touchstone_name != meta$group$touchstone_name[meta$group$index == index]) {
     ## For routine these should only be MHL
     if (x$activity_type == "routine" &&
         all(dat$country[i] %in% c("MHL", "TUV"))) {
@@ -396,10 +392,9 @@ mu_build_data <- function(con, index, meta, pop) {
     } else if (!all(is.na(dat$fvps[i]))) {
       j <- !is_blank(dat$coverage_new[dat$year <2031]) & is_blank(dat$fvps_new[dat$year <2031])
       if(any(j)) stop("modified update error")
-      # xl need to investigate HPVGoldie by Harvard-Sweet, index 79 and 80 which triggered the error
     }
   }
-  if(meta$touchstone_mod$touchstone_name == meta$touchstone_use) dat$fvps_new <- dat$fvps #xl only use this line of code if u want to update any touchstone by itself
+  if(meta$touchstone_mod$touchstone_name == meta$group$touchstone_name[meta$group$index == index]) dat$fvps_new <- dat$fvps #xl only use this line of code if u want to update any touchstone by itself
 
   ## drop excess temporary things
   dat$.code <- NULL
@@ -438,22 +433,19 @@ mu_impact_metadata <- function(meta, touchstone_use) {
   list(group = group, impacts = impacts)
 }
 
+##' Calculate updated impact
+##' @title Calculate updated impact
+##'
+##' @param name Impact type: deaths_averted or cases_averted
+##'
+##' @param d Data: use impact_rate_tot (method 2)
+##'
+##' @export
 mu_scale <- function(name, d) {
-  value_old <- d[[name]]
-  rate_avg_old <- d[[paste0(name, "_rate_avg")]]
+  #' This chunck becomes simpler, since only method 2 is used throughout.
   rate_tot_old <- d[[paste0(name, "_rate_tot")]]
-  coverage_old <- d$coverage_old
-  coverage_new <- d$coverage_new
-  target_pop_avg <- d$target_pop_estimated_avg
-
-  i <- is_blank(coverage_old) &
-    !is_blank(coverage_new) &
-    !is_blank(rate_tot_old)
-
-  #ret <- value_old * coverage_new / coverage_old
-  #ret[i] <- coverage_new[i] * target_pop_avg[i] * rate_avg_old[i]
-  #below is a bit of code for the modup Tini suggested
   fvps_new <- d$fvps_new
+
   ret <- fvps_new * rate_tot_old
   ret
 }
@@ -520,14 +512,6 @@ mu_calculate_rate <- function(name, dat, window, n_years) {
   i <- !is.na(dat[[v_tot]])
   type[i] <- "tot"
   use[i] <- dat[[v_tot]][i]
-  ## Then, if we can take the average rate
-  i <- !is.na(dat[[v_avg]])
-  use[i] <- dat[[v_avg]][i]
-  type[i] <- "avg"
-  ## Then, prefer the instantaneous rate
-  i <- !is.na(dat[[v_inst]])
-  use[i] <- dat[[v_inst]][i]
-  type[i] <- "inst"
 
   dat[[v_use]] <- use
   dat[[v_type]] <- type
