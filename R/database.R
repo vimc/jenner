@@ -1,5 +1,5 @@
 database_connection <- function(location = "science", user = "readonly",
-                                port = NULL) {
+                                port = NULL, local_password_group = "science") {
   if (location == "science") {
     host <- "support.montagu.dide.ic.ac.uk"
     port <- 5432
@@ -15,7 +15,7 @@ database_connection <- function(location = "science", user = "readonly",
   } else if (location == "localhost") {
     host <- "localhost"
     port <- port %||% 5432
-    group <- "science"
+    group <- local_password_group
   } else {
     stop("Unknown location ", location)
   }
