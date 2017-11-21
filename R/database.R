@@ -34,3 +34,7 @@ database_connection <- function(location = "science", user = "readonly",
   attr(ret, "location") <- location
   ret
 }
+
+append_table <- function(con, table, data, ...) {
+  DBI::dbWriteTable(con, table, data, append = TRUE, row.names = FALSE)
+}
