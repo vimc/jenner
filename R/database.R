@@ -1,5 +1,15 @@
+##' Connect to database
+##' @title Connect to database
+##'
+##' @param location One of "science", "production", "uat" or
+##'   "localhost".  Be \emph{very} careful if using production
+##'
+##' @param user Username to connect as
+##' @param local_port Port (when running locally)
+##' @param local_password_group  Password group (when running locally)
+##' @export
 database_connection <- function(location = "science", user = "readonly",
-                                port = NULL, local_password_group = "science") {
+                                local_port = NULL, local_password_group = "science") {
   if (location == "science") {
     host <- "support.montagu.dide.ic.ac.uk"
     port <- 5432
@@ -14,7 +24,7 @@ database_connection <- function(location = "science", user = "readonly",
     group <- "production"
   } else if (location == "localhost") {
     host <- "localhost"
-    port <- port %||% 5432
+    port <- local_port %||% 5432
     group <- local_password_group
   } else {
     stop("Unknown location ", location)
