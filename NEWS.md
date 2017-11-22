@@ -14,4 +14,3 @@
 ### jenner 0.0.3 (2017-11-09)
  * fix suffix in summary_output
  * fix migrate coverage.sql to allow 'bestminus' type of activity (SDF6/7)
-

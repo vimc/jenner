@@ -456,7 +456,7 @@ mu_impact_metadata <- function(meta, touchstone_use) {
 ##'
 ##' @export
 mu_scale <- function(name, d) {
-  #' This chunck becomes simpler, since only method 2 is used throughout.
+  ## This chunck becomes simpler, since only method 2 is used throughout.
   rate_tot_old <- d[[paste0(name, "_rate_tot")]]
   fvps_new <- d$fvps_new
 
