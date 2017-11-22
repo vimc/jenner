@@ -1,3 +1,6 @@
+### jenner 0.0.6 (2017-11-22)
+ * create synthetic fvps for situations where - fvps is blank but given coverage 
+
 ### jenner 0.0.5 (2017-11-21)
  * start work on touchstone import
  * export `database_connection`

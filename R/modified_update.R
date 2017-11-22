@@ -344,6 +344,7 @@ mu_build_data <- function(con, index, meta, pop) {
   ## few unfortunate cases though where the coverage is nonzero but
   ## the coverage_target is not known; those cases I've opted to just
   ## zero the rate calculation but leave the impact in.
+  ## (we have such cases for routines as well.)
 
 
   i <- is_blank(dat$fvps) &
@@ -354,6 +355,19 @@ mu_build_data <- function(con, index, meta, pop) {
     message("Creating synthetic fvps for ", x$model)
     ## Otherwise use pop_routine.
     dat$fvps[i] <- dat$coverage_old[i] * dat$coverage_target[i]
+  }
+  
+  ## There are cases where we have blank fvps_old, but positive coverage_old
+  ## This caused the Inf/-Inf impact rate issue for CHN and TCD
+  ## We create synthetic fvps for such cases when applicable.
+  i <- is_blank(dat$fvps) & !is_blank(dat$coverage_old)
+  if (any(i)) {
+    message("Creating synthetic fvps for ", x$model)
+    if((x$activity_type == "campaign")){
+      dat$fvps[i] <- dat$coverage_old[i] * dat$coverage_target[i]
+    }else{
+      dat$fvps[i] <- dat$coverage_old[i] * dat$pop_routine[i]
+    }
   }
 
   dat <- mu_calculate_rate("deaths", dat, window, n_years)
@@ -383,19 +397,19 @@ mu_build_data <- function(con, index, meta, pop) {
   v <- if (x$activity_type == "campaign")
     "coverage_target_new" else "pop_routine"
   dat$fvps_new <- dat$coverage_new * dat[[v]]
-  i <- !is_blank(dat$coverage_new) & is_blank(dat$fvps_new)
-  if (any(i) & meta$touchstone_mod$touchstone_name != meta$group$touchstone_name[meta$group$index == index]) {
-    ## For routine these should only be MHL
+  
+  ## At the moment we can do nothing for MHL, TUV and XK, because we have no routine pop for them 
+  i <- !is_blank(dat$coverage_new) & is_blank(dat$fvps_new) & dat$year < 2031#& !is_blank(dat$target_pop_estimated)
+  if (any(i)) {
     if (x$activity_type == "routine" &&
-        all(dat$country[i] %in% c("MHL", "TUV"))) {
+        all(dat$country[i] %in% c("MHL", "TUV", "XK"))) {
       dat$fvps_new[i] <- dat$coverage_new[i] * dat$target_pop_estimated[i]
-    } else if (!all(is.na(dat$fvps[i]))) {
-      j <- !is_blank(dat$coverage_new[dat$year <2031]) & is_blank(dat$fvps_new[dat$year <2031])
-      if(any(j)) stop("modified update error")
-    }
+    } else if (!all(is_blank(dat$fvps[i])))
+      stop("modified update error")
   }
-  if(meta$touchstone_mod$touchstone_name == meta$group$touchstone_name[meta$group$index == index]) dat$fvps_new <- dat$fvps #xl only use this line of code if u want to update any touchstone by itself
-
+  #For analysis purpose, a touchstone can be 'updated' by itself - assumes equal fvps
+  if(meta$touchstone_mod$touchstone_name == meta$group$touchstone_name[meta$group$index == index]) 
+    dat$fvps_new <- dat$fvps 
   ## drop excess temporary things
   dat$.code <- NULL
   dat <- dat[dat$year <= year_max, ]
