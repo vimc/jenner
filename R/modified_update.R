@@ -64,8 +64,8 @@ modified_update_calculate <- function(con, touchstone_name_mod, touchstone_use) 
 ##'
 ##' @param path_meta Path to the metadata directory.  In this
 ##'   directory the following files must exist:
-##'   \code{gavi_country_data.csv}, \code{tr_touchstone.csv},
-##'   \code{tr_vaccine.csv}, and \code{years_output.csv}.  There is no
+##'   \code{gavi_country_data.csv}, \code{tr_touchstone.csv}, 
+##'   and \code{years_output.csv}.  There is no
 ##'   validation done on these files and providing the wrong thing
 ##'   will break in interesting and unknown ways.
 ##'
@@ -81,7 +81,7 @@ modified_update_summary_output <- function(con, res, path_meta) {
   ## TODO: At the moment the metadata handling is very crude; the
   ## inputs are not properly documented or anything.
   meta_files <- c("gavi_country_data.csv", "tr_touchstone.csv",
-                  "tr_vaccine.csv", "years_output.csv")
+                  "years_output.csv")
   stopifnot(all(file.exists(file.path(path_meta, meta_files))))
 
 
@@ -96,7 +96,6 @@ modified_update_summary_output <- function(con, res, path_meta) {
     paste(group$touchstone, group$disease, group$model, sep = "\n") %in%
   focal$.code
 
-  tr_vaccine <- read_csv("meta/tr_vaccine.csv")
   tr_touchstone <- read_csv("meta/tr_touchstone.csv")
 
   group_out <- data_frame(
@@ -461,6 +460,10 @@ mu_scale <- function(name, d) {
   fvps_new <- d$fvps_new
 
   ret <- fvps_new * rate_tot_old
+  i <- is.nan(ret) | is.infinite(ret)
+  ret[i] <- NA
+  j <- !is.na(d$coverage_new) & d$coverage_new == 0
+  ret[j] <- 0
   ret
 }
 

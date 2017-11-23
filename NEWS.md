@@ -1,3 +1,7 @@
+### jenner 0.0.7
+ * (VIMC-1074) re-value Inf/NaN impact_new
+ * (VIMC-1043) remove references to tr_vaccine in jenner
+ 
 ### jenner 0.0.6 (2017-11-22)
  * create synthetic fvps for situations where - fvps is blank but given coverage 
 
