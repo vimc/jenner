@@ -80,7 +80,7 @@ create_touchstone <- function(con, dat, demography_from = NULL,
   meta <- c("modelling_group", "touhstone", "status")
   resp_set <- data_frame(modelling_group = unique(dat_meta$modelling_group),
                          touchstone = touchstone_id,
-                         status = "approved")
+                         status = "incomplete")
   append_table(con, "responsibility_set", resp_set)
 
   ## import responsibility - leave current_burden_estimate_set empty
