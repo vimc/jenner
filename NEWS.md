@@ -1,3 +1,6 @@
+### jenner 0.0.7 (2017-12-14)
+ * In `create_touchstone.R`, correct responsibility status from 'approved' to 'incomplete'. 'incompelte' is the default status when a new touchstone is open.
+
 ### jenner 0.0.6 (2017-11-22)
  * create synthetic fvps for situations where - fvps is blank but given coverage 
 
