@@ -616,6 +616,15 @@ mu_fix_sdf7_psu <- function(meta, data){
     v <- "coverage_target_new"
     dat$fvps_new <- dat$coverage_new * dat[[v]]
     
+    ## At the moment we can do nothing for MHL, TUV and XK, because we have no routine pop for them
+    i <- !is_blank(dat$coverage_new) & is_blank(dat$fvps_new) & dat$year < 2031
+    if (any(i)) {
+      if (x$activity_type == "routine" &&
+          all(dat$country[i] %in% c("MHL", "TUV", "XK"))) {
+        dat$fvps_new[i] <- dat$coverage_new[i] * dat$target_pop_estimated[i]
+      } else if (!all(is_blank(dat$fvps[i])))
+        stop("modified update error")
+    }
     
     #For analysis purpose, a touchstone can be 'updated' by itself - assumes equal fvps
     if(meta$touchstone_mod$touchstone_name == meta$group$touchstone_name[meta$group$index == dat_id[1]])
