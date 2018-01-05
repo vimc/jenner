@@ -19,7 +19,7 @@ modified_update_calculate <- function(con, touchstone_name_mod, touchstone_use) 
                " WHERE touchstone_name = $1",
                sep = "\n")
   touchstone_mod <- DBI::dbGetQuery(con, sql, touchstone_name_mod)
-    i <- touchstone_mod$id != '201510gavi-42'
+    i <- touchstone_mod$id != '201510gavi-42' & touchstone_mod$id != '201710gavi-4'
     touchstone_mod <- touchstone_mod[which.max(touchstone_mod$version[i]), ]
   meta <- mu_prepare(con, touchstone_mod$id)
   meta <- mu_impact_metadata(meta, touchstone_use)
@@ -43,10 +43,12 @@ modified_update_calculate <- function(con, touchstone_name_mod, touchstone_use) 
     total = DBI::dbGetQuery(con, sprintf(fmt, "total", year_min, year_max)),
     routine = DBI::dbGetQuery(con, sprintf(fmt, "routine", year_min, year_max)))
 
+  
   index <- meta$group$index
   data <- lapply(index, function(i) mu_build_data(con, i, meta, pop))
+  
   data <- rbind_simple(data)
-
+  data <- mu_fix_sdf7_psu(meta, data)
   ## Perform the update itself the update:
   data$deaths_averted_new <- mu_scale("deaths_averted", data)
   data$cases_averted_new <- mu_scale("cases_averted", data)
@@ -64,7 +66,7 @@ modified_update_calculate <- function(con, touchstone_name_mod, touchstone_use) 
 ##'
 ##' @param path_meta Path to the metadata directory.  In this
 ##'   directory the following files must exist:
-##'   \code{gavi_country_data.csv}, \code{tr_touchstone.csv}, 
+##'   \code{gavi_country_data.csv}, \code{tr_touchstone.csv},
 ##'   and \code{years_output.csv}.  There is no
 ##'   validation done on these files and providing the wrong thing
 ##'   will break in interesting and unknown ways.
@@ -355,7 +357,7 @@ mu_build_data <- function(con, index, meta, pop) {
     ## Otherwise use pop_routine.
     dat$fvps[i] <- dat$coverage_old[i] * dat$coverage_target[i]
   }
-  
+
   ## There are cases where we have blank fvps_old, but positive coverage_old
   ## This caused the Inf/-Inf impact rate issue for CHN and TCD
   ## We create synthetic fvps for such cases when applicable.
@@ -396,8 +398,8 @@ mu_build_data <- function(con, index, meta, pop) {
   v <- if (x$activity_type == "campaign")
     "coverage_target_new" else "pop_routine"
   dat$fvps_new <- dat$coverage_new * dat[[v]]
-  
-  ## At the moment we can do nothing for MHL, TUV and XK, because we have no routine pop for them 
+
+  ## At the moment we can do nothing for MHL, TUV and XK, because we have no routine pop for them
   i <- !is_blank(dat$coverage_new) & is_blank(dat$fvps_new) & dat$year < 2031#& !is_blank(dat$target_pop_estimated)
   if (any(i)) {
     if (x$activity_type == "routine" &&
@@ -407,8 +409,8 @@ mu_build_data <- function(con, index, meta, pop) {
       stop("modified update error")
   }
   #For analysis purpose, a touchstone can be 'updated' by itself - assumes equal fvps
-  if(meta$touchstone_mod$touchstone_name == meta$group$touchstone_name[meta$group$index == index]) 
-    dat$fvps_new <- dat$fvps 
+  if(meta$touchstone_mod$touchstone_name == meta$group$touchstone_name[meta$group$index == index])
+    dat$fvps_new <- dat$fvps
   ## drop excess temporary things
   dat$.code <- NULL
   dat <- dat[dat$year <= year_max, ]
@@ -430,7 +432,7 @@ mu_impact_metadata <- function(meta, touchstone_use) {
     stopifnot(all(n[vary] > 1))
   }
   meta_code <- paste(meta$model, meta$touchstone_name, meta$disease,
-                     meta$vaccine, meta$activity_type, meta$support_type,
+                     meta$vaccine, meta$activity_type, meta$support_type, meta$responsibility,
                      sep = "\r")
   meta_code <- factor(meta_code, unique(meta_code))
 
@@ -534,4 +536,98 @@ mu_calculate_rate <- function(name, dat, window, n_years) {
   dat[[v_type]] <- type
 
   dat
+}
+
+mu_fix_sdf7_psu <- function(meta, data){
+  ### this function fixes SDF7 - PSU - Measles - Campaign impacts
+  i <- meta$group$touchstone_src == "201210gavi-201303gavi-1" & 
+    meta$group$modelling_group == "PSU-Ferrari" &
+    meta$group$vaccine == "Measles"
+  dat_id <- meta$group$index[i]
+  stopifnot(length(dat_id) == 2)
+  
+  ## keep the rest
+  keep <- data[!(data$index %in% dat_id), ]
+  ## identify problem source
+  dat1 <- data[data$index == dat_id[1], ]
+  dat2 <- data[data$index == dat_id[2], ]
+  ## operation
+  dat <- dat1
+  i <- is.na(dat1$deaths_averted) | dat1$deaths_averted == 0.
+  
+  dat$deaths_averted[i] <- dat2$deaths_averted[i]
+  dat$cases_averted[i] <- dat2$cases_averted[i]
+  dat$fvps[i] <- dat2$fvps[i]
+  dat$coverage_old[i] <- dat2$coverage_old[i]
+  dat$coverage_target[i] <- dat2$coverage_target[i]
+  
+  
+  i <- sum(dat$deaths_averted, na.rm = TRUE) - 
+    (sum(dat1$deaths_averted, na.rm = TRUE) + sum(dat2$deaths_averted, na.rm = TRUE))
+  stopifnot( abs(i) < 1 )
+  
+  ### re-calculate impact rates
+  i <- is_blank(dat$fvps) &
+    !(is_blank(dat$deaths_averted) & is_blank(dat$cases_averted)) &
+    !is_blank(dat$coverage_target)
+  if (any(i)) {
+    stopifnot(x$activity_type == "campaign")
+    message("Creating synthetic fvps for ", x$model)
+    ## Otherwise use pop_routine.
+    dat$fvps[i] <- dat$coverage_old[i] * dat$coverage_target[i]
+  }
+  
+  i <- is_blank(dat$fvps) & !is_blank(dat$coverage_old)
+  if (any(i)) {
+    message("Creating synthetic fvps for ", x$model)
+    if((x$activity_type == "campaign")){
+      dat$fvps[i] <- dat$coverage_old[i] * dat$coverage_target[i]
+    }else{
+      dat$fvps[i] <- dat$coverage_old[i] * dat$pop_routine[i]
+    }
+  }
+  
+  year_min <- 2001
+  year_max <- 2030
+  w <- 4L # 1/2 window for rolling average
+  window <- 2 * w + 1
+  years <- year_min:year_max
+  n_years <- length(years)
+  
+  dat <- mu_calculate_rate("deaths", dat, window, n_years)
+  dat <- mu_calculate_rate("cases", dat, window, n_years)
+  
+  dat$target_pop_estimated <- dat$fvps / dat$coverage_old
+  dat$target_pop_estimated[dat$fvps > 0 & is_blank(dat$coverage_old)] <- NA
+  
+  dat$target_pop_estimated_avg <-
+    roll_mean_by(dat$target_pop_estimated, window, n_years)
+  
+  
+  dat$target_pop_given <- dat$coverage_target
+  dat$target_pop_given_new <- dat$coverage_target_new
+  
+  
+  ## We also want new fvps which we compute as coverage * target pop
+  v <- "coverage_target_new"
+  dat$fvps_new <- dat$coverage_new * dat[[v]]
+  
+  ## At the moment we can do nothing for MHL, TUV and XK, because we have no routine pop for them
+  i <- !is_blank(dat$coverage_new) & is_blank(dat$fvps_new) & dat$year < 2031#& !is_blank(dat$target_pop_estimated)
+  if (any(i)) {
+    if (x$activity_type == "routine" &&
+        all(dat$country[i] %in% c("MHL", "TUV", "XK"))) {
+      dat$fvps_new[i] <- dat$coverage_new[i] * dat$target_pop_estimated[i]
+    } else if (!all(is_blank(dat$fvps[i])))
+      stop("modified update error")
+  }
+  
+  #For analysis purpose, a touchstone can be 'updated' by itself - assumes equal fvps
+  if(meta$touchstone_mod$touchstone_name == meta$group$touchstone_name[meta$group$index == dat_id[1]])
+    dat$fvps_new <- dat$fvps
+  ## drop excess temporary things
+  dat$.code <- NULL
+  dat <- dat[dat$year <= year_max, ]
+  
+  dat <- rbind(dat, keep)
 }
