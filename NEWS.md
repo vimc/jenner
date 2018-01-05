@@ -1,4 +1,4 @@
-### jenner 0.0.7
+### jenner 0.0.8
  * (VIMC-1074) re-value Inf/NaN impact_new 
  * (VIMC-1043) remove references to tr_vaccine in jenner - for relevant reports, can safely remove tr_vaccine.csv from meta/ and orderly.yml
  * (VIMC-1266) dealing with the problem of missing sdf7 PSU Measles campaign impact
