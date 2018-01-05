@@ -19,7 +19,7 @@ modified_update_calculate <- function(con, touchstone_name_mod, touchstone_use) 
                " WHERE touchstone_name = $1",
                sep = "\n")
   touchstone_mod <- DBI::dbGetQuery(con, sql, touchstone_name_mod)
-    i <- touchstone_mod$id != '201510gavi-42' & touchstone_mod$id != '201710gavi-4'
+    i <- touchstone_mod$id != '201510gavi-42'
     touchstone_mod <- touchstone_mod[which.max(touchstone_mod$version[i]), ]
   meta <- mu_prepare(con, touchstone_mod$id)
   meta <- mu_impact_metadata(meta, touchstone_use)
@@ -631,3 +631,4 @@ mu_fix_sdf7_psu <- function(meta, data){
   
   dat <- rbind(dat, keep)
 }
+
