@@ -539,6 +539,7 @@ mu_calculate_rate <- function(name, dat, window, n_years) {
 
 mu_fix_sdf7_psu <- function(meta, data){
   ### This function fixes SDF7 - PSU - Measles - Campaign impacts
+  ### Youtrack: https://vimc.myjetbrains.com/youtrack/issue/VIMC-1266
   ### Motiation: the modified update is conducted for each impact estimate set. 
   ### However, for SDF7 PSU Measles campaign, we have two estimate sets - due to previous Measelse and MR_Measels distinction.
   ### Given current modififed_update script, any modified update with SDF7 as the source touchstone is wrong.
