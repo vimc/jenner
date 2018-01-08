@@ -16,7 +16,7 @@ SELECT demographic_statistic.demographic_source,
 -- This will need expanding if we need further detail but this will
 -- hopefully do for now (and will make the queries a little easier to
 -- deal with)
-   AND age_from IN (0, 1, 9)
+   AND age_from IN (0, 1, 2, 9)
 --   AND year BETWEEN 2001 AND 2016
 --   AND country IN ('KEN', 'ZWE')
  ORDER BY demographic_source, age_from, country, year

@@ -1,3 +1,8 @@
+### jenner 0.0.8
+ * (VIMC-1074) re-value Inf/NaN impact_new 
+ * (VIMC-1043) remove references to tr_vaccine in jenner - for relevant reports, can safely remove tr_vaccine.csv from meta/ and orderly.yml
+ * (VIMC-1266) dealing with the problem of missing sdf7 PSU Measles campaign impact
+ 
 ### jenner 0.0.7 (2017-12-14)
  * In `create_touchstone.R`, correct responsibility status from 'approved' to 'incomplete'. 'incompelte' is the default status when a new touchstone is open.
 
