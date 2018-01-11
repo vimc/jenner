@@ -588,15 +588,6 @@ find_year_introduction <- function(con, touchstone){
                                  AND activity_type = 'routine'
                                  ORDER BY vaccine, country, year",
                                  touchstone)
-  # if(touchstone == "201710gavi-3"){
-  #   i <- db.coverage$country == "IRQ" & db.coverage$vaccine == "PCV3"
-  #   keep <- db.coverage[!i, ]
-  #   modify <- db.coverage[i, ]
-  #   i <- modify$year < 2017 | modify$coverage > 0.
-  #   modify <- modify[i, ]
-  #   db.coverage <- rbind(keep, modify)
-  #   db.coverage <- db.coverage[order(db.coverage$vaccine, db.coverage$country, db.coverage$year),]
-  # }
 
   v <- split(db.coverage, list(db.coverage$vaccine, db.coverage$country), drop = TRUE)
   coverage.year_intro <- do.call(rbind,lapply(v, function(i) year_intro(i)))
