@@ -1,3 +1,7 @@
+### jenner 0.0.9
+ * (VIMC-1302): Remove the work done for (VIMC-1266). Because of mr_measles migration, no longer need to treat mr_measles as a special case.
+ * (VIMC-1302): Add a function to generate year of introduction in summary outputs. Avoided touching existing countries. Instead, this function is exported and can be called for reports.
+ 
 ### jenner 0.0.8
  * (VIMC-1074) re-value Inf/NaN impact_new 
  * (VIMC-1043) remove references to tr_vaccine in jenner - for relevant reports, can safely remove tr_vaccine.csv from meta/ and orderly.yml
