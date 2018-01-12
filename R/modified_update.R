@@ -563,34 +563,19 @@ mu_year_introduction <- function(con, dat, dat_summary){
   z
 }
 
-year_intro <-function(a){
-  cols <- c("activity_type", "vaccine", "country", "year", "coverage")
-  cols2 <- c("activity_type", "vaccine", "country", "year_intro")
-
-  i <- is.na(match(colnames(a), cols))
-  if(any(i)) stop("Missing column.")
-
-  a$year_intro <- NA
-  i <- !is.na(a$coverage) & a$coverage != 0.
-  if(any(i)){
-    a$year_intro <- min(a$year[i], na.rm = TRUE)
-  }
-  a <- unique(a[cols2])
-}
-
 find_year_introduction <- function(con, touchstone){
-  db.coverage <- DBI::dbGetQuery(con, "SELECT DISTINCT
-                                 activity_type, vaccine, country, year, coverage
-                                 FROM coverage
-                                 JOIN coverage_set
-                                 ON coverage_set.id = coverage.coverage_set
-                                 WHERE touchstone = $1
-                                 AND activity_type = 'routine'
-                                 ORDER BY vaccine, country, year",
-                                 touchstone)
-
-  v <- split(db.coverage, list(db.coverage$vaccine, db.coverage$country), drop = TRUE)
-  coverage.year_intro <- do.call(rbind,lapply(v, function(i) year_intro(i)))
+  coverage.year_intro <- DBI::dbGetQuery(con, "SELECT
+                               activity_type, vaccine, country, MIN(year) AS year_intro
+                               FROM coverage
+                               JOIN coverage_set
+                               ON coverage_set.id = coverage.coverage_set
+                               WHERE touchstone = $1
+                               AND activity_type = 'routine'
+                               AND coverage IS NOT NULL
+                               AND coverage != 0
+                               GROUP BY vaccine, country, activity_type
+                               ORDER BY vaccine, country",
+                                         touchstone)
   coverage.year_intro$touchstone_src <- touchstone
   coverage.year_intro
 }
