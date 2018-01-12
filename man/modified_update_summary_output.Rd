@@ -15,7 +15,7 @@ modified_update_summary_output(con, res, path_meta)
 \item{path_meta}{Path to the metadata directory.  In this
 directory the following files must exist:
 \code{gavi_country_data.csv}, \code{tr_touchstone.csv},
-\code{tr_vaccine.csv}, and \code{years_output.csv}.  There is no
+and \code{years_output.csv}.  There is no
 validation done on these files and providing the wrong thing
 will break in interesting and unknown ways.}
 }
