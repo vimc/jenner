@@ -398,15 +398,9 @@ mu_build_data <- function(con, index, meta, pop) {
     "coverage_target_new" else "pop_routine"
   dat$fvps_new <- dat$coverage_new * dat[[v]]
 
-  ## At the moment we can do nothing for MHL, TUV and XK, because we have no routine pop for them
-  i <- !is_blank(dat$coverage_new) & is_blank(dat$fvps_new) & dat$year < 2031#& !is_blank(dat$target_pop_estimated)
-  if (any(i)) {
-    if (x$activity_type == "routine" &&
-        all(dat$country[i] %in% c("MHL", "TUV", "XK"))) {
-      dat$fvps_new[i] <- dat$coverage_new[i] * dat$target_pop_estimated[i]
-    } else if (!all(is_blank(dat$fvps[i])))
-      stop("modified update error")
-  }
+  ## I think we do have the demographic data for small countries on
+  ## Montagu now, don't we? So we should be able to use that here...
+  
   #For analysis purpose, a touchstone can be 'updated' by itself - assumes equal fvps
   if(meta$touchstone_mod$touchstone_name == meta$group$touchstone_name[meta$group$index == index])
     dat$fvps_new <- dat$fvps
@@ -503,6 +497,14 @@ mu_fix_coverage <- function(d) {
 }
 
 mu_calculate_rate <- function(name, dat, window, n_years) {
+  ## We'll only ever do modup method 2 now, and for that we only need v_tot.
+
+  ## Would it make sense to strip this function down to only generate
+  ## that one impact rate?
+  
+  ## That would also mean we'd want to tidy up the outputs elsewhere,
+  ## and for instance can get rid of everything relating to the window
+  ## size for the rolling sum.
   v_averted <- sprintf("%s_averted", name)
   v_inst <- sprintf("%s_averted_rate_inst", name)
   v_avg <- sprintf("%s_averted_rate_avg", name)
