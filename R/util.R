@@ -35,15 +35,16 @@ insert_values_into <- function(con, table, d, key = NULL,
              sprintf("RETURNING %s", id))
     sql <- paste(sql, collapse = "\n")
     if (is.null(key)) {
-      DBI::dbGetQuery(con, sql, x)[[id]]
+      DBI::dbGetQuery(con, sql, unname(x))[[id]]
     } else {
       ## Try and retrieve first:
       sql_get <- c(sprintf("SELECT %s FROM %s WHERE", id, table),
                    paste(sprintf("%s = $%d", key, seq_along(key)),
                          collapse = " AND "))
-      ret <- DBI::dbGetQuery(con, paste(sql_get, collapse = "\n"), x[key])[[id]]
+      ret <- DBI::dbGetQuery(con, paste(sql_get, collapse = "\n"),
+                             unname(x[key]))[[id]]
       if (length(ret) == 0L) {
-        ret <- DBI::dbGetQuery(con, sql, x)[[id]]
+        ret <- DBI::dbGetQuery(con, sql, unname(x))[[id]]
       }
       ret
     }
