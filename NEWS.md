@@ -1,3 +1,6 @@
+### jenner 0.0.10
+ * Fix bug with `insert_values_into` where `key` was given - this probably broke with the RPostgres upgrade (VIMC-1467)
+
 ### jenner 0.0.9
  * (VIMC-1302): Remove the work done for (VIMC-1266). Because of mr_measles migration, no longer need to treat mr_measles as a special case.
  * (VIMC-1302): Add a function to generate year of introduction in summary outputs. Avoided touching existing functions. Instead, this function is exported and can be called for reports.
