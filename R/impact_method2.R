@@ -115,24 +115,25 @@ make_impact <- function(con, index, age_min, age_max, year_min, year_max) {
   sql_2 <- paste("SELECT * FROM temporary_coverage_fvps",
                  vaccine_sql,
                  sprintf("AND activity_type = '%s'", activity_type),
+                 sprintf("AND country IN %s", sql_in(unique(tot_impact$country))),
                  sprintf("AND year BETWEEN %s", year_min),
                  sprintf(" AND %s", year_max),
                  sprintf("AND age BETWEEN %s", age_min),
                  sprintf(" AND %s ", age_max), sep="\n")
 
   ## 3. rate calculation
+  # total impact
   tot_impact <- DBI::dbGetQuery(con, sql_1)
   tot_impact$.code <- tot_impact$country
 
+  # total fvps
   dat <- DBI::dbGetQuery(con, sql_2)
-  dat <- dat[dat$country %in% unique(tot_impact$country), ]
   dat$.code <- dat$country
   tot_fvps <- aggregate(fvps ~ .code, data = dat, sum, na.rm=TRUE)
-
+  # merge in total impact and total fvps
   dat <- merge_in(dat, tot_impact, c(tot_impact = "tot_impact"))
   dat$.code <- dat$country
   dat <- merge_in(dat, tot_fvps, c(tot_fvps = "fvps"))
-
   # impact rate
   dat$tot_rate <- dat$tot_impact / dat$tot_fvps
   # avoid inf rate
