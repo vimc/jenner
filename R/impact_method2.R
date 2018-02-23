@@ -5,14 +5,12 @@
 ##' @param con Database connection.  You will need to be \code{readonly} user
 ##' to run this function.
 ##' @param touchstone_name is the touchstone relevant to which impact is calculated
-##' @param age_min minimal age of interest
-##' @param age_max maximal age of interest
-##' @param year_min minimal year of interest
-##' @param year_max maximal year of interest
+##' @param cohort_min minimal birth year of interest
+##' @param cohort_max maximal birth year year of interest
 ##' @param method impact calculation method - chose from method1 and method2
 ##' impact outcome can be provided as age specific if simplified=FALSE
 ##' @export
-impact_calculation <- function(con, touchstone_name = "201710gavi", age_min = 0, age_max = 100, year_min = 2000, year_max = 2030, method = "method2") {
+impact_calculation <- function(con, touchstone_name = "201710gavi", cohort_min = 2000, cohort_max = 2030, trapezoid = FALSE, method = "method2") {
   ## prepare metadata
   sql_group <- read_sql(file_name = "group")
   sql_burden_outcomes <- read_sql(file_name = "burden_outcomes")
@@ -21,29 +19,31 @@ impact_calculation <- function(con, touchstone_name = "201710gavi", age_min = 0,
 
   ## fix and convert input data - for details, see the function
   ## this is needed for allocating impact with respect to fvps_added
-  fix_coverage_fvps(con, touchstone_name, year_min, year_max)
+  fix_coverage_fvps(con, touchstone_name, cohort_min, cohort_max)
 
   ## read impact recipes - this will change once the recipe is imported into Montagu
   ## chunck to change from
   recipe <- read_csv("impact.csv")
   recipe <- recipe[recipe$central_estimates_complete,]
-  #recipe <- recipe[recipe$index == 1, ]
+  recipe <- recipe[recipe$index == 47, ]
   recipe2 <- split(recipe, recipe$index)
   meta <- lapply(recipe2, function(i) line_up(i, group, burden_outcomes))
   meta <- do.call(rbind, meta)
-  ## sometimes we are interested in under 5s, HPV starts from age 9 -> skip HPV in such circumstance
-  if(method == "method2" & age_max < 9) meta <- meta[meta$vaccine != "HPV", ]
+
   row.names(meta) <- NULL
   ## chunch to change to
 
   ## impact calculation
   meta2 <- split(meta, meta$index)
+  you still have not get it right
+  campaign: fvps by cohort, burnden should be all - differnet shape
+  routine: fvps and burden are the same shape
   if(method == "method1") {
     ## method 1 is needed for reporting purpose
-    impact <- lapply(meta2, function(i) make_impact_method1(con, i, age_min, age_max, year_min, year_max))
+    impact <- lapply(meta2, function(i) make_impact_method1(con, i, cohort_min, cohort_max, trapezoid))
   } else {
     ## method 2
-    impact <- lapply(meta2, function(i) make_impact(con, i, age_min, age_max, year_min, year_max))
+    impact <- lapply(meta2, function(i) make_impact(con, i, cohort_min, cohort_max))
   }
 
   ## return output
@@ -65,7 +65,7 @@ impact_calculation <- function(con, touchstone_name = "201710gavi", age_min = 0,
   return(list(groups = groups, scripts = scripts, impact_full = v$impact_full, impact_simplified = v$impact_simplified))
 }
 
-make_impact <- function(con, index, age_min, age_max, year_min, year_max) {
+make_impact <- function(con, index, cohort_min, cohort_max, trapezoid) {
   # This is method 2 impact calcualtion
   message(sprintf("building impact for index %s", unique(index$index)))
   ## 1. parameters to condition sql
@@ -79,25 +79,28 @@ make_impact <- function(con, index, age_min, age_max, year_min, year_max) {
   activity_type <- unique(index$activity_type)
   # burden outcomes used for impact calculation
   outcomes <- sql_in(unique(index$burden_outcome_id))
-
+  #
+  # if(!trapezoid){
+  #   shape <- paste( sprintf("AND (year-age) BETWEEN %s", cohort_min),
+  #                   sprintf(" AND %s", cohort_max), sep="\n")
+  # }else{
+  #   shape <- paste( sprintf("AND (year-age) > %s", cohort_min),
+  #                   sprintf(" AND year <= %s", trapezoid_cap), sep="\n")
+  # }
+  
   ## 2.1 sql - total impact by country
   sql_1 <- paste("SELECT tmp.country, sum(tmp.value) AS tot_impact",
                  "FROM (SELECT country, year, age, value",
                  "FROM burden_estimate",
                  sprintf("WHERE burden_estimate_set = %s",base$burden_estimate_set_id),
-                 sprintf("AND year BETWEEN %s", year_min),
-                 sprintf(" AND %s", year_max),
-                 sprintf("AND age BETWEEN %s", age_min),
-                 sprintf(" AND %s", age_max),
+                 shape,
                  sprintf("AND burden_outcome IN %s ", outcomes),
                  "UNION ALL",
                  "SELECT country, year, age, value*(-1) AS value",
                  "FROM burden_estimate",
                  sprintf("WHERE burden_estimate_set = %s",focal$burden_estimate_set_id),
-                 sprintf("AND year BETWEEN %s", year_min),
-                 sprintf(" AND %s", year_max),
-                 sprintf("AND age BETWEEN %s", age_min),
-                 sprintf(" AND %s", age_max),
+                 sprintf("AND (year-age) BETWEEN %s", cohort_min),
+                 sprintf(" AND %s", cohort_max),
                  sprintf("AND burden_outcome IN %s ) AS tmp", outcomes),
                  "RIGHT JOIN",
                  "(SELECT DISTINCT country",
@@ -125,10 +128,8 @@ make_impact <- function(con, index, age_min, age_max, year_min, year_max) {
                  vaccine_sql,
                  sprintf("AND activity_type = '%s'", activity_type),
                  sprintf("AND country IN %s", sql_in_text(unique(tot_impact$country))),
-                 sprintf("AND year BETWEEN %s", year_min),
-                 sprintf(" AND %s", year_max),
-                 sprintf("AND age BETWEEN %s", age_min),
-                 sprintf(" AND %s ", age_max), sep="\n")
+                 sprintf("AND (year-age) BETWEEN %s", cohort_min),
+                 sprintf(" AND %s ", cohort_max), sep="\n")
 
   ## 3. rate calculation
 
@@ -193,8 +194,7 @@ make_impact <- function(con, index, age_min, age_max, year_min, year_max) {
   return( list(impact_full = impact1, impact_simplified = impact2) )
 }
 
-
-make_impact_method1 <- function(con, index, age_min, age_max, year_min, year_max) {
+make_impact_method1 <- function(con, index, cohort_min, cohort_max) {
   # This function provides method1 imapct, it is direct calculation from scenarios without re-allocating with respect to fvps_added
   # And it will be total impact only, as we are not running seperately no-gavi scenarios
   # It is provided for reporting purpose
@@ -203,7 +203,6 @@ make_impact_method1 <- function(con, index, age_min, age_max, year_min, year_max
   # locate base and focal scenarios, burden sets
   i <- match("burden_outcome_id", names(index))
   v <- index[-i]
-  message(sprintf("building impact for index %s", unique(index$index)))
   base <- unique(v[v$coeff == 1, ])
   focal <- unique(v[v$coeff == -1, ])
   # vacciene and activity type for matching with population, coverage, fvps
@@ -214,39 +213,18 @@ make_impact_method1 <- function(con, index, age_min, age_max, year_min, year_max
 
   ## 2.1 sql - impact by country-year-age
   sql <- paste("SELECT tmp.country, tmp.year, tmp.age, sum(tmp.value) AS impact",
-               # "FROM (SELECT country, year, age, value",
-               # "FROM burden_estimate",
-               # sprintf("WHERE burden_estimate_set = %s",base$burden_estimate_set_id),
-               # sprintf("AND year BETWEEN %s", year_min),
-               # sprintf(" AND %s", year_max),
-               # sprintf("AND age BETWEEN %s", age_min),
-               # sprintf(" AND %s", age_max),
-               # sprintf("AND burden_outcome IN %s ", outcomes),
-               # "UNION ALL",
-               # "SELECT country, year, age, value*(-1) AS value",
-               # "FROM burden_estimate",
-               # sprintf("WHERE burden_estimate_set = %s",focal$burden_estimate_set_id),
-               # sprintf("AND year BETWEEN %s", year_min),
-               # sprintf(" AND %s", year_max),
-               # sprintf("AND age BETWEEN %s", age_min),
-               # sprintf(" AND %s", age_max),
-               # sprintf("AND burden_outcome IN %s ) AS tmp", outcomes),
                "FROM (SELECT country, year, age, value",
                "FROM burden_estimate",
                sprintf("WHERE burden_estimate_set = %s",base$burden_estimate_set_id),
-               sprintf("AND year BETWEEN %s", year_min),
-               sprintf(" AND %s", year_max),
-               sprintf("AND age BETWEEN %s", age_min),
-               sprintf(" AND %s", age_max),
+               sprintf("AND (year-age) BETWEEN %s", cohort_min),
+               sprintf(" AND %s", cohort_max),
                sprintf("AND burden_outcome IN %s ", outcomes),
                "UNION ALL",
                "SELECT country, year, age, value*(-1) AS value",
                "FROM burden_estimate",
                sprintf("WHERE burden_estimate_set = %s",focal$burden_estimate_set_id),
-               sprintf("AND year BETWEEN %s", year_min),
-               sprintf(" AND %s", year_max),
-               sprintf("AND age BETWEEN %s", age_min),
-               sprintf(" AND %s", age_max),
+               sprintf("AND (year-age) BETWEEN %s", cohort_min),
+               sprintf(" AND %s", cohort_max),
                sprintf("AND burden_outcome IN %s ) AS tmp", outcomes),
                "RIGHT JOIN",
                "(SELECT DISTINCT country",
@@ -280,7 +258,7 @@ make_impact_method1 <- function(con, index, age_min, age_max, year_min, year_max
   return( list(impact_full = impact1, impact_simplified = impact2) )
 }
 
-fix_coverage_fvps <- function(con, touchstone_name = "201710gavi", year_min = 2001, year_max = 2030) {
+fix_coverage_fvps <- function(con, touchstone_name = "201710gavi", cohort_min = 2000, cohort_max = 2030) {
   ### This function convert input data - coverage and UNWPP
   ### i.e. input data by country, year and age
   message("Preparing temporary table <temporary_coverage_fvps>")
@@ -300,7 +278,7 @@ fix_coverage_fvps <- function(con, touchstone_name = "201710gavi", year_min = 20
 
   ## 3. select minimal needed input data from db and make it age stratified - gender specific (modup is not considering gender)
   sql <- read_sql(file_name = "coverage_pop")
-  tab <- DBI::dbGetQuery(con, sql, list(touchstone$id, year_min, year_max))
+  tab <- DBI::dbGetQuery(con, sql, list(touchstone$id, year_min=2000, year_max=2100))
 
   ## 4. construct population for each vaccination activity using UN pop -
   # this is needed to convert campaign coverage from target_pop level to UN pop level
