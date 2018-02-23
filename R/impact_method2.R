@@ -27,7 +27,7 @@ impact_calculation <- function(con, touchstone_name = "201710gavi", age_min = 0,
   ## chunck to change from
   recipe <- read_csv("impact.csv")
   recipe <- recipe[recipe$central_estimates_complete,]
-  recipe <- recipe[recipe$index == 1, ]
+  #recipe <- recipe[recipe$index == 1, ]
   recipe2 <- split(recipe, recipe$index)
   meta <- lapply(recipe2, function(i) line_up(i, group, burden_outcomes))
   meta <- do.call(rbind, meta)
@@ -106,6 +106,9 @@ make_impact <- function(con, index, age_min, age_max, year_min, year_max) {
                  ") as focal_country",
                  "ON tmp.country = focal_country.country",
                  "GROUP BY tmp.country", sep="\n")
+  # total impact
+  tot_impact <- DBI::dbGetQuery(con, sql_1)
+  tot_impact$.code <- tot_impact$country
   ## 2.2 sql - coverage, pop, fvps
   ## Rubella routine and HepB_BD are two special cases
   ## Rubella = RCV1 + RCV2
@@ -121,16 +124,13 @@ make_impact <- function(con, index, age_min, age_max, year_min, year_max) {
   sql_2 <- paste("SELECT * FROM temporary_coverage_fvps",
                  vaccine_sql,
                  sprintf("AND activity_type = '%s'", activity_type),
-                 sprintf("AND country IN %s", sql_in(unique(tot_impact$country))),
+                 sprintf("AND country IN %s", sql_in_text(unique(tot_impact$country))),
                  sprintf("AND year BETWEEN %s", year_min),
                  sprintf(" AND %s", year_max),
                  sprintf("AND age BETWEEN %s", age_min),
                  sprintf(" AND %s ", age_max), sep="\n")
 
   ## 3. rate calculation
-  # total impact
-  tot_impact <- DBI::dbGetQuery(con, sql_1)
-  tot_impact$.code <- tot_impact$country
 
   # total fvps
   dat <- DBI::dbGetQuery(con, sql_2)
@@ -281,7 +281,7 @@ make_impact_method1 <- function(con, index, age_min, age_max, year_min, year_max
 }
 
 fix_coverage_fvps <- function(con, touchstone_name = "201710gavi", year_min = 2001, year_max = 2030) {
-  ### This function convert input data - coverage and UNWPP, and makes it compatable to burden estimates
+  ### This function convert input data - coverage and UNWPP
   ### i.e. input data by country, year and age
   message("Preparing temporary table <temporary_coverage_fvps>")
   message("In progress ...")
@@ -411,6 +411,12 @@ sql_in <- function(items) {
   paste0("(",
          paste(items, collapse=","),
          paste0(")"))
+}
+
+sql_in_text <- function(items) {
+  paste0("('",
+         paste(items, collapse="' ,'"),
+         paste0("')"))
 }
 
 merge_in <- function(dat, d, cols) {
