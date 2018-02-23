@@ -27,7 +27,7 @@ impact_calculation <- function(con, touchstone_name = "201710gavi", age_min = 0,
   ## chunck to change from
   recipe <- read_csv("impact.csv")
   recipe <- recipe[recipe$central_estimates_complete,]
-  #recipe <- recipe[recipe$index == 85, ]
+  recipe <- recipe[recipe$index == 1, ]
   recipe2 <- split(recipe, recipe$index)
   meta <- lapply(recipe2, function(i) line_up(i, group, burden_outcomes))
   meta <- do.call(rbind, meta)
@@ -99,6 +99,12 @@ make_impact <- function(con, index, age_min, age_max, year_min, year_max) {
                  sprintf("AND age BETWEEN %s", age_min),
                  sprintf(" AND %s", age_max),
                  sprintf("AND burden_outcome IN %s ) AS tmp", outcomes),
+                 "RIGHT JOIN",
+                 "(SELECT DISTINCT country",
+                 "FROM burden_estimate",
+                 sprintf("WHERE burden_estimate_set = %s",focal$burden_estimate_set_id),
+                 ") as focal_country",
+                 "ON tmp.country = focal_country.country",
                  "GROUP BY tmp.country", sep="\n")
   ## 2.2 sql - coverage, pop, fvps
   ## Rubella routine and HepB_BD are two special cases
@@ -192,7 +198,7 @@ make_impact_method1 <- function(con, index, age_min, age_max, year_min, year_max
   # This function provides method1 imapct, it is direct calculation from scenarios without re-allocating with respect to fvps_added
   # And it will be total impact only, as we are not running seperately no-gavi scenarios
   # It is provided for reporting purpose
-
+  message(sprintf("building impact for index %s", unique(index$index)))
   ## 1. parameters to condition sql
   # locate base and focal scenarios, burden sets
   i <- match("burden_outcome_id", names(index))
@@ -208,6 +214,23 @@ make_impact_method1 <- function(con, index, age_min, age_max, year_min, year_max
 
   ## 2.1 sql - impact by country-year-age
   sql <- paste("SELECT tmp.country, tmp.year, tmp.age, sum(tmp.value) AS impact",
+               # "FROM (SELECT country, year, age, value",
+               # "FROM burden_estimate",
+               # sprintf("WHERE burden_estimate_set = %s",base$burden_estimate_set_id),
+               # sprintf("AND year BETWEEN %s", year_min),
+               # sprintf(" AND %s", year_max),
+               # sprintf("AND age BETWEEN %s", age_min),
+               # sprintf(" AND %s", age_max),
+               # sprintf("AND burden_outcome IN %s ", outcomes),
+               # "UNION ALL",
+               # "SELECT country, year, age, value*(-1) AS value",
+               # "FROM burden_estimate",
+               # sprintf("WHERE burden_estimate_set = %s",focal$burden_estimate_set_id),
+               # sprintf("AND year BETWEEN %s", year_min),
+               # sprintf(" AND %s", year_max),
+               # sprintf("AND age BETWEEN %s", age_min),
+               # sprintf(" AND %s", age_max),
+               # sprintf("AND burden_outcome IN %s ) AS tmp", outcomes),
                "FROM (SELECT country, year, age, value",
                "FROM burden_estimate",
                sprintf("WHERE burden_estimate_set = %s",base$burden_estimate_set_id),
@@ -225,6 +248,12 @@ make_impact_method1 <- function(con, index, age_min, age_max, year_min, year_max
                sprintf("AND age BETWEEN %s", age_min),
                sprintf(" AND %s", age_max),
                sprintf("AND burden_outcome IN %s ) AS tmp", outcomes),
+               "RIGHT JOIN",
+               "(SELECT DISTINCT country",
+               "FROM burden_estimate",
+               sprintf("WHERE burden_estimate_set = %s",focal$burden_estimate_set_id),
+               ") as focal_country",
+               "ON tmp.country = focal_country.country",
                "GROUP BY tmp.country, tmp.year, tmp.age", sep="\n")
   dat <- DBI::dbGetQuery(con, sql)
 
