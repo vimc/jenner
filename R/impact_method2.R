@@ -9,7 +9,7 @@
 ##' @param age_max maximal age of interest
 ##' @param year_min minimal year of interest
 ##' @param year_max maximal year of interest
-##' @param simplified if simplified=TRUE, impact outcome is presented as for per year
+##' @param method impact calculation method - chose from method1 and method2
 ##' impact outcome can be provided as age specific if simplified=FALSE
 ##' @export
 impact_calculation <- function(con, touchstone_name = "201710gavi", age_min = 0, age_max = 100, year_min = 2000, year_max = 2030, method = "method2") {
