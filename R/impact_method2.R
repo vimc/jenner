@@ -10,62 +10,61 @@
 ##' @param method impact calculation method - chose from method1 and method2
 ##' impact outcome can be provided as age specific if simplified=FALSE
 ##' @export
-impact_calculation <- function(con, touchstone_name = "201710gavi", cohort_min = 2000, cohort_max = 2030, trapezoid = FALSE, method = "method2") {
+impact_calculation <- function(con, touchstone_name = "201710gavi", 
+                               cohort_min = 2000, cohort_max = 2030, 
+                               routine_tot_rate_shape = "trace_cohort", method = "method2") {
   ## prepare metadata
-  sql_group <- read_sql(file_name = "group")
-  sql_burden_outcomes <- read_sql(file_name = "burden_outcomes")
-  group <- DBI::dbGetQuery(con, sql_group)
-  burden_outcomes <- DBI::dbGetQuery(con, sql_burden_outcomes)
-
-  ## fix and convert input data - for details, see the function
-  ## this is needed for allocating impact with respect to fvps_added
-  fix_coverage_fvps(con, touchstone_name, cohort_min, cohort_max)
-
-  ## read impact recipes - this will change once the recipe is imported into Montagu
-  ## chunck to change from
-  recipe <- read_csv("impact.csv")
-  recipe <- recipe[recipe$central_estimates_complete,]
-  recipe <- recipe[recipe$index == 47, ]
-  recipe2 <- split(recipe, recipe$index)
-  meta <- lapply(recipe2, function(i) line_up(i, group, burden_outcomes))
-  meta <- do.call(rbind, meta)
-
-  row.names(meta) <- NULL
-  ## chunch to change to
-
+  meta <- prepare_recipe(con, recipe = "impact.csv") 
+  
   ## impact calculation
   meta2 <- split(meta, meta$index)
-  you still have not get it right
-  campaign: fvps by cohort, burnden should be all - differnet shape
-  routine: fvps and burden are the same shape
   if(method == "method1") {
-    ## method 1 is needed for reporting purpose
-    impact <- lapply(meta2, function(i) make_impact_method1(con, i, cohort_min, cohort_max, trapezoid))
+    ## method 1 
+    impact <- lapply(meta2, function(i) 
+      make_impact_method1(con, i, cohort_min, cohort_max))
   } else {
     ## method 2
-    impact <- lapply(meta2, function(i) make_impact(con, i, cohort_min, cohort_max))
+    impact <- lapply(meta2, function(i) 
+      make_impact(con, i, cohort_min, cohort_max, routine_tot_rate_shape))
   }
-
+  
   ## return output
   ## meta output: group -> recipes; scripts -> calculation scripts
   cols_group <- c("index", "touchstone", "modelling_group", "disease", "vaccine",
                   "impact_outcome", "activity_type", "name", "focal_ingredient",
                   "baseline", "burden_outcome")
-
+  
   cols_script <- c("index", "responsibility_set_id",
-                   "responsibility_id", "burden_estimate_set_id", "stochastic_burden_estimate_set_id",
+                   "responsibility_id", "burden_estimate_set_id", #"stochastic_burden_estimate_set_id",
                    "coeff", "burden_outcome_id")
   groups <- unique(meta[cols_group])
   scripts <- meta[cols_script]
-
+  
   ## bind impact estimates
   message("binding data - be patient")
   v <- impact_output(impact, method)
-
+  
   return(list(groups = groups, scripts = scripts, impact_full = v$impact_full, impact_simplified = v$impact_simplified))
 }
 
-make_impact <- function(con, index, cohort_min, cohort_max, trapezoid) {
+prepare_recipe <- function(con, recipe) {
+  sql_group <- read_sql(file_name = "group")
+  sql_burden_outcomes <- read_sql(file_name = "burden_outcomes")
+  group <- DBI::dbGetQuery(con, sql_group)
+  burden_outcomes <- DBI::dbGetQuery(con, sql_burden_outcomes)
+  
+  ## read impact recipes - this will change once the recipe is imported into Montagu
+  recipe <- read_csv(recipe)
+  recipe <- recipe[recipe$central_estimates_complete,]
+  #recipe <- recipe[recipe$index == 47, ]
+  recipe2 <- split(recipe, recipe$index)
+  meta <- lapply(recipe2, function(i) line_up(i, group, burden_outcomes))
+  meta <- do.call(rbind, meta)
+  row.names(meta) <- NULL
+  meta
+}
+
+make_impact <- function(con, index, cohort_min, cohort_max, routine_tot_rate_shape = "trace_cohort") {
   # This is method 2 impact calcualtion
   message(sprintf("building impact for index %s", unique(index$index)))
   ## 1. parameters to condition sql
@@ -79,14 +78,20 @@ make_impact <- function(con, index, cohort_min, cohort_max, trapezoid) {
   activity_type <- unique(index$activity_type)
   # burden outcomes used for impact calculation
   outcomes <- sql_in(unique(index$burden_outcome_id))
-  #
-  # if(!trapezoid){
-  #   shape <- paste( sprintf("AND (year-age) BETWEEN %s", cohort_min),
-  #                   sprintf(" AND %s", cohort_max), sep="\n")
-  # }else{
-  #   shape <- paste( sprintf("AND (year-age) > %s", cohort_min),
-  #                   sprintf(" AND year <= %s", trapezoid_cap), sep="\n")
-  # }
+  # to calculate impact_rate, we have to have total impact and total fvps
+  # which are shape specific for routine and campaign
+  if(activity_type == "campaign"){
+    shape <- paste( sprintf("AND year BETWEEN %s", 2000),
+                    sprintf(" AND %s", 2100), sep="\n")
+  }else{
+  if(routine_tot_rate_shape == "trace_cohort"){
+    shape <- paste( sprintf("AND (year-age) BETWEEN %s", cohort_min),
+                    sprintf(" AND %s", cohort_max), sep="\n")
+  } else {
+    shape <- paste( sprintf("AND (year-age) >= %s", cohort_min),
+                    sprintf(" AND year <= %s", 2100), sep="\n")
+  }
+  }
   
   ## 2.1 sql - total impact by country
   sql_1 <- paste("SELECT tmp.country, sum(tmp.value) AS tot_impact",
@@ -99,8 +104,7 @@ make_impact <- function(con, index, cohort_min, cohort_max, trapezoid) {
                  "SELECT country, year, age, value*(-1) AS value",
                  "FROM burden_estimate",
                  sprintf("WHERE burden_estimate_set = %s",focal$burden_estimate_set_id),
-                 sprintf("AND (year-age) BETWEEN %s", cohort_min),
-                 sprintf(" AND %s", cohort_max),
+                 shape,
                  sprintf("AND burden_outcome IN %s ) AS tmp", outcomes),
                  "RIGHT JOIN",
                  "(SELECT DISTINCT country",
@@ -124,15 +128,26 @@ make_impact <- function(con, index, cohort_min, cohort_max, trapezoid) {
     vaccine_sql <- sprintf("WHERE vaccine = '%s'", vaccine)
   }
 
+  if(activity_type == "campaign"){
+    shape <- paste( sprintf("AND year BETWEEN %s", 2000),
+                    sprintf(" AND %s", 2030), sep="\n")
+  }else{
+    if(routine_tot_rate_shape == "trace_cohort"){
+      shape <- paste( sprintf("AND (year-age) BETWEEN %s", cohort_min),
+                      sprintf(" AND %s", cohort_max), sep="\n")
+    } else {
+      shape <- paste( sprintf("AND (year-age) >= %s", cohort_min),
+                      sprintf(" AND year <= %s", 2100), sep="\n")
+    }
+  }
   sql_2 <- paste("SELECT * FROM temporary_coverage_fvps",
                  vaccine_sql,
                  sprintf("AND activity_type = '%s'", activity_type),
                  sprintf("AND country IN %s", sql_in_text(unique(tot_impact$country))),
-                 sprintf("AND (year-age) BETWEEN %s", cohort_min),
-                 sprintf(" AND %s ", cohort_max), sep="\n")
-
+                 shape, sep="\n")
+  
   ## 3. rate calculation
-
+  
   # total fvps
   dat <- DBI::dbGetQuery(con, sql_2)
   dat$.code <- dat$country
@@ -146,15 +161,15 @@ make_impact <- function(con, index, cohort_min, cohort_max, trapezoid) {
   # avoid inf rate
   i <- dat$tot_fvps == 0.
   dat$tot_rate[i] <- 0.
-
+  
   ## 4. impact calculation
   dat$impact <- dat$fvps * dat$tot_rate
-
+  
   ## 5. distinguish between total and gavi impact by per-year gavi_support
   # total impact
   total_impact <- dat
   total_impact$support_type <- "total"
-
+  
   # gavi impact, if any
   i <- dat$gavi_support
   if(any(i)) {
@@ -169,26 +184,27 @@ make_impact <- function(con, index, cohort_min, cohort_max, trapezoid) {
   }
   dat$cohort <- dat$year - dat$age
   dat$index <- focal$index
-
+  
   ## 6. impact output
   ## 1) full impact estimates - very large output - good for investigation purpose
   cols_impact1 <- c("index", "support_type", "country", "vaccine","year", "age", "cohort","gavi_support", "coverage", "population",
                     "fvps", "tot_rate", "impact")
   impact1 <- dat[cols_impact1]
-
+  
   ## 2) aggrefated impact
   cols_impact2 <- c("index", "impact_type","support_type", "country", "vaccine", "year", "tot_rate", "impact")
   # impact by birth cohort
   impact_cohort <- aggregate(impact ~ index + support_type + country + vaccine + cohort + tot_rate, data=dat, sum, na.rm=TRUE)
   impact_cohort$impact_type <- "cohort"
   names(impact_cohort)[which(names(impact_cohort) == "cohort")] <- "year"
-
-  # impact by calendar year
-  impact_calendar <- aggregate(impact ~ index + support_type + country + vaccine + year + tot_rate, data=dat, sum, na.rm=TRUE)
-  impact_calendar$impact_type <- "calendar"
-  impact2 <- rbind(impact_cohort, impact_calendar)
-  impact2 <- impact2[cols_impact2]
-
+  
+  # # impact by calendar year
+  # impact_calendar <- aggregate(impact ~ index + support_type + country + vaccine + year + tot_rate, data=dat, sum, na.rm=TRUE)
+  # impact_calendar$impact_type <- "calendar"
+  # impact2 <- rbind(impact_cohort, impact_calendar)
+  impact2 <- impact_cohort[cols_impact2]
+  impact2 <- impact2[impact2$year %in% (cohort_min:cohort_max), ]
+  
   ## 3) End
   message("DONE.")
   return( list(impact_full = impact1, impact_simplified = impact2) )
@@ -210,7 +226,7 @@ make_impact_method1 <- function(con, index, cohort_min, cohort_max) {
   activity_type <- unique(index$activity_type)
   # burden outcomes used for impact calculation
   outcomes <- sql_in(unique(index$burden_outcome_id))
-
+  
   ## 2.1 sql - impact by country-year-age
   sql <- paste("SELECT tmp.country, tmp.year, tmp.age, sum(tmp.value) AS impact",
                "FROM (SELECT country, year, age, value",
@@ -234,15 +250,15 @@ make_impact_method1 <- function(con, index, cohort_min, cohort_max) {
                "ON tmp.country = focal_country.country",
                "GROUP BY tmp.country, tmp.year, tmp.age", sep="\n")
   dat <- DBI::dbGetQuery(con, sql)
-
+  
   ## 6. impact output: 1) full impact - impact by year and age/cohort 2) simplified impact - impact by year / cohort
   dat$cohort <- dat$year - dat$age
   dat$index <- focal$index
-
+  
   # full impact - good for investigation purpose
   cols_impact1 <- c("index", "country","year", "age", "cohort", "impact")
   impact1 <- dat[cols_impact1]
-
+  
   # distinguish between 'impact by year' and 'impact by birth cohort'
   cols_impact2 <- c("index", "impact_type","country", "year", "impact")
   # impact by birth cohort
@@ -250,20 +266,28 @@ make_impact_method1 <- function(con, index, cohort_min, cohort_max) {
   impact_cohort$impact_type <- "cohort"
   names(impact_cohort)[which(names(impact_cohort) == "cohort")] <- "year"
   # impact by calendar year
-  impact_calendar <- aggregate(impact ~ index + country + year, data=dat, sum, na.rm=TRUE)
-  impact_calendar$impact_type <- "calendar"
-  impact2 <- rbind(impact_cohort, impact_calendar)
+  # impact_calendar <- aggregate(impact ~ index + country + year, data=dat, sum, na.rm=TRUE)
+  # impact_calendar$impact_type <- "calendar"
+  # impact2 <- rbind(impact_cohort, impact_calendar)
+  impact2 <- impact_cohort
   impact2 <- impact2[cols_impact2]
   message("DONE.")
   return( list(impact_full = impact1, impact_simplified = impact2) )
 }
 
-fix_coverage_fvps <- function(con, touchstone_name = "201710gavi", cohort_min = 2000, cohort_max = 2030) {
+##' Provide age-specific coverage-un_pop-fvps
+##' @title Impact Calculation (method 2)
+##'
+##' @param con Database connection.  You will need to be \code{readonly} user
+##' to run this function.
+##' @param touchstone_name 
+##' @export
+fix_coverage_fvps <- function(con, touchstone_name = "201710gavi") {
   ### This function convert input data - coverage and UNWPP
   ### i.e. input data by country, year and age
   message("Preparing temporary table <temporary_coverage_fvps>")
   message("In progress ...")
-
+  
   ## 1. touchstone specification
   # given touchstone name, use the latest version touchstone
   version <- DBI::dbGetQuery(con, "SELECT MAX(touchstone.version) as version FROM touchstone
@@ -271,15 +295,15 @@ fix_coverage_fvps <- function(con, touchstone_name = "201710gavi", cohort_min = 
   touchstone <- DBI::dbGetQuery(con, "SELECT id FROM touchstone
                                 WHERE touchstone_name = $1
                                 AND version = $2", list(touchstone_name, version$version))
-
+  
   ## 2. creat a number table. It will be used to duplicate input data by [age_from, age_to]
   i <- data.frame(i = 1:101, stringsAsFactors = FALSE)
   DBI::dbWriteTable(con, "num", i, temporary = TRUE, overwrite=TRUE)
-
+  
   ## 3. select minimal needed input data from db and make it age stratified - gender specific (modup is not considering gender)
   sql <- read_sql(file_name = "coverage_pop")
-  tab <- DBI::dbGetQuery(con, sql, list(touchstone$id, year_min=2000, year_max=2100))
-
+  tab <- DBI::dbGetQuery(con, sql, list(touchstone$id, 2000, 2100))
+  
   ## 4. construct population for each vaccination activity using UN pop -
   # this is needed to convert campaign coverage from target_pop level to UN pop level
   # we need this to allocate campaign fvps to each targeted age
@@ -287,7 +311,7 @@ fix_coverage_fvps <- function(con, touchstone_name = "201710gavi", cohort_min = 
                      tab$year, tab$gavi_support, tab$gender, tab$coverage,sep="><")
   target_cohortS <- aggregate(population ~ .code, data = tab, sum, na.rm = TRUE)
   tab <- merge_in(tab, target_cohortS, c(target_cohortS = "population"))
-
+  
   ## 5. calculate age level fvps
   tab$fvps <- NA
   i <- is.na(tab$target)
@@ -298,23 +322,23 @@ fix_coverage_fvps <- function(con, touchstone_name = "201710gavi", cohort_min = 
   # report problems - fvps >> pop
   tab$diff <- (tab$target - tab$target_cohortS) / tab$target_cohortS
   write.csv(tab[tab$diff > 1., ], "problematic_campaign.csv", row.names = FALSE)
-
+  
   ## 6. calculate age level coverage
   tab$coverage <- tab$fvps / (tab$population+1) # plus one to avoid 0 pop for old age
   tab <- tab[c("vaccine", "activity_type", "country", "year", "age", "gavi_support", "population", "coverage", "fvps")]
-
+  
   ## cap fvps by population, and coverage by 1 - eg. AFG 2015 Measles campagin ; HTI Measles 2025
   ## This operation makes sense - you cannot vaccinate more people than population
   ## In addition, we need to cap coverage by 1 for method3 implementation (not happening for now)
   i <- tab$coverage > 1. & !is.na(tab$coverage)
   tab$coverage[i] <- 1
   tab$fvps[i] <- tab$population[i]
-
+  
   ## 8. make a local temporary table
   ## so that we only manipulate pop-coverage-fvps once
   DBI::dbWriteTable(con, "temporary_coverage_fvps", tab, temporary = TRUE, overwrite = TRUE)
   message("Temporary table created - Success!")
-
+  
 }
 
 impact_output <- function(impact, method) {
@@ -329,11 +353,11 @@ impact_output <- function(impact, method) {
   if(method == "method1") {
     impact_full <- impact_full[order(impact_full$index, impact_full$country, impact_full$year, impact_full$age), ]
     impact_simplified <- impact_simplified[order(impact_simplified$index, impact_simplified$impact_type, impact_simplified$country, impact_simplified$year), ]
-
+    
   } else {
     impact_full <- impact_full[order(impact_full$index, impact_full$support_type, impact_full$country, impact_full$year, impact_full$age), ]
     impact_simplified <- impact_simplified[order(impact_simplified$index, impact_simplified$impact_type, impact_simplified$support_type, impact_simplified$country, impact_simplified$year), ]
-
+    
   }
   row.names(impact_full) <- NULL
   row.names(impact_simplified) <- NULL
@@ -347,16 +371,16 @@ line_up <- function(recipe, group, burden_outcomes) {
   burden_outcome <- unlist(strsplit(recipe$burden_outcome, ","))
   j <- duplicated(burden_outcome)
   if(any(j)) stop("Duplicated burden_outcomes not expected.")
-
+  
   j <- match(burden_outcome, burden_outcomes$code)
   k <- is.na(j)
   if(any(k)) stop("Unexpected burden outcome in recipe file.")
   burdens <- data.frame(index = recipe$index,
                         burden_outcome_id = burden_outcomes$id[j])
-
+  
   ### meta ids
   ids <- c("responsibility_set_id", "responsibility_id", "burden_estimate_set_id", "stochastic_burden_estimate_set_id")
-
+  
   j <- recipe$touchstone == group$touchstone &
     recipe$modelling_group == group$modelling_group &
     recipe$disease == group$disease &
@@ -366,7 +390,7 @@ line_up <- function(recipe, group, burden_outcomes) {
   stopifnot(nrow(v) == 1L)
   v$coeff <- 1
   recipe_base <- cbind(recipe, v)
-
+  
   k <- recipe$touchstone == group$touchstone &
     recipe$modelling_group == group$modelling_group &
     recipe$disease == group$disease &
@@ -377,12 +401,12 @@ line_up <- function(recipe, group, burden_outcomes) {
   w$coeff <- -1
   recipe_focal <- cbind(recipe, w)
   recipe_base$coverage_set_id <- recipe_focal$coverage_set_id
-
+  
   stopifnot(v$responsibility_set_id == w$responsibility_set_id)
   recipe <- rbind(recipe_base, recipe_focal)
   recipe2 <- merge(recipe, burdens, by = "index")
   recipe2
-
+  
 }
 
 sql_in <- function(items) {
