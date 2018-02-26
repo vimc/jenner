@@ -99,5 +99,5 @@ sql_in <- function(items, text_item = TRUE) {
 
 read_sql <- function(file_name) {
   sql <- read_file(
-    system.file(file.path("sql", filename), package = "jenner", mustWork = TRUE))
+    system.file(file.path("sql", file_name), package = "jenner", mustWork = TRUE))
 }
