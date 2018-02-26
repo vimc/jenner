@@ -48,8 +48,8 @@ impact_calculation <- function(con, touchstone_name = "201710gavi",
 }
 
 prepare_recipe <- function(con, recipe) {
-  sql_group <- read_sql(file_name = "impact_metad2_metadata/group.sql")
-  sql_burden_outcomes <- read_sql(file_name = "impact_metad2_metadata/burden_outcomes.sql")
+  sql_group <- read_sql(file_name = "impact_method2_metadata/group.sql")
+  sql_burden_outcomes <- read_sql(file_name = "impact_method2_metadata/burden_outcomes.sql")
   group <- DBI::dbGetQuery(con, sql_group)
   burden_outcomes <- DBI::dbGetQuery(con, sql_burden_outcomes)
 
@@ -301,7 +301,7 @@ fix_coverage_fvps <- function(con, touchstone_name = "201710gavi") {
   DBI::dbWriteTable(con, "num", i, temporary = TRUE, overwrite=TRUE)
 
   ## 3. select minimal needed input data from db and make it age stratified - gender specific (modup is not considering gender)
-  sql <- read_sql(file_name = "impact_metad2_metadata/coverage_pop.sql")
+  sql <- read_sql(file_name = "impact_method2_metadata/coverage_pop.sql")
   tab <- DBI::dbGetQuery(con, sql, list(touchstone$id, 2000, 2100))
 
   ## 4. construct population for each vaccination activity using UN pop -
