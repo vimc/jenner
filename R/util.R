@@ -14,7 +14,7 @@ read_file <- function(filename) {
 }
 
 read_csv <- function(...) {
-  read.csv(..., stringsAsFactors = FALSE)
+  utils::read.csv(..., stringsAsFactors = FALSE)
 }
 
 data_frame <- function(...) {

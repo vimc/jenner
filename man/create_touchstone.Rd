@@ -20,6 +20,10 @@ in future we'll allow this to be imported from a csv}
 
 \item{path_meta}{Path that we look for various metadata files.
 Eventually we'll document what they look like.}
+
+\item{transaction}{Do in one transaction (logical scalar)}
+
+\item{dry_run}{Don't commit (just rollback the transaction after completion)}
 }
 \description{
 Create and import a new touchstone.

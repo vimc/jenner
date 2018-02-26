@@ -493,7 +493,7 @@ mu_fix_coverage <- function(d) {
   d_fix <- d[fix, ]
   i <- code[fix]
 
-  tmp <- d_fix[tapply(seq_along(i), i, head, 1), ]
+  tmp <- d_fix[tapply(seq_along(i), i, utils::head, 1), ]
   tmp$target <- unname(tapply(d_fix$target, i, sum, na.rm = TRUE))
   reached <- tapply(d_fix$coverage * d_fix$target, i, sum, na.rm = TRUE)
   tmp$coverage <- unname(reached / tmp$target)
@@ -538,6 +538,8 @@ mu_calculate_rate <- function(name, dat, window, n_years) {
 
 ##' Look for introduction year and add to summary output
 ##' @title Find year of introduction
+##'
+##' @param con Database connection
 ##'
 ##' @param dat Data: the list output from the modup
 ##'

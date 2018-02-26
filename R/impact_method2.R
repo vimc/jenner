@@ -309,7 +309,7 @@ fix_coverage_fvps <- function(con, touchstone_name = "201710gavi") {
   # we need this to allocate campaign fvps to each targeted age
   tab$.code <- paste(tab$vaccine, tab$activity_type, tab$country,
                      tab$year, tab$gavi_support, tab$gender, tab$coverage,sep="><")
-  target_cohortS <- aggregate(population ~ .code, data = tab, sum, na.rm = TRUE)
+  target_cohortS <- stats::aggregate(population ~ .code, data = tab, sum, na.rm = TRUE)
   tab <- merge_in(tab, target_cohortS, c(target_cohortS = "population"))
 
   ## 5. calculate age level fvps
@@ -321,7 +321,7 @@ fix_coverage_fvps <- function(con, touchstone_name = "201710gavi") {
   tab$fvps[i] <- tab$coverage[i] * tab$population[i]
   # report problems - fvps >> pop
   tab$diff <- (tab$target - tab$target_cohortS) / tab$target_cohortS
-  write.csv(tab[tab$diff > 1., ], "problematic_campaign.csv", row.names = FALSE)
+  utils::write.csv(tab[tab$diff > 1., ], "problematic_campaign.csv", row.names = FALSE)
 
   ## 6. calculate age level coverage
   tab$coverage <- tab$fvps / (tab$population+1) # plus one to avoid 0 pop for old age

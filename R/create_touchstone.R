@@ -15,8 +15,8 @@
 ##' @param path_meta Path that we look for various metadata files.
 ##'   Eventually we'll document what they look like.
 ##'
-##' @param transaction
-##' @param dry_run
+##' @param transaction Do in one transaction (logical scalar)
+##' @param dry_run Don't commit (just rollback the transaction after completion)
 ##' @export
 create_touchstone <- function(con, dat, demography_from = NULL,
                               path_meta = "meta",
@@ -138,8 +138,8 @@ read_touchstone_metadata <- function(path_meta) {
       if (!setequal(columns, names(d))) {
         stop(sprintf("Incorrect columns in %s:\n\tExpected: %s\n\tRecieved: %s",
                      filename,
-                     paste(expected, collapse = "\n"),
-                     paste(recieved, collapse = "\n")))
+                     paste(columns, collapse = "\n"),
+                     paste(names(d), collapse = "\n")))
         }
     }
     if (!is.null(rows)) {
