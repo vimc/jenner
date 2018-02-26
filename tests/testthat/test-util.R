@@ -9,3 +9,9 @@ test_that("sql_in, text", {
   expect_equal(sql_in("a"), "('a')")
   expect_equal(sql_in(c("a", "b")), "('a', 'b')")
 })
+
+test_that("squote", {
+  expect_equal(squote(character(0)), character(0))
+  expect_equal(squote("a"), "'a'")
+  expect_equal(squote(c("a", "b")), c("'a'", "'b'"))
+})

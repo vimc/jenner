@@ -90,11 +90,17 @@ rbind_simple <- function(x) {
 }
 
 sql_in <- function(items, text_item = TRUE) {
-  if (text_item) {
-    sprintf("('%s')", paste(items, collapse = "', '"))
-  } else {
-    sprintf("(%s)", paste(items, collapse = ", "))
-  }
+  items <- paste(if (text_item) squote(items) else items,
+                 collapse= ", ")
+  sprintf("(%s)", items)
+}
+
+squote <- function(x) {
+  sprintf("'%s'", x)
+}
+
+dquote <- function(x) {
+  sprintf('"%s"', x)
 }
 
 read_sql <- function(file_name) {
