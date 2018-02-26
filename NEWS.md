@@ -1,7 +1,7 @@
-### jemmer 0.0.11
+### jenner 0.0.11
  * VIMC-1380 method 2 impact calculation  
- * R/impact_method2.R - this is the impact calculation functions; currently read from .csv recipe; will be changed when recipe is imported montagu
- * inst/sql/impact_method2_metadata - this contains two metadata: groups and burden_outcomes; and one sql statement for fvps convertion 
+ * Currently impact calculation is assisted by .csv recipe; this will be changed when recipe is imported montagu
+ * Both direct impact caculation and method2 (re-allocate impact by fvps * da_rate) are provided
 
 ### jenner 0.0.10
  * Fix bug with `insert_values_into` where `key` was given - this probably broke with the RPostgres upgrade (VIMC-1467)
