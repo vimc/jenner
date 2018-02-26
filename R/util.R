@@ -107,3 +107,17 @@ read_sql <- function(file_name) {
   sql <- read_file(
     system.file(file.path("sql", file_name), package = "jenner", mustWork = TRUE))
 }
+
+
+merge_in <- function(dat, d, cols, .code = ".code") {
+  i <- match(dat[[.code]], d[[.code]])
+  keep <- d[i, cols, drop = FALSE]
+  rownames(keep) <- NULL
+  nms <- names(cols)
+  if (!is.null(nms)) {
+    nms[!nzchar(nms)] <- cols[!nzchar(nms)]
+    names(keep) <- nms
+  }
+  v <- cbind(dat, keep)
+  v <- v[-which(names(v) == .code)]
+}

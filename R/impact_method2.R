@@ -414,31 +414,4 @@ line_up <- function(recipe, group, burden_outcomes) {
 
 }
 
-# merge_in <- function(dat, d, cols) {
-#   i <- match(dat$.code, d$.code)
-#   keep <- d[i, cols, drop = FALSE]
-#   rownames(keep) <- NULL
-#   nms <- names(cols)
-#   if (!is.null(nms)) {
-#     nms[!nzchar(nms)] <- cols[!nzchar(nms)]
-#     names(keep) <- nms
-#   }
-#   v <- cbind(dat, keep)
-#   v <- v[-which(names(v) == ".code")]
-# }
-
-merge_in <- function(dat, d, cols, .code = ".code") {
-  i <- match(dat[[.code]], d[[.code]])
-  keep <- d[i, cols, drop = FALSE]
-  rownames(keep) <- NULL
-  nms <- names(cols)
-  if (!is.null(nms)) {
-    nms[!nzchar(nms)] <- cols[!nzchar(nms)]
-    names(keep) <- nms
-  }
-  v <- cbind(dat, keep)
-  v <- v[-which(names(v) == .code)]
-}
-
-
 
