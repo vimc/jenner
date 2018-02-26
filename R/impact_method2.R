@@ -7,6 +7,7 @@
 ##' @param touchstone_name is the touchstone relevant to which impact is calculated
 ##' @param cohort_min minimal birth year of interest
 ##' @param cohort_max maximal birth year year of interest
+##' @param routine_tot_rate_shape Xiang will document this (TODO)
 ##' @param method impact calculation method - chose from method1 and method2
 ##' impact outcome can be provided as age specific if simplified=FALSE
 ##' @export
@@ -262,11 +263,11 @@ make_impact_method1 <- function(con, index) {
   # distinguish between 'impact by year' and 'impact by birth cohort'
   cols_impact2 <- c("index", "impact_type","country", "year", "impact")
   # impact by birth cohort
-  impact_cohort <- aggregate(impact ~ index + country + cohort, data=dat, sum, na.rm=TRUE)
+  impact_cohort <- stats::aggregate(impact ~ index + country + cohort, data=dat, sum, na.rm=TRUE)
   impact_cohort$impact_type <- "cohort"
   names(impact_cohort)[which(names(impact_cohort) == "cohort")] <- "year"
   # impact by calendar year
-  impact_calendar <- aggregate(impact ~ index + country + year, data=dat, sum, na.rm=TRUE)
+  impact_calendar <- stats::aggregate(impact ~ index + country + year, data=dat, sum, na.rm=TRUE)
   impact_calendar$impact_type <- "calendar"
   impact2 <- rbind(impact_cohort, impact_calendar)
   #impact2 <- impact_cohort

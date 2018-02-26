@@ -5,7 +5,7 @@
 \title{Connect to database}
 \usage{
 database_connection(location = "science", user = "readonly",
-  local_host = NULL, local_port = NULL, local_password_group = "science")
+  local_port = NULL, local_password_group = "science")
 }
 \arguments{
 \item{location}{One of "science", "production", "uat" or

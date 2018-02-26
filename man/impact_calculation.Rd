@@ -18,6 +18,8 @@ to run this function.}
 
 \item{cohort_max}{maximal birth year year of interest}
 
+\item{routine_tot_rate_shape}{Xiang will document this (TODO)}
+
 \item{method}{impact calculation method - chose from method1 and method2
 impact outcome can be provided as age specific if simplified=FALSE}
 }

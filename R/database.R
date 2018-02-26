@@ -9,7 +9,7 @@
 ##' @param local_password_group  Password group (when running locally)
 ##' @export
 database_connection <- function(location = "science", user = "readonly",
-                                local_host = NULL, local_port = NULL,
+                                local_port = NULL,
                                 local_password_group = "science") {
   if (location == "science") {
     host <- "support.montagu.dide.ic.ac.uk"
