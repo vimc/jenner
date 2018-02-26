@@ -48,8 +48,8 @@ impact_calculation <- function(con, touchstone_name = "201710gavi",
 }
 
 prepare_recipe <- function(con, recipe) {
-  sql_group <- read_sql(file_name = "group")
-  sql_burden_outcomes <- read_sql(file_name = "burden_outcomes")
+  sql_group <- read_sql(file_name = "impact_metad2_metadata/group")
+  sql_burden_outcomes <- read_sql(file_name = "impact_metad2_metadata/burden_outcomes")
   group <- DBI::dbGetQuery(con, sql_group)
   burden_outcomes <- DBI::dbGetQuery(con, sql_burden_outcomes)
 
@@ -77,7 +77,7 @@ make_impact <- function(con, index, cohort_min, cohort_max, routine_tot_rate_sha
   vaccine <- unique(index$vaccine)
   activity_type <- unique(index$activity_type)
   # burden outcomes used for impact calculation
-  outcomes <- sql_in(unique(index$burden_outcome_id))
+  outcomes <- sql_in(unique(index$burden_outcome_id), text_item = FALSE)
   # to calculate impact_rate, we have to have total impact and total fvps
   # which are shape specific for routine and campaign
   if (activity_type == "campaign"){
@@ -143,7 +143,7 @@ make_impact <- function(con, index, cohort_min, cohort_max, routine_tot_rate_sha
   sql_2 <- paste("SELECT * FROM temporary_coverage_fvps",
                  vaccine_sql,
                  sprintf("AND activity_type = '%s'", activity_type),
-                 sprintf("AND country IN %s", sql_in_text(unique(tot_impact$country))),
+                 sprintf("AND country IN %s", sql_in(unique(tot_impact$country))),
                  shape, sep="\n")
 
   ## 3. rate calculation
@@ -225,7 +225,7 @@ make_impact_method1 <- function(con, index) {
   vaccine <- unique(index$vaccine)
   activity_type <- unique(index$activity_type)
   # burden outcomes used for impact calculation
-  outcomes <- sql_in(unique(index$burden_outcome_id))
+  outcomes <- sql_in(unique(index$burden_outcome_id), text_item = FALSE)
 
   ## 2.1 sql - impact by country-year-age
   sql <- paste("SELECT tmp.country, tmp.year, tmp.age, sum(tmp.value) AS impact",
@@ -280,7 +280,7 @@ make_impact_method1 <- function(con, index) {
 ##'
 ##' @param con Database connection.  You will need to be \code{readonly} user
 ##' to run this function.
-##' @param touchstone_name
+##' @param touchstone_name Specify touchstone name only, not with specific version.
 ##' @export
 fix_coverage_fvps <- function(con, touchstone_name = "201710gavi") {
   ### This function convert input data - coverage and UNWPP
@@ -301,7 +301,7 @@ fix_coverage_fvps <- function(con, touchstone_name = "201710gavi") {
   DBI::dbWriteTable(con, "num", i, temporary = TRUE, overwrite=TRUE)
 
   ## 3. select minimal needed input data from db and make it age stratified - gender specific (modup is not considering gender)
-  sql <- read_sql(file_name = "coverage_pop")
+  sql <- read_sql(file_name = "impact_metad2_metadata/coverage_pop")
   tab <- DBI::dbGetQuery(con, sql, list(touchstone$id, 2000, 2100))
 
   ## 4. construct population for each vaccination activity using UN pop -
@@ -413,20 +413,21 @@ line_up <- function(recipe, group, burden_outcomes) {
 
 }
 
-sql_in <- function(items) {
-  paste0("(",
-         paste(items, collapse=","),
-         paste0(")"))
-}
+# merge_in <- function(dat, d, cols) {
+#   i <- match(dat$.code, d$.code)
+#   keep <- d[i, cols, drop = FALSE]
+#   rownames(keep) <- NULL
+#   nms <- names(cols)
+#   if (!is.null(nms)) {
+#     nms[!nzchar(nms)] <- cols[!nzchar(nms)]
+#     names(keep) <- nms
+#   }
+#   v <- cbind(dat, keep)
+#   v <- v[-which(names(v) == ".code")]
+# }
 
-sql_in_text <- function(items) {
-  paste0("('",
-         paste(items, collapse="' ,'"),
-         paste0("')"))
-}
-
-merge_in <- function(dat, d, cols) {
-  i <- match(dat$.code, d$.code)
+merge_in <- function(dat, d, cols, .code = ".code") {
+  i <- match(dat[[.code]], d[[.code]])
   keep <- d[i, cols, drop = FALSE]
   rownames(keep) <- NULL
   nms <- names(cols)
@@ -435,12 +436,8 @@ merge_in <- function(dat, d, cols) {
     names(keep) <- nms
   }
   v <- cbind(dat, keep)
-  v <- v[-which(names(v) == ".code")]
+  v <- v[-which(names(v) == .code)]
 }
 
-read_sql <- function(file_name) {
-  path_sql <- system.file("sql/impact_method2_metadata", package = "jenner",
-                          mustWork = TRUE)
-  sql <- read_file(file.path(path_sql, paste0(file_name,".sql")))
-}
+
 

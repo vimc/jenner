@@ -10,7 +10,7 @@ fix_coverage_fvps(con, touchstone_name = "201710gavi")
 \item{con}{Database connection.  You will need to be \code{readonly} user
 to run this function.}
 
-\item{touchstone_name}{}
+\item{touchstone_name}{Specify touchstone name only, not with specific version.}
 }
 \description{
 Provide age-specific coverage-un_pop-fvps

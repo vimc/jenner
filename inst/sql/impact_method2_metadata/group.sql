@@ -1,3 +1,5 @@
+--- meta data table
+--- responsibility based: one line per responsibility
 SELECT 
 responsibility_set.id AS responsibility_set_id,
 responsibility.id AS responsibility_id,
@@ -11,14 +13,14 @@ coverage_set.name AS coverage_set
 
 FROM responsibility
 JOIN responsibility_set
-ON responsibility_set.id = responsibility_set
+  ON responsibility_set.id = responsibility_set
 JOIN scenario
-ON scenario.id = responsibility.scenario
+  ON scenario.id = responsibility.scenario
 JOIN scenario_description
-ON scenario_description.id = scenario.scenario_description
+  ON scenario_description.id = scenario.scenario_description
 JOIN touchstone
-ON touchstone.id = scenario.touchstone
+  ON touchstone.id = scenario.touchstone
 JOIN scenario_coverage_set
-ON scenario_coverage_set.scenario = scenario.id
+  ON scenario_coverage_set.scenario = scenario.id
 JOIN coverage_set
-ON coverage_set.id = scenario_coverage_set.coverage_set
+  ON coverage_set.id = scenario_coverage_set.coverage_set

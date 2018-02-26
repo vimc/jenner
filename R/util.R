@@ -88,3 +88,16 @@ rbind_simple <- function(x) {
   names(cols) <- nms
   as.data.frame(cols, stringsAsFactors = FALSE)
 }
+
+sql_in <- function(items, text_item = TRUE) {
+  if (text_item) {
+    sprintf("('%s')", paste(items, collapse = "', '"))
+  } else {
+    sprintf("(%s)", paste(items, collapse = ", "))
+  }
+}
+
+read_sql <- function(file_name) {
+  sql <- read_file(
+    system.file(file.path("sql", filename), package = "jenner", mustWork = TRUE))
+}
