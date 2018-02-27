@@ -7,7 +7,10 @@
 ##' @param touchstone_name is the touchstone relevant to which impact is calculated
 ##' @param cohort_min minimal birth year of interest
 ##' @param cohort_max maximal birth year year of interest
-##' @param routine_tot_rate_shape Xiang will document this (TODO)
+##' @param routine_tot_rate_shape This parameter determines how we chop off the year-age matrix to calculate impact rates
+##' campaign is stratiforward, use all fvps and all burden estimates to calculate impact rate. So no need to specify.
+##' Becuase all impacts (years 2000-2100) are derived from campaigns between 2000 and 2030.
+##' Routine is more complicated. We either trance birth cohort between 2000-2030 or trance all birth cohorts between 2000-2100.
 ##' @param method impact calculation method - chose from method1 and method2
 ##' impact outcome can be provided as age specific if simplified=FALSE
 ##' @export
@@ -89,8 +92,7 @@ make_impact <- function(con, index, cohort_min, cohort_max, routine_tot_rate_sha
       shape <- paste( sprintf("AND (year-age) BETWEEN %s", cohort_min),
                       sprintf(" AND %s", cohort_max), sep="\n")
     } else {
-      shape <- paste( sprintf("AND (year-age) >= %s", cohort_min),
-                      sprintf(" AND year <= %s", 2100), sep="\n")
+      shape <- paste( sprintf("AND (year-age) >= %s", cohort_min))
     }
   }
 
@@ -132,14 +134,6 @@ make_impact <- function(con, index, cohort_min, cohort_max, routine_tot_rate_sha
   if (activity_type == "campaign"){
     shape <- paste( sprintf("AND year BETWEEN %s", 2000),
                     sprintf(" AND %s", 2030), sep="\n")
-  }else{
-    if (routine_tot_rate_shape == "trace_cohort"){
-      shape <- paste( sprintf("AND (year-age) BETWEEN %s", cohort_min),
-                      sprintf(" AND %s", cohort_max), sep="\n")
-    } else {
-      shape <- paste( sprintf("AND (year-age) >= %s", cohort_min),
-                      sprintf(" AND year <= %s", 2100), sep="\n")
-    }
   }
   sql_2 <- paste("SELECT * FROM temporary_coverage_fvps",
                  vaccine_sql,
