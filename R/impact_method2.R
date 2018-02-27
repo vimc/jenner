@@ -274,6 +274,7 @@ make_impact_method1 <- function(con, index) {
 ##' @param year_min min year of vaccination
 ##' @param year_max max year of vaccination
 ##' @param write_table If true, create a temporary table; otherwise return a dataframe
+##' @param report_suspecious_coverage switch on/off the reporting of suspecious coverage
 ##' @export
 fix_coverage_fvps <- function(con, touchstone_name = "201710gavi", year_min = 2000, year_max = 2100, write_table = TRUE, report_suspecious_coverage = FALSE) {
   ### This function convert input data - coverage and UNWPP
