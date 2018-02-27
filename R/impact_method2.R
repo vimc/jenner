@@ -271,9 +271,11 @@ make_impact_method1 <- function(con, index) {
 ##' @param con Database connection.  You will need to be \code{readonly} user
 ##' to run this function.
 ##' @param touchstone_name Specify touchstone name only, not with specific version.
+##' @param year_min min year of vaccination
+##' @param year_max max year of vaccination
 ##' @param write_table If true, create a temporary table; otherwise return a dataframe
 ##' @export
-fix_coverage_fvps <- function(con, touchstone_name = "201710gavi", write_table = TRUE) {
+fix_coverage_fvps <- function(con, touchstone_name = "201710gavi", year_min = 2000, year_max = 2100, write_table = TRUE) {
   ### This function convert input data - coverage and UNWPP
   ### i.e. input data by country, year and age
   message("Preparing temporary table <temporary_coverage_fvps>")
@@ -292,9 +294,8 @@ fix_coverage_fvps <- function(con, touchstone_name = "201710gavi", write_table =
   DBI::dbWriteTable(con, "num", i, temporary = TRUE, overwrite=TRUE)
 
   ## 3. select minimal needed input data from db and make it age stratified - gender specific (modup is not considering gender)
-  #2000 and 2100 are the year range.
   sql <- read_sql(file_name = "impact_method2_metadata/coverage_pop.sql")
-  tab <- DBI::dbGetQuery(con, sql, list(touchstone$id, 2000, 2100))
+  tab <- DBI::dbGetQuery(con, sql, list(touchstone$id, year_min, year_max))
 
   ## 4. construct population for each vaccination activity using UN pop -
   # this is needed to convert campaign coverage from target_pop level to UN pop level
