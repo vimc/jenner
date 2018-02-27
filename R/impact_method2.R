@@ -275,7 +275,7 @@ make_impact_method1 <- function(con, index) {
 ##' @param year_max max year of vaccination
 ##' @param write_table If true, create a temporary table; otherwise return a dataframe
 ##' @export
-fix_coverage_fvps <- function(con, touchstone_name = "201710gavi", year_min = 2000, year_max = 2100, write_table = TRUE) {
+fix_coverage_fvps <- function(con, touchstone_name = "201710gavi", year_min = 2000, year_max = 2100, write_table = TRUE, report_suspecious_coverage = FALSE) {
   ### This function convert input data - coverage and UNWPP
   ### i.e. input data by country, year and age
   message("Preparing temporary table <temporary_coverage_fvps>")
@@ -314,8 +314,9 @@ fix_coverage_fvps <- function(con, touchstone_name = "201710gavi", year_min = 20
   tab$fvps[i] <- tab$coverage[i] * tab$population[i]
   # report problems - fvps >> pop
   tab$diff <- (tab$target - tab$target_cohortS) / tab$target_cohortS
-  utils::write.csv(tab[tab$diff > 1., ], "problematic_campaign.csv", row.names = FALSE)
-
+  if (report_suspecious_coverage) {
+    utils::write.csv(tab[tab$diff > 1., ], "problematic_campaign.csv", row.names = FALSE)
+  }
   ## 6. calculate age level coverage
   tab$coverage <- tab$fvps / (tab$population+1) # plus one to avoid 0 pop for old age
   tab <- tab[c("vaccine", "activity_type", "country", "year", "age", "gavi_support", "population", "coverage", "fvps")]
