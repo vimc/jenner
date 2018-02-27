@@ -18,7 +18,10 @@ to run this function.}
 
 \item{cohort_max}{maximal birth year year of interest}
 
-\item{routine_tot_rate_shape}{Xiang will document this (TODO)}
+\item{routine_tot_rate_shape}{This parameter determines how we chop off the year-age matrix to calculate impact rates
+campaign is stratiforward, use all fvps and all burden estimates to calculate impact rate. So no need to specify.
+Becuase all impacts (years 2000-2100) are derived from campaigns between 2000 and 2030.
+Routine is more complicated. We either trance birth cohort between 2000-2030 or trance all birth cohorts between 2000-2100.}
 
 \item{method}{impact calculation method - chose from method1 and method2
 impact outcome can be provided as age specific if simplified=FALSE}
