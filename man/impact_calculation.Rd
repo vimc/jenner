@@ -4,8 +4,8 @@
 \alias{impact_calculation}
 \title{Impact Calculation (method 2)}
 \usage{
-impact_calculation(con, touchstone_name = "201710gavi", cohort_min = 2000,
-  cohort_max = 2030, routine_tot_rate_shape = "trace_cohort",
+impact_calculation(con, touchstone_name = "201710gavi", year_min = 2000,
+  year_max = 2030, routine_tot_rate_shape = "trace_cohort",
   method = "method2")
 }
 \arguments{
@@ -14,9 +14,9 @@ to run this function.}
 
 \item{touchstone_name}{is the touchstone relevant to which impact is calculated}
 
-\item{cohort_min}{minimal birth year of interest}
+\item{year_min}{minimal year of vaccination}
 
-\item{cohort_max}{maximal birth year year of interest}
+\item{year_max}{maximal year year of vaccination}
 
 \item{routine_tot_rate_shape}{This parameter determines how we chop off the year-age matrix to calculate impact rates
 campaign is stratiforward, use all fvps and all burden estimates to calculate impact rate. So no need to specify.

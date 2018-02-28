@@ -5,7 +5,8 @@
 \title{Impact Calculation (method 2)}
 \usage{
 fix_coverage_fvps(con, touchstone_name = "201710gavi", year_min = 2000,
-  year_max = 2100, write_table = TRUE, report_suspecious_coverage = FALSE)
+  year_max = 2100, pine = FALSE, write_table = TRUE,
+  report_suspecious_coverage = FALSE)
 }
 \arguments{
 \item{con}{Database connection.  You will need to be \code{readonly} user
@@ -16,6 +17,8 @@ to run this function.}
 \item{year_min}{min year of vaccination}
 
 \item{year_max}{max year of vaccination}
+
+\item{pine}{this is for testthat. we only grab data for pine countries if true}
 
 \item{write_table}{If true, create a temporary table; otherwise return a dataframe}
 

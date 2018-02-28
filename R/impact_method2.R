@@ -5,8 +5,8 @@
 ##' @param con Database connection.  You will need to be \code{readonly} user
 ##' to run this function.
 ##' @param touchstone_name is the touchstone relevant to which impact is calculated
-##' @param cohort_min minimal birth year of interest
-##' @param cohort_max maximal birth year year of interest
+##' @param year_min minimal year of vaccination
+##' @param year_max maximal year year of vaccination
 ##' @param routine_tot_rate_shape This parameter determines how we chop off the year-age matrix to calculate impact rates
 ##' campaign is stratiforward, use all fvps and all burden estimates to calculate impact rate. So no need to specify.
 ##' Becuase all impacts (years 2000-2100) are derived from campaigns between 2000 and 2030.
@@ -15,7 +15,7 @@
 ##' impact outcome can be provided as age specific if simplified=FALSE
 ##' @export
 impact_calculation <- function(con, touchstone_name = "201710gavi",
-                               cohort_min = 2000, cohort_max = 2030,
+                               year_min = 2000, year_max = 2030,
                                routine_tot_rate_shape = "trace_cohort", method = "method2") {
   ## prepare metadata
   meta <- prepare_recipe(con, recipe = "impact.csv")
@@ -29,7 +29,7 @@ impact_calculation <- function(con, touchstone_name = "201710gavi",
   } else {
     ## method 2
     impact <- lapply(meta2, function(i)
-      make_impact(con, i, cohort_min, cohort_max, routine_tot_rate_shape))
+      make_impact(con, i, year_min, year_max, routine_tot_rate_shape))
   }
 
   ## return output
@@ -68,7 +68,7 @@ prepare_recipe <- function(con, recipe) {
   meta
 }
 
-make_impact <- function(con, index, cohort_min, cohort_max, routine_tot_rate_shape = "trace_cohort") {
+make_impact <- function(con, index, year_min, year_max, routine_tot_rate_shape = "trace_cohort") {
   # This is method 2 impact calcualtion
   message(sprintf("building impact for index %s", unique(index$index)))
 
@@ -83,12 +83,25 @@ make_impact <- function(con, index, cohort_min, cohort_max, routine_tot_rate_sha
   activity_type <- unique(index$activity_type)
   # burden outcomes used for impact calculation
   outcomes <- sql_in(unique(index$burden_outcome_id), text_item = FALSE)
-
+  # vaccine_routine_age is used to define birth_cohort
+  # cohort range defined here substrat cohort specific impact
+  # normally routine coverage is given at age = 0, so birth year = vaccination year
+  cohort_min <- year_min
+  cohort_max <- year_max
+  # MCV2 and HPV are different
+  vaccine_routine_age <- DBI::dbGetQuery(con, "SELECT vaccine, age FROM vaccine_routine_age")
+  if(vaccine %in% c("MCV2", "HPV")) {
+    cohort_min <- year_min - vaccine_routine_age$age[vaccine_routine_age$vaccine == vaccine]
+    cohort_max <- year_max - vaccine_routine_age$age[vaccine_routine_age$vaccine == vaccine]
+  }
+  # Rubella is more complex. birth cohort receives RCV1 at birth and (maybe)RCV2 at age 2. we follow RCV1, and keep the default cohort range.
+  # so infact used RCV2 fvps cohort 1998-1999 for cohort 2029-2030, when calculate tot_rate. This is a compromise we have to make.
 
   ## 2. rate calculation
   # to calculate impact_rate, we have to have total impact and total fvps
   # which are shape specific for routine and campaign
   ## 2.1 total impact
+  ## the shape is activity_type specific and vacine specific for routine
   if (activity_type == "campaign"){
     shape <- paste(sprintf("AND year BETWEEN %s", 2000),
                    sprintf(" AND %s", 2100), sep="\n")
@@ -137,6 +150,13 @@ make_impact <- function(con, index, cohort_min, cohort_max, routine_tot_rate_sha
   if (activity_type == "campaign"){
     shape <- paste(sprintf("AND year BETWEEN %s", 2000),
                    sprintf(" AND %s", 2030), sep="\n")
+  }else{
+    if (routine_tot_rate_shape == "trace_cohort"){
+      shape <- paste(sprintf("AND year BETWEEN %s", year_min),
+                     sprintf(" AND %s", year_max), sep="\n")
+    } else {
+      shape <- paste(sprintf("AND year >= %s", year_min))
+    }
   }
   sql_2 <- paste("SELECT * FROM temporary_coverage_fvps",
                  vaccine_sql,
@@ -273,10 +293,11 @@ make_impact_method1 <- function(con, index) {
 ##' @param touchstone_name Specify touchstone name only, not with specific version.
 ##' @param year_min min year of vaccination
 ##' @param year_max max year of vaccination
+##' @param pine this is for testthat. we only grab data for pine countries if true
 ##' @param write_table If true, create a temporary table; otherwise return a dataframe
 ##' @param report_suspecious_coverage switch on/off the reporting of suspecious coverage
 ##' @export
-fix_coverage_fvps <- function(con, touchstone_name = "201710gavi", year_min = 2000, year_max = 2100, write_table = TRUE, report_suspecious_coverage = FALSE) {
+fix_coverage_fvps <- function(con, touchstone_name = "201710gavi", year_min = 2000, year_max = 2100, pine = FALSE, write_table = TRUE, report_suspecious_coverage = FALSE) {
   ### This function convert input data - coverage and UNWPP
   ### i.e. input data by country, year and age
   message("Preparing temporary table <temporary_coverage_fvps>")
@@ -296,6 +317,11 @@ fix_coverage_fvps <- function(con, touchstone_name = "201710gavi", year_min = 20
 
   ## 3. select minimal needed input data from db and make it age stratified - gender specific (modup is not considering gender)
   sql <- read_sql(file_name = "impact_method2_metadata/coverage_pop.sql")
+  if(pine) {
+    countries <- c("PAK", "IND", "NGA", "ETH")
+    v <- sprintf("AND country IN %s", sql_in(countries))
+    sql <- sprintf(sql, v, v)
+  }
   tab <- DBI::dbGetQuery(con, sql, list(touchstone$id, year_min, year_max))
 
   ## 4. construct population for each vaccination activity using UN pop -
