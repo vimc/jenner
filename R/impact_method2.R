@@ -321,6 +321,8 @@ fix_coverage_fvps <- function(con, touchstone_name = "201710gavi", year_min = 20
     countries <- c("PAK", "IND", "NGA", "ETH")
     v <- sprintf("AND country IN %s", sql_in(countries))
     sql <- sprintf(sql, v, v)
+  } else {
+    sql <- sprintf(sql, "\t", "\t")
   }
   tab <- DBI::dbGetQuery(con, sql, list(touchstone$id, year_min, year_max))
 
