@@ -1,0 +1,121 @@
+index,touchstone,modelling_group,disease,vaccine,impact_outcome,activity_type,name,focal_ingredient,baseline,burden_outcome,central_estimates_complete,stochastic_estimates_complete,comment
+1,201710gavi-3,CDA-Razavi,HepB,HepB,cases_averted,routine,cases_averted_total_routine,hepb-hepb-routine-with,hepb-no-vaccination,"hepb_cases_acute_severe,hepb_cases_dec_cirrh,hepb_cases_hcc",TRUE,FALSE,VIMC-HepB: current no bd countries
+2,201710gavi-3,CDA-Razavi,HepB,HepB,cases_averted,routine,cases_averted_total_routine,hepb-bd-routine-with-hepb-routine-with,hepb-bd-routine-with,"hepb_cases_acute_severe,hepb_cases_dec_cirrh,hepb_cases_hcc",TRUE,FALSE,VIMC-HepB: current bd countries
+3,201710gavi-3,CDA-Razavi,HepB,HepB,dalys_averted,routine,dalys_averted_total_routine,hepb-hepb-routine-with,hepb-no-vaccination,dalys,TRUE,FALSE,VIMC-HepB: current no bd countries
+4,201710gavi-3,CDA-Razavi,HepB,HepB,dalys_averted,routine,dalys_averted_total_routine,hepb-bd-routine-with-hepb-routine-with,hepb-bd-routine-with,dalys,TRUE,FALSE,VIMC-HepB: current bd countries
+5,201710gavi-3,CDA-Razavi,HepB,HepB,deaths_averted,routine,deaths_averted_total_routine,hepb-hepb-routine-with,hepb-no-vaccination,"hepb_deaths_acute,hepb_deaths_dec_cirrh,hepb_deaths_hcc",TRUE,FALSE,VIMC-HepB: current no bd countries
+6,201710gavi-3,CDA-Razavi,HepB,HepB,deaths_averted,routine,deaths_averted_total_routine,hepb-bd-routine-with-hepb-routine-with,hepb-bd-routine-with,"hepb_deaths_acute,hepb_deaths_dec_cirrh,hepb_deaths_hcc",TRUE,FALSE,VIMC-HepB: current bd countries
+7,201710gavi-3,CDA-Razavi,HepB,HepB_BD,cases_averted,routine,cases_averted_total_routine,hepb-bd-routine-with,hepb-no-vaccination,"hepb_cases_acute_severe,hepb_cases_dec_cirrh,hepb_cases_hcc",TRUE,FALSE,VIMC-BD: current bd countries
+8,201710gavi-3,CDA-Razavi,HepB,HepB_BD,cases_averted,routine,cases_averted_total_routine,hepb-bd-routine-with-hepb-routine-with,hepb-hepb-routine-with,"hepb_cases_acute_severe,hepb_cases_dec_cirrh,hepb_cases_hcc",TRUE,FALSE,VIS-BD_facility
+9,201710gavi-3,CDA-Razavi,HepB,HepB_BD,dalys_averted,routine,dalys_averted_total_routine,hepb-bd-routine-with,hepb-no-vaccination,dalys,TRUE,FALSE,VIMC-BD: current bd countries
+10,201710gavi-3,CDA-Razavi,HepB,HepB_BD,dalys_averted,routine,dalys_averted_total_routine,hepb-bd-routine-with-hepb-routine-with,hepb-hepb-routine-with,dalys,TRUE,FALSE,VIS-BD_facility
+11,201710gavi-3,CDA-Razavi,HepB,HepB_BD,deaths_averted,routine,deaths_averted_total_routine,hepb-bd-routine-with,hepb-no-vaccination,"hepb_deaths_acute,hepb_deaths_dec_cirrh,hepb_deaths_hcc",TRUE,FALSE,VIMC-BD: current bd countries
+12,201710gavi-3,CDA-Razavi,HepB,HepB_BD,deaths_averted,routine,deaths_averted_total_routine,hepb-bd-routine-with-hepb-routine-with,hepb-hepb-routine-with,"hepb_deaths_acute,hepb_deaths_dec_cirrh,hepb_deaths_hcc",TRUE,FALSE,VIS-BD_facility
+13,201710gavi-3,CDA-Razavi,HepB,HepB_BD_both,cases_averted,routine,cases_averted_total_routine,hepb-bd-routine-best-hepb-routine-with,hepb-hepb-routine-with,"hepb_cases_acute_severe,hepb_cases_dec_cirrh,hepb_cases_hcc",TRUE,FALSE,VIS-BD_all
+14,201710gavi-3,CDA-Razavi,HepB,HepB_BD_both,dalys_averted,routine,dalys_averted_total_routine,hepb-bd-routine-best-hepb-routine-with,hepb-hepb-routine-with,dalys,TRUE,FALSE,VIS-BD_all
+15,201710gavi-3,CDA-Razavi,HepB,HepB_BD_both,deaths_averted,routine,deaths_averted_total_routine,hepb-bd-routine-best-hepb-routine-with,hepb-hepb-routine-with,"hepb_deaths_acute,hepb_deaths_dec_cirrh,hepb_deaths_hcc",TRUE,FALSE,VIS-BD_all
+16,201710gavi-3,CDA-Razavi,HepB,HepB_BD_home,cases_averted,routine,cases_averted_total_routine,hepb-bd-routine-best-hepb-routine-with,hepb-bd-routine-with-hepb-routine-with,"hepb_cases_acute_severe,hepb_cases_dec_cirrh,hepb_cases_hcc",TRUE,FALSE,VIS-BD_home
+17,201710gavi-3,CDA-Razavi,HepB,HepB_BD_home,dalys_averted,routine,dalys_averted_total_routine,hepb-bd-routine-best-hepb-routine-with,hepb-bd-routine-with-hepb-routine-with,dalys,TRUE,FALSE,VIS-BD_home
+18,201710gavi-3,CDA-Razavi,HepB,HepB_BD_home,deaths_averted,routine,deaths_averted_total_routine,hepb-bd-routine-best-hepb-routine-with,hepb-bd-routine-with-hepb-routine-with,"hepb_deaths_acute,hepb_deaths_dec_cirrh,hepb_deaths_hcc",TRUE,FALSE,VIS-BD_home
+19,201710gavi-3,IC-Hallett,HepB,HepB,cases_averted,routine,cases_averted_total_routine,hepb-hepb-routine-with,hepb-no-vaccination,"hepb_cases_acute_severe,hepb_cases_dec_cirrh,hepb_cases_hcc",TRUE,FALSE,VIMC-HepB: current no bd countries
+20,201710gavi-3,IC-Hallett,HepB,HepB,cases_averted,routine,cases_averted_total_routine,hepb-bd-routine-with-hepb-routine-with,hepb-bd-routine-with,"hepb_cases_acute_severe,hepb_cases_dec_cirrh,hepb_cases_hcc",TRUE,FALSE,VIMC-HepB: current bd countries
+21,201710gavi-3,IC-Hallett,HepB,HepB,dalys_averted,routine,dalys_averted_total_routine,hepb-hepb-routine-with,hepb-no-vaccination,dalys,TRUE,FALSE,VIMC-HepB: current no bd countries
+22,201710gavi-3,IC-Hallett,HepB,HepB,dalys_averted,routine,dalys_averted_total_routine,hepb-bd-routine-with-hepb-routine-with,hepb-bd-routine-with,dalys,TRUE,FALSE,VIMC-HepB: current bd countries
+23,201710gavi-3,IC-Hallett,HepB,HepB,deaths_averted,routine,deaths_averted_total_routine,hepb-hepb-routine-with,hepb-no-vaccination,"hepb_deaths_acute,hepb_deaths_dec_cirrh,hepb_deaths_hcc",TRUE,FALSE,VIMC-HepB: current no bd countries
+24,201710gavi-3,IC-Hallett,HepB,HepB,deaths_averted,routine,deaths_averted_total_routine,hepb-bd-routine-with-hepb-routine-with,hepb-bd-routine-with,"hepb_deaths_acute,hepb_deaths_dec_cirrh,hepb_deaths_hcc",TRUE,FALSE,VIMC-HepB: current bd countries
+25,201710gavi-3,IC-Hallett,HepB,HepB_BD,cases_averted,routine,cases_averted_total_routine,hepb-bd-routine-with,hepb-no-vaccination,"hepb_cases_acute_severe,hepb_cases_dec_cirrh,hepb_cases_hcc",TRUE,FALSE,VIMC-BD: current bd countries
+26,201710gavi-3,IC-Hallett,HepB,HepB_BD,cases_averted,routine,cases_averted_total_routine,hepb-bd-routine-with-hepb-routine-with,hepb-hepb-routine-with,"hepb_cases_acute_severe,hepb_cases_dec_cirrh,hepb_cases_hcc",TRUE,FALSE,VIS-BD_facility
+27,201710gavi-3,IC-Hallett,HepB,HepB_BD,dalys_averted,routine,dalys_averted_total_routine,hepb-bd-routine-with,hepb-no-vaccination,dalys,TRUE,FALSE,VIMC-BD: current bd countries
+28,201710gavi-3,IC-Hallett,HepB,HepB_BD,dalys_averted,routine,dalys_averted_total_routine,hepb-bd-routine-with-hepb-routine-with,hepb-hepb-routine-with,dalys,TRUE,FALSE,VIS-BD_facility
+29,201710gavi-3,IC-Hallett,HepB,HepB_BD,deaths_averted,routine,deaths_averted_total_routine,hepb-bd-routine-with,hepb-no-vaccination,"hepb_deaths_acute,hepb_deaths_dec_cirrh,hepb_deaths_hcc",TRUE,FALSE,VIMC-BD: current bd countries
+30,201710gavi-3,IC-Hallett,HepB,HepB_BD,deaths_averted,routine,deaths_averted_total_routine,hepb-bd-routine-with-hepb-routine-with,hepb-hepb-routine-with,"hepb_deaths_acute,hepb_deaths_dec_cirrh,hepb_deaths_hcc",TRUE,FALSE,VIS-BD_facility
+31,201710gavi-3,IC-Hallett,HepB,HepB_BD_both,cases_averted,routine,cases_averted_total_routine,hepb-bd-routine-best-hepb-routine-with,hepb-hepb-routine-with,"hepb_cases_acute_severe,hepb_cases_dec_cirrh,hepb_cases_hcc",TRUE,FALSE,VIS-BD_all
+32,201710gavi-3,IC-Hallett,HepB,HepB_BD_both,dalys_averted,routine,dalys_averted_total_routine,hepb-bd-routine-best-hepb-routine-with,hepb-hepb-routine-with,dalys,TRUE,FALSE,VIS-BD_all
+33,201710gavi-3,IC-Hallett,HepB,HepB_BD_both,deaths_averted,routine,deaths_averted_total_routine,hepb-bd-routine-best-hepb-routine-with,hepb-hepb-routine-with,"hepb_deaths_acute,hepb_deaths_dec_cirrh,hepb_deaths_hcc",TRUE,FALSE,VIS-BD_all
+34,201710gavi-3,IC-Hallett,HepB,HepB_BD_home,cases_averted,routine,cases_averted_total_routine,hepb-bd-routine-best-hepb-routine-with,hepb-bd-routine-with-hepb-routine-with,"hepb_cases_acute_severe,hepb_cases_dec_cirrh,hepb_cases_hcc",TRUE,FALSE,VIS-BD_home
+35,201710gavi-3,IC-Hallett,HepB,HepB_BD_home,dalys_averted,routine,dalys_averted_total_routine,hepb-bd-routine-best-hepb-routine-with,hepb-bd-routine-with-hepb-routine-with,dalys,TRUE,FALSE,VIS-BD_home
+36,201710gavi-3,IC-Hallett,HepB,HepB_BD_home,deaths_averted,routine,deaths_averted_total_routine,hepb-bd-routine-best-hepb-routine-with,hepb-bd-routine-with-hepb-routine-with,"hepb_deaths_acute,hepb_deaths_dec_cirrh,hepb_deaths_hcc",TRUE,FALSE,VIS-BD_home
+37,201710gavi-3,Li,HepB,HepB,cases_averted,routine,cases_averted_total_routine,hepb-hepb-routine-with,hepb-no-vaccination,"hepb_cases_acute_symp,hepb_cases_fulminant,hepb_cases_chronic",TRUE,FALSE,VIMC-HepB: current no bd countries
+38,201710gavi-3,Li,HepB,HepB,cases_averted,routine,cases_averted_total_routine,hepb-bd-routine-with-hepb-routine-with,hepb-bd-routine-with,"hepb_cases_acute_symp,hepb_cases_fulminant,hepb_cases_chronic",TRUE,FALSE,VIMC-HepB: current bd countries
+39,201710gavi-3,Li,HepB,HepB,deaths_averted,routine,deaths_averted_total_routine,hepb-hepb-routine-with,hepb-no-vaccination,"hepb_deaths_acute,hepb_deaths_total_cirrh,hepb_deaths_hcc",TRUE,FALSE,VIMC-HepB: current no bd countries
+40,201710gavi-3,Li,HepB,HepB,deaths_averted,routine,deaths_averted_total_routine,hepb-bd-routine-with-hepb-routine-with,hepb-bd-routine-with,"hepb_deaths_acute,hepb_deaths_total_cirrh,hepb_deaths_hcc",TRUE,FALSE,VIMC-HepB: current bd countries
+41,201710gavi-3,Li,HepB,HepB_BD,cases_averted,routine,cases_averted_total_routine,hepb-bd-routine-with,hepb-no-vaccination,"hepb_cases_acute_symp,hepb_cases_fulminant,hepb_cases_chronic",TRUE,FALSE,VIMC-BD: current bd countries
+42,201710gavi-3,Li,HepB,HepB_BD,cases_averted,routine,cases_averted_total_routine,hepb-bd-routine-with-hepb-routine-with,hepb-hepb-routine-with,"hepb_cases_acute_symp,hepb_cases_fulminant,hepb_cases_chronic",TRUE,FALSE,VIS-BD_facility
+43,201710gavi-3,Li,HepB,HepB_BD,deaths_averted,routine,deaths_averted_total_routine,hepb-bd-routine-with,hepb-no-vaccination,"hepb_deaths_acute,hepb_deaths_total_cirrh,hepb_deaths_hcc",TRUE,FALSE,VIMC-BD: current bd countries
+44,201710gavi-3,Li,HepB,HepB_BD,deaths_averted,routine,deaths_averted_total_routine,hepb-bd-routine-with-hepb-routine-with,hepb-hepb-routine-with,"hepb_deaths_acute,hepb_deaths_total_cirrh,hepb_deaths_hcc",TRUE,FALSE,VIS-BD_facility
+45,201710gavi-3,Li,HepB,HepB_BD_both,cases_averted,routine,cases_averted_total_routine,hepb-bd-routine-best-hepb-routine-with,hepb-hepb-routine-with,"hepb_cases_acute_symp,hepb_cases_fulminant,hepb_cases_chronic",TRUE,FALSE,VIS-BD_all
+46,201710gavi-3,Li,HepB,HepB_BD_both,deaths_averted,routine,deaths_averted_total_routine,hepb-bd-routine-best-hepb-routine-with,hepb-hepb-routine-with,"hepb_deaths_acute,hepb_deaths_total_cirrh,hepb_deaths_hcc",TRUE,FALSE,VIS-BD_all
+47,201710gavi-3,Li,HepB,HepB_BD_home,cases_averted,routine,cases_averted_total_routine,hepb-bd-routine-best-hepb-routine-with,hepb-bd-routine-with-hepb-routine-with,"hepb_cases_acute_symp,hepb_cases_fulminant,hepb_cases_chronic",TRUE,FALSE,VIS-BD_home
+48,201710gavi-3,Li,HepB,HepB_BD_home,deaths_averted,routine,deaths_averted_total_routine,hepb-bd-routine-best-hepb-routine-with,hepb-bd-routine-with-hepb-routine-with,"hepb_deaths_acute,hepb_deaths_total_cirrh,hepb_deaths_hcc",TRUE,FALSE,VIS-BD_home
+49,201710gavi-2,JHU-Tam,Hib,Hib3,cases_averted,routine,cases_averted_total_routine,hib-routine-gavi-LiST,hib-no-vaccination-LiST,"cases_pneumo,cases_men",TRUE,FALSE,
+50,201710gavi-2,JHU-Tam,Hib,Hib3,deaths_averted,routine,deaths_averted_total_routine,hib-routine-gavi-LiST,hib-no-vaccination-LiST,"deaths_pneumo,deaths_men",TRUE,FALSE,
+51,201710gavi-2,LSHTM-Clark,Hib,Hib3,cases_averted,routine,cases_averted_total_routine,hib-routine-gavi,hib-no-vaccination,cases,TRUE,FALSE,
+52,201710gavi-2,LSHTM-Clark,Hib,Hib3,dalys_averted,routine,dalys_averted_total_routine,hib-routine-gavi,hib-no-vaccination,dalys,TRUE,FALSE,
+53,201710gavi-2,LSHTM-Clark,Hib,Hib3,deaths_averted,routine,deaths_averted_total_routine,hib-routine-gavi,hib-no-vaccination,deaths,TRUE,FALSE,
+54,201710gavi-3,Harvard-Sweet,HPV,HPV,cases_averted,campaign,cases_averted_total_campaign,hpv-campaign-gavi,hpv-no-vaccination,cases,TRUE,FALSE,
+55,201710gavi-3,Harvard-Sweet,HPV,HPV,cases_averted,routine,cases_averted_total_routine,hpv-routine-gavi,hpv-campaign-gavi,cases,TRUE,FALSE,
+56,201710gavi-3,Harvard-Sweet,HPV,HPV,dalys_averted,campaign,dalys_averted_total_campaign,hpv-campaign-gavi,hpv-no-vaccination,dalys,TRUE,FALSE,
+57,201710gavi-3,Harvard-Sweet,HPV,HPV,dalys_averted,routine,dalys_averted_total_routine,hpv-routine-gavi,hpv-campaign-gavi,dalys,TRUE,FALSE,
+58,201710gavi-3,Harvard-Sweet,HPV,HPV,deaths_averted,campaign,deaths_averted_total_campaign,hpv-campaign-gavi,hpv-no-vaccination,deaths,TRUE,FALSE,
+59,201710gavi-3,Harvard-Sweet,HPV,HPV,deaths_averted,routine,deaths_averted_total_routine,hpv-routine-gavi,hpv-campaign-gavi,deaths,TRUE,FALSE,
+60,201710gavi-3,LSHTM-Jit,HPV,HPV,cases_averted,campaign,cases_averted_total_campaign,hpv-campaign-gavi,hpv-no-vaccination,cases,TRUE,FALSE,
+61,201710gavi-3,LSHTM-Jit,HPV,HPV,cases_averted,routine,cases_averted_total_routine,hpv-routine-gavi,hpv-campaign-gavi,cases,TRUE,FALSE,
+62,201710gavi-3,LSHTM-Jit,HPV,HPV,dalys_averted,campaign,dalys_averted_total_campaign,hpv-campaign-gavi,hpv-no-vaccination,dalys,TRUE,FALSE,
+63,201710gavi-3,LSHTM-Jit,HPV,HPV,dalys_averted,routine,dalys_averted_total_routine,hpv-routine-gavi,hpv-campaign-gavi,dalys,TRUE,FALSE,
+64,201710gavi-3,LSHTM-Jit,HPV,HPV,deaths_averted,campaign,deaths_averted_total_campaign,hpv-campaign-gavi,hpv-no-vaccination,deaths,TRUE,FALSE,
+65,201710gavi-3,LSHTM-Jit,HPV,HPV,deaths_averted,routine,deaths_averted_total_routine,hpv-routine-gavi,hpv-campaign-gavi,deaths,TRUE,FALSE,
+66,201710gavi-2,OUCRU-Clapham,JE,JE,cases_averted,campaign,cases_averted_total_campaign,je-campaign-gavi,je-routine-gavi,cases,TRUE,FALSE,
+67,201710gavi-2,OUCRU-Clapham,JE,JE,cases_averted,routine,cases_averted_total_routine,je-routine-gavi,je-routine-no-vaccination,cases,TRUE,FALSE,
+68,201710gavi-2,OUCRU-Clapham,JE,JE,dalys_averted,campaign,dalys_averted_total_campaign,je-campaign-gavi,je-routine-gavi,dalys,TRUE,FALSE,
+69,201710gavi-2,OUCRU-Clapham,JE,JE,dalys_averted,routine,dalys_averted_total_routine,je-routine-gavi,je-routine-no-vaccination,dalys,TRUE,FALSE,
+70,201710gavi-2,OUCRU-Clapham,JE,JE,deaths_averted,campaign,deaths_averted_total_campaign,je-campaign-gavi,je-routine-gavi,deaths,TRUE,FALSE,
+71,201710gavi-2,OUCRU-Clapham,JE,JE,deaths_averted,routine,deaths_averted_total_routine,je-routine-gavi,je-routine-no-vaccination,deaths,TRUE,FALSE,
+72,201710gavi-2,LSHTM-Jit,Measles,MCV1,cases_averted,routine,cases_averted_total_routine,measles-mcv1-gavi,measles-no-vaccination,cases,TRUE,FALSE,
+73,201710gavi-2,LSHTM-Jit,Measles,MCV1,dalys_averted,routine,dalys_averted_total_routine,measles-mcv1-gavi,measles-no-vaccination,dalys,TRUE,FALSE,
+74,201710gavi-2,LSHTM-Jit,Measles,MCV1,deaths_averted,routine,deaths_averted_total_routine,measles-mcv1-gavi,measles-no-vaccination,deaths,TRUE,FALSE,
+75,201710gavi-2,LSHTM-Jit,Measles,MCV2,cases_averted,routine,cases_averted_total_routine,measles-mcv2-gavi,measles-mcv1-gavi,cases,TRUE,FALSE,
+76,201710gavi-2,LSHTM-Jit,Measles,MCV2,dalys_averted,routine,dalys_averted_total_routine,measles-mcv2-gavi,measles-mcv1-gavi,dalys,TRUE,FALSE,
+77,201710gavi-2,LSHTM-Jit,Measles,MCV2,deaths_averted,routine,deaths_averted_total_routine,measles-mcv2-gavi,measles-mcv1-gavi,deaths,TRUE,FALSE,
+78,201710gavi-2,LSHTM-Jit,Measles,Measles,cases_averted,campaign,cases_averted_total_campaign,measles-campaign-gavi,measles-mcv2-gavi,cases,TRUE,FALSE,
+79,201710gavi-2,LSHTM-Jit,Measles,Measles,dalys_averted,campaign,dalys_averted_total_campaign,measles-campaign-gavi,measles-mcv2-gavi,dalys,TRUE,FALSE,
+80,201710gavi-2,LSHTM-Jit,Measles,Measles,deaths_averted,campaign,deaths_averted_total_campaign,measles-campaign-gavi,measles-mcv2-gavi,deaths,TRUE,FALSE,
+81,201710gavi-2,PSU-Ferrari,Measles,MCV1,cases_averted,routine,cases_averted_total_routine,measles-mcv1-gavi,measles-no-vaccination,cases,TRUE,FALSE,
+82,201710gavi-2,PSU-Ferrari,Measles,MCV1,deaths_averted,routine,deaths_averted_total_routine,measles-mcv1-gavi,measles-no-vaccination,deaths,TRUE,FALSE,
+83,201710gavi-2,PSU-Ferrari,Measles,MCV2,cases_averted,routine,cases_averted_total_routine,measles-mcv2-gavi,measles-mcv1-gavi,cases,TRUE,FALSE,
+84,201710gavi-2,PSU-Ferrari,Measles,MCV2,deaths_averted,routine,deaths_averted_total_routine,measles-mcv2-gavi,measles-mcv1-gavi,deaths,TRUE,FALSE,
+85,201710gavi-2,PSU-Ferrari,Measles,Measles,cases_averted,campaign,cases_averted_total_campaign,measles-campaign-gavi,measles-mcv2-gavi,cases,TRUE,FALSE,
+86,201710gavi-2,PSU-Ferrari,Measles,Measles,deaths_averted,campaign,deaths_averted_total_campaign,measles-campaign-gavi,measles-mcv2-gavi,deaths,TRUE,FALSE,
+87,201710gavi-3,Cambridge-Trotter,MenA,MenA,cases_averted,campaign,cases_averted_total_campaign,mena-campaign-gavi,mena-no-vaccination,cases,TRUE,FALSE,
+88,201710gavi-3,Cambridge-Trotter,MenA,MenA,cases_averted,routine,cases_averted_total_routine,mena-routine-gavi,mena-campaign-gavi,cases,TRUE,FALSE,
+89,201710gavi-3,Cambridge-Trotter,MenA,MenA,dalys_averted,campaign,dalys_averted_total_campaign,mena-campaign-gavi,mena-no-vaccination,dalys,TRUE,FALSE,
+90,201710gavi-3,Cambridge-Trotter,MenA,MenA,dalys_averted,routine,dalys_averted_total_routine,mena-routine-gavi,mena-campaign-gavi,dalys,TRUE,FALSE,
+91,201710gavi-3,Cambridge-Trotter,MenA,MenA,deaths_averted,campaign,deaths_averted_total_campaign,mena-campaign-gavi,mena-no-vaccination,deaths,TRUE,FALSE,
+92,201710gavi-3,Cambridge-Trotter,MenA,MenA,deaths_averted,routine,deaths_averted_total_routine,mena-routine-gavi,mena-campaign-gavi,deaths,TRUE,FALSE,
+93,201710gavi-3,KPW-Jackson,MenA,MenA,cases_averted,campaign,cases_averted_total_campaign,mena-campaign-gavi,mena-no-vaccination,cases,TRUE,FALSE,
+94,201710gavi-3,KPW-Jackson,MenA,MenA,cases_averted,routine,cases_averted_total_routine,mena-routine-gavi,mena-campaign-gavi,cases,TRUE,FALSE,
+95,201710gavi-3,KPW-Jackson,MenA,MenA,dalys_averted,campaign,dalys_averted_total_campaign,mena-campaign-gavi,mena-no-vaccination,dalys,TRUE,FALSE,
+96,201710gavi-3,KPW-Jackson,MenA,MenA,dalys_averted,routine,dalys_averted_total_routine,mena-routine-gavi,mena-campaign-gavi,dalys,TRUE,FALSE,
+97,201710gavi-3,KPW-Jackson,MenA,MenA,deaths_averted,campaign,deaths_averted_total_campaign,mena-campaign-gavi,mena-no-vaccination,deaths,TRUE,FALSE,
+98,201710gavi-3,KPW-Jackson,MenA,MenA,deaths_averted,routine,deaths_averted_total_routine,mena-routine-gavi,mena-campaign-gavi,deaths,TRUE,FALSE,
+99,201710gavi-4,JHU-Tam,PCV,PCV3,cases_averted,routine,cases_averted_total_routine,pcv-routine-gavi-LiST,pcv-no-vaccination-LiST,"cases_pneumo,cases_men",TRUE,FALSE,
+100,201710gavi-4,JHU-Tam,PCV,PCV3,deaths_averted,routine,deaths_averted_total_routine,pcv-routine-gavi-LiST,pcv-no-vaccination-LiST,"deaths_pneumo,deaths_men",TRUE,FALSE,
+101,201710gavi-4,LSHTM-Clark,PCV,PCV3,cases_averted,routine,cases_averted_total_routine,pcv-routine-gavi,pcv-no-vaccination,cases,TRUE,FALSE,
+102,201710gavi-4,LSHTM-Clark,PCV,PCV3,dalys_averted,routine,dalys_averted_total_routine,pcv-routine-gavi,pcv-no-vaccination,dalys,TRUE,FALSE,
+103,201710gavi-4,LSHTM-Clark,PCV,PCV3,deaths_averted,routine,deaths_averted_total_routine,pcv-routine-gavi,pcv-no-vaccination,deaths,TRUE,FALSE,
+104,201710gavi-2,JHU-Tam,Rota,Rota,cases_averted,routine,cases_averted_total_routine,rota-routine-gavi-LiST,rota-no-vaccination-LiST,cases,TRUE,FALSE,
+105,201710gavi-2,JHU-Tam,Rota,Rota,deaths_averted,routine,deaths_averted_total_routine,rota-routine-gavi-LiST,rota-no-vaccination-LiST,deaths,TRUE,FALSE,
+106,201710gavi-2,LSHTM-Clark,Rota,Rota,cases_averted,routine,cases_averted_total_routine,rota-routine-gavi,rota-no-vaccination,cases,TRUE,FALSE,
+107,201710gavi-2,LSHTM-Clark,Rota,Rota,dalys_averted,routine,dalys_averted_total_routine,rota-routine-gavi,rota-no-vaccination,dalys,TRUE,FALSE,
+108,201710gavi-2,LSHTM-Clark,Rota,Rota,deaths_averted,routine,deaths_averted_total_routine,rota-routine-gavi,rota-no-vaccination,deaths,TRUE,FALSE,
+109,201710gavi-2,PHE-Vynnycky,Rubella,Rubella,cases_averted,campaign,cases_averted_total_campaign,rubella-campaign-gavi,rubella-routine-no-vaccination,rubella_cases_congenital,TRUE,FALSE,
+110,201710gavi-2,PHE-Vynnycky,Rubella,Rubella,cases_averted,routine,cases_averted_total_routine,rubella-routine-gavi,rubella-campaign-gavi,rubella_cases_congenital,TRUE,FALSE,"RCV1 is treated as focal, not RCV2"
+111,201710gavi-2,PHE-Vynnycky,Rubella,Rubella,dalys_averted,campaign,dalys_averted_total_campaign,rubella-campaign-gavi,rubella-routine-no-vaccination,dalys,TRUE,FALSE,
+112,201710gavi-2,PHE-Vynnycky,Rubella,Rubella,dalys_averted,routine,dalys_averted_total_routine,rubella-routine-gavi,rubella-campaign-gavi,dalys,TRUE,FALSE,"RCV1 is treated as focal, not RCV2"
+113,201710gavi-2,PHE-Vynnycky,Rubella,Rubella,deaths_averted,campaign,deaths_averted_total_campaign,rubella-campaign-gavi,rubella-routine-no-vaccination,rubella_deaths_congenital,TRUE,FALSE,
+114,201710gavi-2,PHE-Vynnycky,Rubella,Rubella,deaths_averted,routine,deaths_averted_total_routine,rubella-routine-gavi,rubella-campaign-gavi,rubella_deaths_congenital,TRUE,FALSE,"RCV1 is treated as focal, not RCV2"
+115,201710gavi-2,IC-Garske,YF,YF,cases_averted,campaign,cases_averted_total_campaign,yf-preventive-gavi,yf-no-vaccination,cases,TRUE,FALSE,
+116,201710gavi-2,IC-Garske,YF,YF,cases_averted,routine,cases_averted_total_routine,yf-routine-gavi,yf-preventive-gavi,cases,TRUE,FALSE,
+117,201710gavi-2,IC-Garske,YF,YF,dalys_averted,campaign,dalys_averted_total_campaign,yf-preventive-gavi,yf-no-vaccination,dalys,TRUE,FALSE,
+118,201710gavi-2,IC-Garske,YF,YF,dalys_averted,routine,dalys_averted_total_routine,yf-routine-gavi,yf-preventive-gavi,dalys,TRUE,FALSE,
+119,201710gavi-2,IC-Garske,YF,YF,deaths_averted,campaign,deaths_averted_total_campaign,yf-preventive-gavi,yf-no-vaccination,deaths,TRUE,FALSE,
+120,201710gavi-2,IC-Garske,YF,YF,deaths_averted,routine,deaths_averted_total_routine,yf-routine-gavi,yf-preventive-gavi,deaths,TRUE,FALSE,

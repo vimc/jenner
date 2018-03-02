@@ -4,15 +4,12 @@
 \alias{impact_calculation}
 \title{Impact Calculation (method 2)}
 \usage{
-impact_calculation(con, touchstone_name = "201710gavi", year_min = 2000,
-  year_max = 2030, routine_tot_rate_shape = "trace_cohort",
-  method = "method2")
+impact_calculation(con, meta, year_min = 2000, year_max = 2030,
+  routine_tot_rate_shape = "trace_cohort", method = "method2")
 }
 \arguments{
 \item{con}{Database connection.  You will need to be \code{readonly} user
 to run this function.}
-
-\item{touchstone_name}{is the touchstone relevant to which impact is calculated}
 
 \item{year_min}{minimal year of vaccination}
 

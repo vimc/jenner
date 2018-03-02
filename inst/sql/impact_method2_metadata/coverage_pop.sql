@@ -21,7 +21,7 @@ JOIN num
   ON num.i <= (age_to - age_from + 1)
 WHERE touchstone = $1
 %1s
-  AND vaccine NOT IN ('none', 'PCV', 'DTP3')
+  AND vaccine NOT IN ('none', 'DTP3')
   AND year BETWEEN $2 AND $3) As coverage_fvps
 ----------------------------------------------------------------------------------
 LEFT JOIN

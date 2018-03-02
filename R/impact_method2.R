@@ -4,7 +4,6 @@
 ##'
 ##' @param con Database connection.  You will need to be \code{readonly} user
 ##' to run this function.
-##' @param touchstone_name is the touchstone relevant to which impact is calculated
 ##' @param year_min minimal year of vaccination
 ##' @param year_max maximal year year of vaccination
 ##' @param routine_tot_rate_shape This parameter determines how we chop off the year-age matrix to calculate impact rates
@@ -14,12 +13,9 @@
 ##' @param method impact calculation method - chose from method1 and method2
 ##' impact outcome can be provided as age specific if simplified=FALSE
 ##' @export
-impact_calculation <- function(con, touchstone_name = "201710gavi",
-                               year_min = 2000, year_max = 2030,
-                               routine_tot_rate_shape = "trace_cohort", method = "method2") {
-  ## prepare metadata
-  meta <- prepare_recipe(con, recipe = "impact.csv")
+impact_calculation <- function(con, meta, year_min = 2000, year_max = 2030, routine_tot_rate_shape = "trace_cohort", method = "method2") {
 
+if(nrow(meta) == 0L) stop("No active recipe found in 'meta'!")
   ## impact calculation
   meta2 <- split(meta, meta$index)
   if (method == "method1") {
@@ -51,7 +47,15 @@ impact_calculation <- function(con, touchstone_name = "201710gavi",
   list(groups = groups, scripts = scripts, impact_full = v$impact_full, impact_simplified = v$impact_simplified)
 }
 
-prepare_recipe <- function(con, recipe) {
+##' Prepare impact calculation recipes
+##' @title Prepare impact recipe
+##' @param con Database connection.  You will need to be \code{readonly} user
+##' to run this function.
+##' @param recipe at the moment, it is a csv file.
+##' Once imported, recipe will be more flexible
+##' @export
+prepare_recipe <- function(con, recipe = "impact.csv") {
+  ## prepare metadata
   sql_group <- read_sql(file_name = "impact_method2_metadata/group.sql")
   sql_burden_outcomes <- read_sql(file_name = "impact_method2_metadata/burden_outcomes.sql")
   group <- DBI::dbGetQuery(con, sql_group)
@@ -113,6 +117,29 @@ make_impact <- function(con, index, year_min, year_max, routine_tot_rate_shape =
       shape <- paste(sprintf("AND (year-age) >= %s", cohort_min))
     }
   }
+  # sql_1 <- paste("SELECT tmp.country, sum(tmp.value) AS tot_impact",
+  #                "FROM (SELECT country, year, age, value",
+  #                "FROM burden_estimate",
+  #                sprintf("WHERE burden_estimate_set = %s",base$burden_estimate_set_id),
+  #                shape,
+  #                sprintf("AND burden_outcome IN %s ", outcomes),
+  #                "UNION ALL",
+  #                "SELECT country, year, age, value*(-1) AS value",
+  #                "FROM burden_estimate",
+  #                sprintf("WHERE burden_estimate_set = %s",focal$burden_estimate_set_id),
+  #                shape,
+  #                sprintf("AND burden_outcome IN %s ) AS tmp", outcomes),
+  #                "RIGHT JOIN",
+  #                "(SELECT DISTINCT country",
+  #                "FROM burden_estimate",
+  #                sprintf("WHERE burden_estimate_set = %s",focal$burden_estimate_set_id),
+  #                ") as focal_country",
+  #                "ON tmp.country = focal_country.country",
+  #                "GROUP BY tmp.country", sep="\n")
+  focal_countries  <- DBI::dbGetQuery(con, paste("SELECT DISTINCT country",
+                                      "FROM burden_estimate",
+                                      sprintf("WHERE burden_estimate_set = %s",focal$burden_estimate_set_id)))
+
   sql_1 <- paste("SELECT tmp.country, sum(tmp.value) AS tot_impact",
                  "FROM (SELECT country, year, age, value",
                  "FROM burden_estimate",
@@ -123,14 +150,9 @@ make_impact <- function(con, index, year_min, year_max, routine_tot_rate_shape =
                  "SELECT country, year, age, value*(-1) AS value",
                  "FROM burden_estimate",
                  sprintf("WHERE burden_estimate_set = %s",focal$burden_estimate_set_id),
+                 sprintf("AND country IN %s", sql_in(focal_countries$country)),
                  shape,
                  sprintf("AND burden_outcome IN %s ) AS tmp", outcomes),
-                 "RIGHT JOIN",
-                 "(SELECT DISTINCT country",
-                 "FROM burden_estimate",
-                 sprintf("WHERE burden_estimate_set = %s",focal$burden_estimate_set_id),
-                 ") as focal_country",
-                 "ON tmp.country = focal_country.country",
                  "GROUP BY tmp.country", sep="\n")
   tot_impact <- DBI::dbGetQuery(con, sql_1)
   tot_impact$.code <- tot_impact$country
@@ -238,6 +260,30 @@ make_impact_method1 <- function(con, index) {
   outcomes <- sql_in(unique(index$burden_outcome_id), text_item = FALSE)
 
   ## 2.1 sql - impact by country-year-age
+  # sql <- paste("SELECT tmp.country, tmp.year, tmp.age, sum(tmp.value) AS impact",
+  #              "FROM (SELECT country, year, age, value",
+  #              "FROM burden_estimate",
+  #              sprintf("WHERE burden_estimate_set = %s",base$burden_estimate_set_id),
+  #              sprintf("AND year BETWEEN %s", 2000),
+  #              sprintf(" AND %s", 2100),
+  #              sprintf("AND burden_outcome IN %s ", outcomes),
+  #              "UNION ALL",
+  #              "SELECT country, year, age, value*(-1) AS value",
+  #              "FROM burden_estimate",
+  #              sprintf("WHERE burden_estimate_set = %s",focal$burden_estimate_set_id),
+  #              sprintf("AND year BETWEEN %s", 2000),
+  #              sprintf(" AND %s", 2100),
+  #              sprintf("AND burden_outcome IN %s ) AS tmp", outcomes),
+  #              "RIGHT JOIN",
+  #              "(SELECT DISTINCT country",
+  #              "FROM burden_estimate",
+  #              sprintf("WHERE burden_estimate_set = %s",focal$burden_estimate_set_id),
+  #              ") as focal_country",
+  #              "ON tmp.country = focal_country.country",
+  #              "GROUP BY tmp.country, tmp.year, tmp.age", sep="\n")
+  focal_countries  <- DBI::dbGetQuery(con, paste("SELECT DISTINCT country",
+                                                 "FROM burden_estimate",
+                                                 sprintf("WHERE burden_estimate_set = %s",focal$burden_estimate_set_id)))
   sql <- paste("SELECT tmp.country, tmp.year, tmp.age, sum(tmp.value) AS impact",
                "FROM (SELECT country, year, age, value",
                "FROM burden_estimate",
@@ -249,15 +295,10 @@ make_impact_method1 <- function(con, index) {
                "SELECT country, year, age, value*(-1) AS value",
                "FROM burden_estimate",
                sprintf("WHERE burden_estimate_set = %s",focal$burden_estimate_set_id),
+               sprintf("AND country IN %s", sql_in(focal_countries$country)),
                sprintf("AND year BETWEEN %s", 2000),
                sprintf(" AND %s", 2100),
                sprintf("AND burden_outcome IN %s ) AS tmp", outcomes),
-               "RIGHT JOIN",
-               "(SELECT DISTINCT country",
-               "FROM burden_estimate",
-               sprintf("WHERE burden_estimate_set = %s",focal$burden_estimate_set_id),
-               ") as focal_country",
-               "ON tmp.country = focal_country.country",
                "GROUP BY tmp.country, tmp.year, tmp.age", sep="\n")
   dat <- DBI::dbGetQuery(con, sql)
 
@@ -443,70 +484,3 @@ line_up <- function(recipe, group, burden_outcomes) {
 
 }
 
-##' Make a small chunck of test data for testing purpose
-##' @title Generate test data
-##' @param con Database connection.  You will need to be \code{readonly} user
-##' to run this function.
-##' @param con_test This is a SQLite connection
-##' @param modelling_group this is the modelling_group that the test data is linked to
-##' @param year_min min year of vaccination
-##' @param year_max max year of vaccination
-##' @export
-test_data <- function (con, con_test, modelling_group = "PSU-Ferrari", year_min = 2000, year_max = 2030) {
-
-  countries <- jenner::sql_in(c("PAK", "IND", "NGA", "ETH"))
-  sql_meta <- c("SELECT meta2.* from
-                (SELECT touchstone.touchstone_name, max(touchstone.version) as version, modelling_group, scenario.scenario_description
-                FROM responsibility
-                JOIN responsibility_set
-                ON responsibility_set.id = responsibility.responsibility_set
-                JOIN scenario
-                ON scenario.id = responsibility.scenario
-                JOIN scenario_description on scenario_description.id = scenario.scenario_description
-                JOIN touchstone
-                ON touchstone.id = responsibility_set.touchstone
-                WHERE touchstone_name = '201710gavi'
-                GROUP BY touchstone.touchstone_name, modelling_group, scenario.scenario_description) as meta
-
-                join touchstone
-                on touchstone.touchstone_name = meta.touchstone_name
-                and touchstone.version = meta.version
-                JOIN ( select responsibility_set.touchstone, modelling_group, scenario_description, activity_type,
-                responsibility.id as responsibility_id, scenario.id as sceanrio_id, current_burden_estimate_set
-                FROM responsibility
-                JOIN responsibility_set
-                ON responsibility_set.id = responsibility.responsibility_set
-                JOIN scenario
-                ON scenario.id = responsibility.scenario
-                join coverage_set on coverage_set.id = scenario.focal_coverage_set
-                where current_burden_estimate_set IS NOT NULL
-                ) as meta2
-                ON meta2.touchstone = touchstone.id
-                and meta2.modelling_group = meta.modelling_group
-                and meta2.scenario_description = meta.scenario_description
-                WHERE meta2.modelling_group = '%s'")
-
-  sql_meta <- sprintf(sql_meta, modelling_group)
-  meta = DBI::dbGetQuery(con, sql_meta)
-  i <- duplicated(data.frame(meta$scenario, meta$modelling_group))
-  if (any(i)) {stop("duplication in meta not expected")}
-
-  ids <- meta$current_burden_estimate_set[!is.na(meta$current_burden_estimate_set)]
-  ### we use all recipes and pine countries as test data
-  ### year range is 2000 - 2030 (fvps) and 2000-2100 (burden) for campaign
-  ### year range is 2020 - 2030 (fvps and burden) for routine
-  ## when calculate impact:
-  ## do routine only - because campaign impact uses all coverage and all impact, too big for a test
-  sql_burden <- paste(sprintf("SELECT * FROM burden_estimate
-                              WHERE burden_estimate_set
-                              IN %s", sql_in(ids, text_item =FALSE)),
-                      sprintf("AND country IN %s", countries),
-                      sprintf("AND year BETWEEN $1 AND $2")
-  )
-  burden_lite <- DBI::dbGetQuery(con, sql_burden, list(year_min, year_max))
-
-  input_lite <- jenner::fix_coverage_fvps(con, year_min = year_min, year_max = year_max, pine = TRUE, write_table = FALSE)
-
-  DBI::dbWriteTable(con_test, "burden_estimate", burden_lite, overwrite = TRUE)
-  DBI::dbWriteTable(con_test, "temporary_coverage_fvps", input_lite, overwrite = TRUE)
-}
