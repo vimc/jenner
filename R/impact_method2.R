@@ -215,15 +215,16 @@ make_impact <- function(con, index, year_min, year_max, routine_tot_rate_shape =
   impact_cohort <- stats::aggregate(impact ~ index + support_type + country + vaccine + cohort + tot_rate, data=dat, sum, na.rm=TRUE)
   impact_cohort$impact_type <- "cohort"
   names(impact_cohort)[which(names(impact_cohort) == "cohort")] <- "year"
-  impact_cohort <- impact_cohort[impact_cohort$year %in% (cohort_min:cohort_max), ]
-  # impact by year of vaccination
-  impact_calendar <- aggregate(impact ~ index + support_type + country + vaccine + year + tot_rate, data=dat, sum, na.rm=TRUE)
-  impact_calendar$impact_type <- "calendar"
-  impact_calendar <- impact_calendar[impact_calendar$year %in% (year_min:year_max), ]
-  impact2 <- rbind(impact_cohort, impact_calendar)
+  #impact_cohort <- impact_cohort[impact_cohort$year %in% (cohort_min:cohort_max), ]
+  # # impact by year of vaccination
+  # impact_calendar <- stats::aggregate(impact ~ index + support_type + country + vaccine + year + tot_rate, data=dat, sum, na.rm=TRUE)
+  # impact_calendar$impact_type <- "calendar"
+  # impact_calendar <- impact_calendar[impact_calendar$year %in% (year_min:year_max), ]
+  # impact2 <- rbind(impact_cohort, impact_calendar)
 
   impact2 <- impact_cohort[cols_impact2]
-
+  impact2 <- impact2[impact2$year %in% (cohort_min:cohort_max), ]
+  
   ## 6. End
   return( list(impact_full = impact1, impact_simplified = impact2) )
 }
@@ -246,27 +247,6 @@ make_impact_method1 <- function(con, index) {
   outcomes <- sql_in(unique(index$burden_outcome_id), text_item = FALSE)
 
   ## 2.1 sql - impact by country-year-age
-  # sql <- paste("SELECT tmp.country, tmp.year, tmp.age, sum(tmp.value) AS impact",
-  #              "FROM (SELECT country, year, age, value",
-  #              "FROM burden_estimate",
-  #              sprintf("WHERE burden_estimate_set = %s",base$burden_estimate_set_id),
-  #              sprintf("AND year BETWEEN %s", 2000),
-  #              sprintf(" AND %s", 2100),
-  #              sprintf("AND burden_outcome IN %s ", outcomes),
-  #              "UNION ALL",
-  #              "SELECT country, year, age, value*(-1) AS value",
-  #              "FROM burden_estimate",
-  #              sprintf("WHERE burden_estimate_set = %s",focal$burden_estimate_set_id),
-  #              sprintf("AND year BETWEEN %s", 2000),
-  #              sprintf(" AND %s", 2100),
-  #              sprintf("AND burden_outcome IN %s ) AS tmp", outcomes),
-  #              "RIGHT JOIN",
-  #              "(SELECT DISTINCT country",
-  #              "FROM burden_estimate",
-  #              sprintf("WHERE burden_estimate_set = %s",focal$burden_estimate_set_id),
-  #              ") as focal_country",
-  #              "ON tmp.country = focal_country.country",
-  #              "GROUP BY tmp.country, tmp.year, tmp.age", sep="\n")
   focal_countries  <- DBI::dbGetQuery(con, paste("SELECT DISTINCT country",
                                                  "FROM burden_estimate",
                                                  sprintf("WHERE burden_estimate_set = %s",focal$burden_estimate_set_id)))
