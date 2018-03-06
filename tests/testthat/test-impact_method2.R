@@ -21,7 +21,7 @@ test_that("impact_calculation, method1", {
   vaccine_base <- "HPV"
   year_min <- 2020
   year_max <- 2030
-  method = "method1"
+  method <- "method1"
 
   meta <- prepare_recipe(con, recipe = "impact.csv") # the .csv is needed at least for now, I am afraid.
   meta2 <- meta[meta$modelling_group == modelling_group & meta$vaccine == vaccine_focal & meta$activity_type == "routine", ]
@@ -35,10 +35,10 @@ test_that("impact_calculation, method1", {
   tot_impact <- aggregate(value ~ index + country + year + age, data = tot_impact, sum, na.rm=TRUE)
   ## run function
   dat <- impact_calculation(con = con_test, meta = meta2, year_min = year_min, year_max = year_max, method = method)
-  a = dat$impact_full
-  a = a[order(a$index, a$country, a$year, a$age), ]
-  b = tot_impact
-  b = b[order(b$index, b$country, b$year, b$age), ]
+  a <- dat$impact_full
+  a <- a[order(a$index, a$country, a$year, a$age), ]
+  b <- tot_impact
+  b <- b[order(b$index, b$country, b$year, b$age), ]
   expect_equal(a$impact, b$value)
 })
 
@@ -62,7 +62,7 @@ test_that("impact_calculation, method2", {
   vaccine_base <- "HPV"
   year_min <- 2020
   year_max <- 2030
-  method = "method2"
+  method <- "method2"
 
   meta <- prepare_recipe(con, recipe = "impact.csv") # the .csv is needed at least for now, I am afraid.
   meta2 <- meta[meta$modelling_group == modelling_group & meta$vaccine == vaccine_focal & meta$activity_type == "routine", ]
@@ -74,15 +74,15 @@ test_that("impact_calculation, method2", {
   fvps <- fvps[fvps$activity_type == "routine", ]
 
   ## define shape and run the function
-  cohort_min = year_min
-  cohort_max = year_max
+  cohort_min <- year_min
+  cohort_max <- year_max
   if( vaccine_focal == "MCV2") {
-    cohort_min = year_min - 2
-    cohort_max = year_max - 2
+    cohort_min <- year_min - 2
+    cohort_max <- year_max - 2
   }
   if( vaccine_focal == "HPV") {
-    cohort_min = year_min - 9
-    cohort_max = year_max - 9
+    cohort_min <- year_min - 9
+    cohort_max <- year_max - 9
   }
   dat <- impact_calculation(con = con_test, meta = meta2, year_min = year_min, year_max = year_max, method = "method2")
   ## mannual impact calculation
@@ -99,11 +99,11 @@ test_that("impact_calculation, method2", {
   impact$impact <- impact$tot_rate * impact$fvps
   impact$cohort <- impact$year - impact$age
 
-  a = dat$impact_full
-  a = a[a$support_type == "total", ]
-  a = a[order(a$index, a$country, a$year, a$age), ]
+  a <- dat$impact_full
+  a <- a[a$support_type == "total", ]
+  a <- a[order(a$index, a$country, a$year, a$age), ]
 
-  b = impact[impact$cohort %in% cohort_min:cohort_max, ]
-  b = b[order(b$index, b$country, b$year, b$age), ]
+  b <- impact[impact$cohort %in% cohort_min:cohort_max, ]
+  b <- b[order(b$index, b$country, b$year, b$age), ]
   expect_equal(a$impact, b$impact)
 })
