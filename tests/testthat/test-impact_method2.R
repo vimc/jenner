@@ -2,10 +2,10 @@ context("impact_method2")
 
 source("generate-test-data.R")
 test_that("impact_calculation, method1", {
-  host <- Sys.getenv("MONTAGU_DB_HOST", "support.montagu.dide.ic.ac.uk")
-  port <- as.integer(Sys.getenv("MONTAGU_DB_PORT", 5432))
-  user <- Sys.getenv("MONTAGU_DB_USER", "import")
-  password <- Sys.getenv("MONTAGU_DB_PASSWORD", "changeme")
+  host <- Sys.getenv("MONTAGU_HOST", "support.montagu.dide.ic.ac.uk")
+  port <- as.integer(Sys.getenv("MONTAGU_PORT", 5432))
+  user <- Sys.getenv("MONTAGU_USER", "readonly")
+  password <- Sys.getenv("MONTAGU_PASSWORD", "changeme")
   con <- DBI::dbConnect(RPostgres::Postgres(),
                         dbname = "montagu",
                         host = host,
@@ -43,10 +43,10 @@ test_that("impact_calculation, method1", {
 })
 
 test_that("impact_calculation, method2", {
-  host <- Sys.getenv("MONTAGU_DB_HOST", "support.montagu.dide.ic.ac.uk")
-  port <- as.integer(Sys.getenv("MONTAGU_DB_PORT", 5432))
-  user <- Sys.getenv("MONTAGU_DB_USER", "import")
-  password <- Sys.getenv("MONTAGU_DB_PASSWORD", "changeme")
+  host <- Sys.getenv("MONTAGU_HOST", "support.montagu.dide.ic.ac.uk")
+  port <- as.integer(Sys.getenv("MONTAGU_PORT", 5432))
+  user <- Sys.getenv("MONTAGU_USER", "readonly")
+  password <- Sys.getenv("MONTAGU_PASSWORD", "changeme")
   con <- DBI::dbConnect(RPostgres::Postgres(),
                         dbname = "montagu",
                         host = host,
