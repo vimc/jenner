@@ -4,9 +4,11 @@
 \alias{admin_set_active_touchstone}
 \title{Set the active touchstone}
 \usage{
-admin_set_active_touchstone(touchstone_id, dry_run = TRUE)
+admin_set_active_touchstone(con, touchstone_id, dry_run = TRUE)
 }
 \arguments{
+\item{con}{Database connection (will require write access to the database)}
+
 \item{touchstone_id}{Touchstone id to set as "open"}
 
 \item{dry_run}{Don't commit the transaction - just test if it would work}

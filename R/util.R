@@ -14,7 +14,7 @@ read_file <- function(filename) {
 }
 
 read_csv <- function(...) {
-  read.csv(..., stringsAsFactors = FALSE)
+  utils::read.csv(..., stringsAsFactors = FALSE)
 }
 
 data_frame <- function(...) {
@@ -87,4 +87,37 @@ rbind_simple <- function(x) {
     unlist(lapply(x, "[[", nm), use.names = FALSE))
   names(cols) <- nms
   as.data.frame(cols, stringsAsFactors = FALSE)
+}
+
+sql_in <- function(items, text_item = TRUE) {
+  items <- paste(if (text_item) squote(items) else items,
+                 collapse= ", ")
+  sprintf("(%s)", items)
+}
+
+squote <- function(x) {
+  sprintf("'%s'", x)
+}
+
+dquote <- function(x) {
+  sprintf('"%s"', x)
+}
+
+read_sql <- function(file_name) {
+  sql <- read_file(
+    system.file(file.path("sql", file_name), package = "jenner", mustWork = TRUE))
+}
+
+
+merge_in <- function(dat, d, cols, .code = ".code") {
+  i <- match(dat[[.code]], d[[.code]])
+  keep <- d[i, cols, drop = FALSE]
+  rownames(keep) <- NULL
+  nms <- names(cols)
+  if (!is.null(nms)) {
+    nms[!nzchar(nms)] <- cols[!nzchar(nms)]
+    names(keep) <- nms
+  }
+  v <- cbind(dat, keep)
+  v <- v[-which(names(v) == .code)]
 }
