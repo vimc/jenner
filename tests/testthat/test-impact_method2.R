@@ -4,6 +4,10 @@ test_that("impact_calculation, method1", {
   skip_if_not_installed("RSQLite")
   con <- test_montagu_readonly_connection()
   con_test <- DBI::dbConnect(RSQLite::SQLite(), dbname=":memory:")
+  on.exit({
+    DBI::dbDisconnect(con)
+    DBI::dbDisconnect(con_test)
+  })
 
   ## build test data
   message("Can only test routine at the moment.")
@@ -15,10 +19,12 @@ test_that("impact_calculation, method1", {
   method <- "method1"
 
   meta <- prepare_recipe(con, recipe = "impact.csv") # the .csv is needed at least for now, I am afraid.
-  meta2 <- meta[meta$modelling_group == modelling_group & meta$vaccine == vaccine_focal & meta$activity_type == "routine", ]
+  meta2 <- meta[meta$modelling_group == modelling_group &
+                meta$vaccine == vaccine_focal &
+                meta$activity_type == "routine", ]
 
-  test_data(con = con, con_test = con_test, modelling_group = modelling_group, vaccine_focal = vaccine_focal, vaccine_base = vaccine_base, year_min = year_min, year_max = year_max)
-  DBI::dbDisconnect(conn = con)
+  import_test_data_impact_method2(con = con, con_test = con_test, modelling_group = modelling_group, vaccine_focal = vaccine_focal, vaccine_base = vaccine_base, year_min = year_min, year_max = year_max)
+
   burden <- DBI::dbReadTable(con_test, "burden_estimate")
   ## mannually calculate impact
   tot_impact <- merge(meta2, burden, by.x = c("burden_estimate_set_id", "burden_outcome_id"), by.y = c("burden_estimate_set", "burden_outcome"))
@@ -37,6 +43,10 @@ test_that("impact_calculation, method2", {
   skip_if_not_installed("RSQLite")
   con <- test_montagu_readonly_connection()
   con_test <- DBI::dbConnect(RSQLite::SQLite(), dbname=":memory:")
+  on.exit({
+    DBI::dbDisconnect(con)
+    DBI::dbDisconnect(con_test)
+  })
 
   ## build test data
   message("Can only test routine at the moment.")
@@ -50,7 +60,7 @@ test_that("impact_calculation, method2", {
   meta <- prepare_recipe(con, recipe = "impact.csv") # the .csv is needed at least for now, I am afraid.
   meta2 <- meta[meta$modelling_group == modelling_group & meta$vaccine == vaccine_focal & meta$activity_type == "routine", ]
 
-  test_data(con = con, con_test = con_test, modelling_group = modelling_group, vaccine_focal = vaccine_focal, vaccine_base = vaccine_base, year_min = year_min, year_max = year_max)
+  import_test_data_impact_method2(con = con, con_test = con_test, modelling_group = modelling_group, vaccine_focal = vaccine_focal, vaccine_base = vaccine_base, year_min = year_min, year_max = year_max)
   DBI::dbDisconnect(conn = con)
   burden <- DBI::dbReadTable(con_test, "burden_estimate")
   fvps <- DBI::dbReadTable(con_test, "temporary_coverage_fvps")

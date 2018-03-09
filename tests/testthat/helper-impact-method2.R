@@ -1,4 +1,4 @@
-generate_test_data_impact_method2 <- function(con, con_test, modelling_group = "PSU-Ferrari", vaccine_focal = "MCV1", vaccine_base = "none", year_min = 2000, year_max = 2030) {
+import_test_data_impact_method2 <- function(con, con_test, modelling_group = "PSU-Ferrari", vaccine_focal = "MCV1", vaccine_base = "none", year_min = 2000, year_max = 2030) {
 
   countries <- sql_in(c("PAK", "IND", "NGA", "ETH"))
   sql_meta <- c("SELECT meta2.* from
@@ -38,7 +38,7 @@ generate_test_data_impact_method2 <- function(con, con_test, modelling_group = "
   if(nrow(meta) == 0L) {
     stop("Unknown model-vaccine combination.")
   }
-  i <- duplicated(data.frame(meta$scenario, meta$modelling_group))
+  i <- duplicated(data.frame(meta$scenario_description, meta$modelling_group))
   if (any(i)) {
     stop("duplication in meta not expected")
   }
