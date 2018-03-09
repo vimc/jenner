@@ -37,6 +37,10 @@ test_that("impact_calculation, method1", {
   b <- tot_impact
   b <- b[order(b$index, b$country, b$year, b$age), ]
   expect_equal(a$impact, b$value)
+
+  ## saveRDS(a, "jenner-test-data/impact_calculation/method1.rds")
+  expect_known_value(a, "jenner-test-data/impact_calculation/method1.rds",
+                     update = FALSE)
 })
 
 test_that("impact_calculation, method2", {
@@ -98,4 +102,8 @@ test_that("impact_calculation, method2", {
   b <- impact[impact$cohort %in% cohort_min:cohort_max, ]
   b <- b[order(b$index, b$country, b$year, b$age), ]
   expect_equal(a$impact, b$impact)
+
+  ## saveRDS(a, "jenner-test-data/impact_calculation/method2.rds")
+  expect_known_value(a, "jenner-test-data/impact_calculation/method2.rds",
+                     update = FALSE)
 })
