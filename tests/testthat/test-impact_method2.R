@@ -1,6 +1,7 @@
 context("impact_method2")
 
 test_that("impact_calculation, method1", {
+  skip_if_not_installed("RSQLite")
   con <- test_montagu_readonly_connection()
   con_test <- DBI::dbConnect(RSQLite::SQLite(), dbname=":memory:")
 
@@ -33,6 +34,7 @@ test_that("impact_calculation, method1", {
 })
 
 test_that("impact_calculation, method2", {
+  skip_if_not_installed("RSQLite")
   con <- test_montagu_readonly_connection()
   con_test <- DBI::dbConnect(RSQLite::SQLite(), dbname=":memory:")
 
