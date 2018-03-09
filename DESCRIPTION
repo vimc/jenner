@@ -16,3 +16,4 @@ RoxygenNote: 6.0.1
 Suggests:
     RSQLite,
     testthat
+Encoding: UTF-8
