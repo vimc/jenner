@@ -1,18 +1,7 @@
 context("impact_method2")
 
 test_that("impact_calculation, method1", {
-  skip_if_no_montagu_password()
-
-  host <- Sys.getenv("MONTAGU_HOST", "support.montagu.dide.ic.ac.uk")
-  port <- as.integer(Sys.getenv("MONTAGU_PORT", 5432))
-  user <- Sys.getenv("MONTAGU_USER", "readonly")
-  password <- Sys.getenv("MONTAGU_PASSWORD", "changeme")
-  con <- DBI::dbConnect(RPostgres::Postgres(),
-                        dbname = "montagu",
-                        host = host,
-                        port = port,
-                        password = password,
-                        user = user)
+  con <- test_montagu_readonly_connection()
   con_test <- DBI::dbConnect(RSQLite::SQLite(), dbname=":memory:")
 
   ## build test data
@@ -44,18 +33,7 @@ test_that("impact_calculation, method1", {
 })
 
 test_that("impact_calculation, method2", {
-  skip_if_no_montagu_password()
-
-  host <- Sys.getenv("MONTAGU_HOST", "support.montagu.dide.ic.ac.uk")
-  port <- as.integer(Sys.getenv("MONTAGU_PORT", 5432))
-  user <- Sys.getenv("MONTAGU_USER", "readonly")
-  password <- Sys.getenv("MONTAGU_PASSWORD", "changeme")
-  con <- DBI::dbConnect(RPostgres::Postgres(),
-                        dbname = "montagu",
-                        host = host,
-                        port = port,
-                        password = password,
-                        user = user)
+  con <- test_montagu_readonly_connection()
   con_test <- DBI::dbConnect(RSQLite::SQLite(), dbname=":memory:")
 
   ## build test data
