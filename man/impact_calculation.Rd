@@ -11,6 +11,8 @@ impact_calculation(con, meta, year_min = 2000, year_max = 2030,
 \item{con}{Database connection.  You will need to be \code{readonly} user
 to run this function.}
 
+\item{meta}{This is the metadata that goes into the calcualtion}
+
 \item{year_min}{minimal year of vaccination}
 
 \item{year_max}{maximal year year of vaccination}
