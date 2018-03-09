@@ -26,3 +26,10 @@ test_montagu_readonly_connection <- function() {
 
   con
 }
+
+
+skip_if_no_test_data <- function() {
+  if (!file.exists("jenner-test-data")) {
+    testthat::skip("Test data not found - please clone vimc/jenner-test-data")
+  }
+}
