@@ -4,6 +4,7 @@
 ##'
 ##' @param con Database connection.  You will need to be \code{readonly} user
 ##' to run this function.
+##' @param meta This is the metadata that goes into the calcualtion
 ##' @param year_min minimal year of vaccination
 ##' @param year_max maximal year year of vaccination
 ##' @param routine_tot_rate_shape This parameter determines how we chop off the year-age matrix to calculate impact rates
@@ -64,7 +65,7 @@ prepare_recipe <- function(con, recipe = "impact.csv") {
   ## read impact recipes - this will change once the recipe is imported into Montagu
   recipe <- read_csv(recipe)
   recipe <- recipe[recipe$central_estimates_complete,]
-  #recipe <- recipe[recipe$index == 47, ]
+  #recipe <- recipe[recipe$index == 100, ]
   recipe2 <- split(recipe, recipe$index)
   meta <- lapply(recipe2, function(i) line_up(i, group, burden_outcomes))
   meta <- do.call(rbind, meta)
@@ -215,16 +216,14 @@ make_impact <- function(con, index, year_min, year_max, routine_tot_rate_shape =
   impact_cohort <- stats::aggregate(impact ~ index + support_type + country + vaccine + cohort + tot_rate, data=dat, sum, na.rm=TRUE)
   impact_cohort$impact_type <- "cohort"
   names(impact_cohort)[which(names(impact_cohort) == "cohort")] <- "year"
-  #impact_cohort <- impact_cohort[impact_cohort$year %in% (cohort_min:cohort_max), ]
+  impact_cohort <- impact_cohort[impact_cohort$year %in% (cohort_min:cohort_max), ]
   # # impact by year of vaccination
-  # impact_calendar <- stats::aggregate(impact ~ index + support_type + country + vaccine + year + tot_rate, data=dat, sum, na.rm=TRUE)
-  # impact_calendar$impact_type <- "calendar"
-  # impact_calendar <- impact_calendar[impact_calendar$year %in% (year_min:year_max), ]
-  # impact2 <- rbind(impact_cohort, impact_calendar)
+  impact_calendar <- stats::aggregate(impact ~ index + support_type + country + vaccine + year + tot_rate, data=dat, sum, na.rm=TRUE)
+  impact_calendar$impact_type <- "calendar"
+  impact_calendar <- impact_calendar[impact_calendar$year %in% (year_min:year_max), ]
+  impact2 <- rbind(impact_cohort, impact_calendar)
 
-  impact2 <- impact_cohort[cols_impact2]
-  impact2 <- impact2[impact2$year %in% (cohort_min:cohort_max), ]
-  
+  impact2 <- impact2[cols_impact2]
   ## 6. End
   return( list(impact_full = impact1, impact_simplified = impact2) )
 }
@@ -351,7 +350,7 @@ fix_coverage_fvps <- function(con, touchstone_name = "201710gavi", year_min = 20
   # report problems - fvps >> pop
   tab$diff <- (tab$target - tab$target_cohortS) / tab$target_cohortS
   if (report_suspecious_coverage) {
-    utils::write.csv(tab[tab$diff > 1., ], "problematic_campaign.csv", row.names = FALSE)
+    utils::write.csv(tab[tab$diff > 1., ], "suspicious_campaign_coverage.csv", row.names = FALSE)
   }
   ## 6. calculate age level coverage
   tab$coverage <- tab$fvps / (tab$population+1) # plus one to avoid 0 pop for old age
