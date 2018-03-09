@@ -38,6 +38,7 @@ test_that("impact_calculation, method1", {
   b <- b[order(b$index, b$country, b$year, b$age), ]
   expect_equal(a$impact, b$value)
 
+  skip_if_no_reference_data()
   ## saveRDS(a, "jenner-test-data/impact_calculation/method1.rds")
   expect_known_value(a, "jenner-test-data/impact_calculation/method1.rds",
                      update = FALSE)
@@ -103,6 +104,7 @@ test_that("impact_calculation, method2", {
   b <- b[order(b$index, b$country, b$year, b$age), ]
   expect_equal(a$impact, b$impact)
 
+  skip_if_no_reference_data()
   ## saveRDS(a, "jenner-test-data/impact_calculation/method2.rds")
   expect_known_value(a, "jenner-test-data/impact_calculation/method2.rds",
                      update = FALSE)
