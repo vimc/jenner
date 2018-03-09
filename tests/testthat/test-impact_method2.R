@@ -61,7 +61,6 @@ test_that("impact_calculation, method2", {
   meta2 <- meta[meta$modelling_group == modelling_group & meta$vaccine == vaccine_focal & meta$activity_type == "routine", ]
 
   import_test_data_impact_method2(con = con, con_test = con_test, modelling_group = modelling_group, vaccine_focal = vaccine_focal, vaccine_base = vaccine_base, year_min = year_min, year_max = year_max)
-  DBI::dbDisconnect(conn = con)
   burden <- DBI::dbReadTable(con_test, "burden_estimate")
   fvps <- DBI::dbReadTable(con_test, "temporary_coverage_fvps")
   fvps <- fvps[fvps$activity_type == "routine", ]
