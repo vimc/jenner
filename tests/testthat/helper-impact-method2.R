@@ -1,6 +1,6 @@
-test_data <- function (con, con_test, modelling_group = "PSU-Ferrari", vaccine_focal = "MCV1", vaccine_base = "none", year_min = 2000, year_max = 2030) {
+generate_test_data_impact_method2 <- function(con, con_test, modelling_group = "PSU-Ferrari", vaccine_focal = "MCV1", vaccine_base = "none", year_min = 2000, year_max = 2030) {
 
-  countries <- jenner::sql_in(c("PAK", "IND", "NGA", "ETH"))
+  countries <- sql_in(c("PAK", "IND", "NGA", "ETH"))
   sql_meta <- c("SELECT meta2.* from
                 (SELECT touchstone.touchstone_name, max(touchstone.version) as version, modelling_group, scenario.scenario_description
                 FROM responsibility
@@ -35,9 +35,13 @@ test_data <- function (con, con_test, modelling_group = "PSU-Ferrari", vaccine_f
 
   sql_meta <- sprintf(sql_meta, modelling_group, sql_in(c(vaccine_focal, vaccine_base)))
   meta = DBI::dbGetQuery(con, sql_meta)
-  if(nrow(meta) == 0L) stop("Unknown model-vaccine combination.")
+  if(nrow(meta) == 0L) {
+    stop("Unknown model-vaccine combination.")
+  }
   i <- duplicated(data.frame(meta$scenario, meta$modelling_group))
-  if (any(i)) {stop("duplication in meta not expected")}
+  if (any(i)) {
+    stop("duplication in meta not expected")
+  }
 
   ids <- meta$current_burden_estimate_set[!is.na(meta$current_burden_estimate_set)]
   ### we use all recipes and pine countries as test data
@@ -52,7 +56,7 @@ test_data <- function (con, con_test, modelling_group = "PSU-Ferrari", vaccine_f
                       sprintf("AND year BETWEEN $1 AND $2")
   )
   burden_lite <- DBI::dbGetQuery(con, sql_burden, list(year_min, year_max))
-  input_lite <- jenner::fix_coverage_fvps(con, year_min = year_min, year_max = year_max, pine = TRUE, write_table = FALSE)
+  input_lite <- fix_coverage_fvps(con, year_min = year_min, year_max = year_max, pine = TRUE, write_table = FALSE)
   input_lite <- input_lite[input_lite$vaccine == vaccine_focal, ]
   vaccine_routine_age <- DBI::dbReadTable(con, "vaccine_routine_age")
   DBI::dbWriteTable(con_test, "burden_estimate", burden_lite, overwrite = TRUE)

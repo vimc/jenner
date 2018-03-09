@@ -1,7 +1,8 @@
 context("impact_method2")
 
-source("generate-test-data.R")
 test_that("impact_calculation, method1", {
+  skip_if_no_montagu_password()
+
   host <- Sys.getenv("MONTAGU_HOST", "support.montagu.dide.ic.ac.uk")
   port <- as.integer(Sys.getenv("MONTAGU_PORT", 5432))
   user <- Sys.getenv("MONTAGU_USER", "readonly")
@@ -43,6 +44,8 @@ test_that("impact_calculation, method1", {
 })
 
 test_that("impact_calculation, method2", {
+  skip_if_no_montagu_password()
+
   host <- Sys.getenv("MONTAGU_HOST", "support.montagu.dide.ic.ac.uk")
   port <- as.integer(Sys.getenv("MONTAGU_PORT", 5432))
   user <- Sys.getenv("MONTAGU_USER", "readonly")
