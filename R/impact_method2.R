@@ -211,18 +211,18 @@ make_impact <- function(con, index, year_min, year_max, routine_tot_rate_shape =
   impact1 <- dat[cols_impact1]
 
   ## 2) aggrefated impact
-  cols_impact2 <- c("index", "impact_type","support_type", "country", "vaccine", "year", "tot_rate", "impact")
+  cols_impact2 <- c("index", "vaccine", "impact_type","support_type", "country", "year", "coverage", "population", "fvps","tot_rate", "impact")
   # impact by birth cohort
-  impact_cohort <- stats::aggregate(impact ~ index + support_type + country + vaccine + cohort + tot_rate, data=dat, sum, na.rm=TRUE)
+  impact_cohort <- stats::aggregate(cbind(population, fvps, impact) ~ index + support_type + country + vaccine + cohort + tot_rate, data=dat, sum, na.rm=TRUE)
   impact_cohort$impact_type <- "cohort"
   names(impact_cohort)[which(names(impact_cohort) == "cohort")] <- "year"
   impact_cohort <- impact_cohort[impact_cohort$year %in% (cohort_min:cohort_max), ]
   # # impact by year of vaccination
-  impact_calendar <- stats::aggregate(impact ~ index + support_type + country + vaccine + year + tot_rate, data=dat, sum, na.rm=TRUE)
+  impact_calendar <- stats::aggregate(cbind(population, fvps, impact) ~ index + support_type + country + vaccine + year + tot_rate, data=dat, sum, na.rm=TRUE)
   impact_calendar$impact_type <- "calendar"
   impact_calendar <- impact_calendar[impact_calendar$year %in% (year_min:year_max), ]
   impact2 <- rbind(impact_cohort, impact_calendar)
-
+  impact2$coverage <- impact2$fvps / impact2$population
   impact2 <- impact2[cols_impact2]
   ## 6. End
   return( list(impact_full = impact1, impact_simplified = impact2) )

@@ -1,6 +1,8 @@
 ### jenner 0.0.12
  * VIMC-1591 add more routine vaccine age 
- * VIMC-1591 undo the constrain on coverage_old
+ * VIMC-1591 undo the constrain on coverage_old when touchstone_new = touchstone_old
+ * VIMC-1591 add three columns in the output for method2 impact calculation - population, fvps and coverage
+ 
 ### jenner 0.0.11
  * VIMC-1380 method 2 impact calculation  
  * Currently impact calculation is assisted by .csv recipe; this will be changed when recipe is imported montagu
