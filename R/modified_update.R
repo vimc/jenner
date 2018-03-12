@@ -199,7 +199,7 @@ mu_prepare <- function(con, touchstone_new, modup_by_itself = FALSE) {
   ## sometimes we do modup for touchstone_old = touchstone_new
   ## the if-else clause is important to deal with this
   if(modup_by_itself) {
-    touchstone_new2 <- "201802uxe-1"
+    touchstone_new2 <- NULL
   } else {
     touchstone_new2 <- touchstone_new
   }
