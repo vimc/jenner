@@ -20,7 +20,7 @@ We will surely move that file to model_documentation once it is complete.}
 
 \item{year_max}{maximum year}
 
-\item{vimc_dalys_only}{set to be TRUE is we are only interested in Ferrari, Li and LiST (201710gavi)}
+\item{vimc_dalys_only}{set to be TRUE if we are only interested in Ferrari, Li and LiST (201710gavi)}
 }
 \description{
 Calculate dalys
