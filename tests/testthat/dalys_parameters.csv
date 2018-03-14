@@ -1,0 +1,5 @@
+disease,modelling_group,vimc_dalys,burden_outcome_id,code,sub_condition,proportion,average_duration,period,disability_weight
+Measles,LSHTM-Jit,TRUE,1,cases,permanent_encephalitis,0.001675,1000,year,0.637
+Measles,LSHTM-Jit,TRUE,1,cases,untreated,0.75,14,day,0.133
+Measles,LSHTM-Jit,TRUE,1,cases,treated,0.25,14,day,0.051
+Measles,LSHTM-Jit,TRUE,6,deaths,deaths,1,1000,year,1
