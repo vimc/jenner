@@ -15,5 +15,5 @@ Imports:
 RoxygenNote: 6.0.1
 Suggests:
     RSQLite,
-    testthat
+    testthat (>= 1.0.2)
 Encoding: UTF-8
