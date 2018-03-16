@@ -85,6 +85,7 @@ make_impact <- function(con, index, year_min, year_max, routine_tot_rate_shape =
   focal <- unique(v[v$coef == -1, ])
   # vacciene and activity type for matching with population, coverage, fvps
   vaccine <- unique(index$vaccine)
+  disease <- unique(index$disease)
   activity_type <- unique(index$activity_type)
   # burden outcomes used for impact calculation
   outcomes <- sql_in(unique(index$burden_outcome_id), text_item = FALSE)
@@ -118,7 +119,8 @@ make_impact <- function(con, index, year_min, year_max, routine_tot_rate_shape =
       shape <- paste(sprintf("AND (year-age) >= %s", cohort_min))
     }
   }
-  if(vaccine == "HepB") {
+  
+  if(disease == "HepB") {
     focal_countries  <- DBI::dbGetQuery(con, 
                                         paste("SELECT * FROM",
                                               "(SELECT DISTINCT country",
@@ -132,9 +134,9 @@ make_impact <- function(con, index, year_min, year_max, routine_tot_rate_shape =
                                               ") AS base_countries",
                                               "ON focal_countries.country = base_countries.country"
                                         ))
-    countrise <- sprintf("AND country IN %s", sql_in(focal_countries$country)),
+    countries <- paste(sprintf("AND country IN %s", sql_in(focal_countries$country)))
   } else {
-    countrise <- NULL
+    countries <- "\t"
   }
   
   
@@ -258,12 +260,13 @@ make_impact_method1 <- function(con, index) {
   focal <- unique(v[v$coef == -1, ])
   # vacciene and activity type for matching with population, coverage, fvps
   vaccine <- unique(index$vaccine)
+  disease <- unique(index$disease)
   activity_type <- unique(index$activity_type)
   # burden outcomes used for impact calculation
   outcomes <- sql_in(unique(index$burden_outcome_id), text_item = FALSE)
   
   ## 2.1 sql - impact by country-year-age
-  if(vaccine == "HepB") {
+  if(disease == "HepB") {
     focal_countries  <- DBI::dbGetQuery(con, 
                                         paste("SELECT * FROM",
                                               "(SELECT DISTINCT country",
@@ -277,9 +280,9 @@ make_impact_method1 <- function(con, index) {
                                               ") AS base_countries",
                                               "ON focal_countries.country = base_countries.country"
                                         ))
-    countrise <- sprintf("AND country IN %s", sql_in(focal_countries$country)),
+    countries <- paste(sprintf("AND country IN %s", sql_in(focal_countries$country)))
   } else {
-    countrise <- NULL
+    countries <- "\t"
   }
   
   sql <- paste("SELECT tmp.country, tmp.year, tmp.age, sum(tmp.value) AS impact",
