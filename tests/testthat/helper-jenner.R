@@ -32,4 +32,15 @@ skip_if_no_reference_data <- function() {
   if (!file.exists("jenner-test-data")) {
     testthat::skip("Test data not found - please clone vimc/jenner-test-data")
   }
+  args <- c("git", "-C", "jenner-test-data", "rev-parse", "HEAD")
+  expected <- readLines("test-data-version")
+  hash <- system2(args, stdout = TRUE)
+  if (!is.null(attr(hash, "status"))) {
+    stop("git failed with error code ", attr(hash, "status"))
+  }
+  if (hash != expected) {
+    testthat::skip(sprintf(
+      "Please update jenner-test-data to %s or update test-data-version to %s",
+      expected, hash))
+  }
 }
