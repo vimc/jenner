@@ -1,3 +1,6 @@
+### jenner 0.0.13
+ * VIMC-1611 constrain the number of countries for HepB impact calculation - because different scenarios have different number of countries 
+
 ### jenner 0.0.12
  * VIMC-1591 add more routine vaccine age 
  * VIMC-1591 undo the constrain on coverage_old when touchstone_new = touchstone_old
