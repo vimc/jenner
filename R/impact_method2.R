@@ -124,7 +124,7 @@ make_impact <- function(con, index, year_min, year_max, routine_tot_rate_shape =
   stopifnot(length(disease) == 1)
   if(disease == "HepB") {
     focal_countries  <- DBI::dbGetQuery(con,
-                                        paste("SELECT * FROM",
+                                        paste("SELECT focal_countries.country FROM",
                                               "(SELECT DISTINCT country",
                                               "FROM burden_estimate",
                                               sprintf("WHERE burden_estimate_set = %s",focal$burden_estimate_set_id),
@@ -274,7 +274,7 @@ make_impact_method1 <- function(con, index) {
   stopifnot(length(disease) == 1)
   if(disease == "HepB") {
     focal_countries  <- DBI::dbGetQuery(con,
-                                        paste("SELECT * FROM",
+                                        paste("SELECT focal_countries.country FROM",
                                               "(SELECT DISTINCT country",
                                               "FROM burden_estimate",
                                               sprintf("WHERE burden_estimate_set = %s",focal$burden_estimate_set_id),
@@ -367,7 +367,8 @@ fix_coverage_fvps <- function(con, touchstone_name = "201710gavi", year_min = 20
   ## 3. select minimal needed input data from db and make it age stratified - gender specific (modup is not considering gender)
   sql <- read_sql(file_name = "impact_method2_metadata/coverage_pop.sql")
   if(pine) {
-    countries <- c("PAK", "IND", "NGA", "ETH")
+    ## pine + PHL: add PHL because HepB scenarios may not have any pine countries
+    countries <- c("PAK", "IND", "NGA", "ETH", "PHL")
     v <- sprintf("AND country IN %s", sql_in(countries))
     sql <- sprintf(sql, v, v)
   } else {
