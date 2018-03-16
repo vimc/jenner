@@ -1,6 +1,6 @@
 import_test_data_impact_method2 <- function(con, con_test, modelling_group = "PSU-Ferrari", vaccine_focal = "MCV1", vaccine_base = "none", year_min = 2000, year_max = 2030) {
 
-  countries <- sql_in(c("PAK", "IND", "NGA", "ETH"))
+  countries <- sql_in(c("PAK", "IND", "NGA", "ETH", "PHL"))
   sql_meta <- c("SELECT meta2.* from
                 (SELECT touchstone.touchstone_name, max(touchstone.version) as version, modelling_group, scenario.scenario_description
                 FROM responsibility

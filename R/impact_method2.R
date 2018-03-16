@@ -15,8 +15,7 @@
 ##' impact outcome can be provided as age specific if simplified=FALSE
 ##' @export
 impact_calculation <- function(con, meta, year_min = 2000, year_max = 2030, routine_tot_rate_shape = "trace_cohort", method = "method2") {
-
-if(nrow(meta) == 0L) stop("No active recipe found in 'meta'!")
+  if(nrow(meta) == 0L) stop("No active recipe found in 'meta'!")
   ## impact calculation
   meta2 <- split(meta, meta$index)
   if (method == "method1") {
@@ -85,6 +84,7 @@ make_impact <- function(con, index, year_min, year_max, routine_tot_rate_shape =
   focal <- unique(v[v$coef == -1, ])
   # vacciene and activity type for matching with population, coverage, fvps
   vaccine <- unique(index$vaccine)
+  disease <- unique(index$disease)
   activity_type <- unique(index$activity_type)
   # burden outcomes used for impact calculation
   outcomes <- sql_in(unique(index$burden_outcome_id), text_item = FALSE)
@@ -118,21 +118,42 @@ make_impact <- function(con, index, year_min, year_max, routine_tot_rate_shape =
       shape <- paste(sprintf("AND (year-age) >= %s", cohort_min))
     }
   }
-  focal_countries  <- DBI::dbGetQuery(con, paste("SELECT DISTINCT country",
-                                      "FROM burden_estimate",
-                                      sprintf("WHERE burden_estimate_set = %s",focal$burden_estimate_set_id)))
+  # For hepb, differnt scenarios have differt number of countries,
+  # therefore we need to constrain on counties that go into impact calculation
+  # this stopifnot error message should not showup, because each index is linked to only one disease
+  stopifnot(length(disease) == 1)
+  if(disease == "HepB") {
+    focal_countries  <- DBI::dbGetQuery(con,
+                                        paste("SELECT focal_countries.country FROM",
+                                              "(SELECT DISTINCT country",
+                                              "FROM burden_estimate",
+                                              sprintf("WHERE burden_estimate_set = %s",focal$burden_estimate_set_id),
+                                              ") AS focal_countries",
+                                              "INNER JOIN",
+                                              "(SELECT DISTINCT country",
+                                              "FROM burden_estimate",
+                                              sprintf("WHERE burden_estimate_set = %s",base$burden_estimate_set_id),
+                                              ") AS base_countries",
+                                              "ON focal_countries.country = base_countries.country"
+                                        ))
+    countries <- paste(sprintf("AND country IN %s", sql_in(focal_countries$country)))
+  } else {
+    countries <- "\t"
+  }
+
 
   sql_1 <- paste("SELECT tmp.country, sum(tmp.value) AS tot_impact",
                  "FROM (SELECT country, year, age, value",
                  "FROM burden_estimate",
                  sprintf("WHERE burden_estimate_set = %s",base$burden_estimate_set_id),
+                 countries,
                  shape,
                  sprintf("AND burden_outcome IN %s ", outcomes),
                  "UNION ALL",
                  "SELECT country, year, age, value*(-1) AS value",
                  "FROM burden_estimate",
                  sprintf("WHERE burden_estimate_set = %s",focal$burden_estimate_set_id),
-                 sprintf("AND country IN %s", sql_in(focal_countries$country)),
+                 countries,
                  shape,
                  sprintf("AND burden_outcome IN %s ) AS tmp", outcomes),
                  "GROUP BY tmp.country", sep="\n")
@@ -241,18 +262,40 @@ make_impact_method1 <- function(con, index) {
   focal <- unique(v[v$coef == -1, ])
   # vacciene and activity type for matching with population, coverage, fvps
   vaccine <- unique(index$vaccine)
+  disease <- unique(index$disease)
   activity_type <- unique(index$activity_type)
   # burden outcomes used for impact calculation
   outcomes <- sql_in(unique(index$burden_outcome_id), text_item = FALSE)
 
   ## 2.1 sql - impact by country-year-age
-  focal_countries  <- DBI::dbGetQuery(con, paste("SELECT DISTINCT country",
-                                                 "FROM burden_estimate",
-                                                 sprintf("WHERE burden_estimate_set = %s",focal$burden_estimate_set_id)))
+  # For hepb, differnt scenarios have differt number of countries,
+  # therefore we need to constrain on counties that go into impact calculation
+  # this stopifnot error message should not showup, because each index is linked to only one disease
+  stopifnot(length(disease) == 1)
+  if(disease == "HepB") {
+    focal_countries  <- DBI::dbGetQuery(con,
+                                        paste("SELECT focal_countries.country FROM",
+                                              "(SELECT DISTINCT country",
+                                              "FROM burden_estimate",
+                                              sprintf("WHERE burden_estimate_set = %s",focal$burden_estimate_set_id),
+                                              ") AS focal_countries",
+                                              "INNER JOIN",
+                                              "(SELECT DISTINCT country",
+                                              "FROM burden_estimate",
+                                              sprintf("WHERE burden_estimate_set = %s",base$burden_estimate_set_id),
+                                              ") AS base_countries",
+                                              "ON focal_countries.country = base_countries.country"
+                                        ))
+    countries <- paste(sprintf("AND country IN %s", sql_in(focal_countries$country)))
+  } else {
+    countries <- "\t"
+  }
+
   sql <- paste("SELECT tmp.country, tmp.year, tmp.age, sum(tmp.value) AS impact",
                "FROM (SELECT country, year, age, value",
                "FROM burden_estimate",
                sprintf("WHERE burden_estimate_set = %s",base$burden_estimate_set_id),
+               countries,
                sprintf("AND year BETWEEN %s", 2000),
                sprintf(" AND %s", 2100),
                sprintf("AND burden_outcome IN %s ", outcomes),
@@ -260,7 +303,7 @@ make_impact_method1 <- function(con, index) {
                "SELECT country, year, age, value*(-1) AS value",
                "FROM burden_estimate",
                sprintf("WHERE burden_estimate_set = %s",focal$burden_estimate_set_id),
-               sprintf("AND country IN %s", sql_in(focal_countries$country)),
+               countries,
                sprintf("AND year BETWEEN %s", 2000),
                sprintf(" AND %s", 2100),
                sprintf("AND burden_outcome IN %s ) AS tmp", outcomes),
@@ -324,7 +367,8 @@ fix_coverage_fvps <- function(con, touchstone_name = "201710gavi", year_min = 20
   ## 3. select minimal needed input data from db and make it age stratified - gender specific (modup is not considering gender)
   sql <- read_sql(file_name = "impact_method2_metadata/coverage_pop.sql")
   if(pine) {
-    countries <- c("PAK", "IND", "NGA", "ETH")
+    ## pine + PHL: add PHL because HepB scenarios may not have any pine countries
+    countries <- c("PAK", "IND", "NGA", "ETH", "PHL")
     v <- sprintf("AND country IN %s", sql_in(countries))
     sql <- sprintf(sql, v, v)
   } else {
