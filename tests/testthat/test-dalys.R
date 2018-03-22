@@ -17,7 +17,6 @@ test_that("dalys_calculation", {
 
   # parameters - we are testing against Measles - Jit
   dalys_src <- read.csv("dalys_parameters.csv", stringsAsFactors = FALSE)
-  #dalys_src$duration <- duration_weighting(dalys_src$period) * dalys_src$average_duration
   touchstone_name <- "201710gavi"
   touchstone <- "201710gavi-2" # at this moment, touchstone is manually filled
   modelling_group <- "PSU-Ferrari"
