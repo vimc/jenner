@@ -17,12 +17,15 @@ calculate_dalys <- function(con, dalys_src, touchstone_name, year_min, year_max,
   dalys_parameters <- create_dalys_parameters(con, dalys_src=dalys_src, touchstone_name, vimc_dalys_only)
   ## [make remaining life expectancy table] - this will take some time
   life_table <- create_dalys_life_table(con, touchstone_name, year_min, year_max)
-
+  
   sets <- unique(dalys_parameters$burden_estimate_set_id)
-
+  
   dalys_out <- rep(list(NULL),length(sets))
   for(i in seq_along(sets)){
-    dalys_out[[i]] <- calculate_dalys1(con, life_table, sets[i], year_min, year_max)
+    burden_outcomes <- sql_in(unique(
+      dalys_parameters$burden_outcome_id[dalys_parameters$burden_estimate_set_id == sets[i]]
+    ),text_item = FALSE)
+    dalys_out[[i]] <- calculate_dalys1(con, life_table, sets[i], burden_outcomes[i], year_min, year_max)
   }
   # output
   dat <- do.call(rbind, dalys_out)
@@ -41,24 +44,24 @@ create_dalys_parameters <- function(con, touchstone_name = "201710gavi", dalys_s
   ## transform average duration into years; N.B. duration will be compared with remaining life-expectancy
   ## 1000 years of duration is funny, but helpful
   dalys_src$duration <-  dalys_src$average_duration * duration_weighting(dalys_src$period)
-
-
+  
+  
   i <- dalys_src$period == "year"
   dalys_src$duration[i] <- dalys_src$average_duration[i]
   i <- dalys_src$period == "month"
   dalys_src$duration[i] <- dalys_src$average_duration[i] / 12
   i <- dalys_src$period == "day"
   dalys_src$duration[i] <- dalys_src$average_duration[i] / 365
-
+  
   ## adjusted weight = proportion * diability_weight; this saves calculation later
   dalys_src$adjusted_weight <- dalys_src$proportion * dalys_src$disability_weight
-
+  
   ## find relevant responsibilities
   sql <- read_sql(file_name = "dalys_calculation/responsibility.sql")
   recipe <- DBI::dbGetQuery(con, sql, touchstone_name)
-
+  
   dalys_src <- merge(dalys_src, recipe, by = c("disease", "modelling_group"), all.x = TRUE)
-
+  
   dalys_src <- dalys_src[order(dalys_src$burden_estimate_set_id), ]
   cols <- c("disease", "modelling_group", "scenario", "burden_estimate_set_id","burden_outcome_id", "code", "sub_condition", "duration", "adjusted_weight")
   ## make a temporary table - dalys_parameters. This stores model-specific dalys parameters.
@@ -69,14 +72,14 @@ create_dalys_parameters <- function(con, touchstone_name = "201710gavi", dalys_s
 create_dalys_life_table <- function(con, touchstone_name = "201710gavi", year_min = 2000, year_max = 2030) {
   message("Creating touchstone specific life table - remaining life expectancy by country, year and age")
   sql <- read_sql(file_name = "dalys_calculation/raw_remaining_life_expectancy.sql")
-
+  
   life_ex <- DBI::dbGetQuery(con, sql, touchstone_name)
   cols <- c("country", "gender", "year", "age", "value")
-
+  
   # interpolate years
   l <- split(life_ex, list(life_ex$country, life_ex$age_from, life_ex$gender))
   life_ex2 <- do.call(rbind, lapply(l, function(i) interpolate_year(i, year_min, year_max)))
-
+  
   # interpolate age
   # keep age 0
   life_ex0 <- life_ex2[life_ex2$age == 0,]
@@ -118,12 +121,26 @@ interpolate_age <- function(dat) {
   interp
 }
 
-calculate_dalys1 <- function(con, life_table, burden_estiamte_set_id, year_min, year_max) {
+calculate_dalys1 <- function(con, life_table, burden_estiamte_set_id, burden_outcomes, year_min, year_max) {
   message(sprintf("calculating dalys for burden_estimate_set %s", burden_estiamte_set_id))
-
-  sql <- read_sql(file_name = "dalys_calculation/burden_dalys_parameters.sql")
   # burden_estimates
-  v <- DBI::dbGetQuery(con, sql, list(burden_estiamte_set_id, year_min, year_max))
+  #sql <- read_sql(file_name = "dalys_calculation/burden_dalys_parameters.sql")
+  #sql <- sprintf(sql, burden_outcomes)
+  #v <- DBI::dbGetQuery(con, sql, list(burden_estiamte_set_id, year_min, year_max))
+  
+  sql <- paste("SELECT burden_estimate_set, burden_estimate.country, year, age, burden_outcome, value as burden",
+               "FROM burden_estimate",
+               "WHERE burden_estimate_set = $1",
+               sprintf("AND burden_outcome IN %s", burden_outcomes),
+               "AND year BETWEEN $2 AND $3")
+  sql2 <- paste("SELECT * FROM dalys_parameters",
+                "WHERE burden_estimate_set_id = $1")
+  b <- DBI::dbGetQuery(con, sql, list(burden_estiamte_set_id, year_min, year_max))
+  p <- DBI::dbGetQuery(con, sql2, list(burden_estiamte_set_id))
+  v <- merge(b, p, by.x = c("burden_estimate_set", "burden_outcome"),
+             by.y = c("burden_estimate_set_id", "burden_outcome_id"), all.x=TRUE)
+  message("finish reading from db")
+  
   # match dalys parameters
   v$.code <- paste(v$country, v$year, v$age, sep="-")
   v <- merge(v, life_table, by= ".code", all.x=TRUE)
