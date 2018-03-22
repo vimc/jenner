@@ -49,7 +49,7 @@ test_that("dalys_calculation", {
   dat <- jenner::calculate_dalys(con, dalys_src, touchstone_name, year_min, year_max)
   dat <- dat[order(dat$country, dat$year, dat$age),]
   expect_equal (dat$burden_estimate_set, dat$value, dat0$dalys)
-  saveRDS(dat, "jenner-test-data/dalys_calculation/PSU-Ferrari.rds")
+  #saveRDS(dat, "jenner-test-data/dalys_calculation/PSU-Ferrari.rds")
   expect_known_value(dat, "jenner-test-data/dalys/PSU-Ferrari.rds",
                      update = FALSE)
 })
