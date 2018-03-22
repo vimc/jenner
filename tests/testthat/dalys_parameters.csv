@@ -1,5 +1,68 @@
 disease,modelling_group,vimc_dalys,burden_outcome_id,code,sub_condition,proportion,average_duration,period,disability_weight
-Measles,LSHTM-Jit,TRUE,1,cases,permanent_encephalitis,0.001675,1000,year,0.637
-Measles,LSHTM-Jit,TRUE,1,cases,untreated,0.75,14,day,0.133
-Measles,LSHTM-Jit,TRUE,1,cases,treated,0.25,14,day,0.051
-Measles,LSHTM-Jit,TRUE,6,deaths,deaths,1,1000,year,1
+HepB,CDA-Razavi,FALSE,24,hepb_cases_acute_severe,,,,,
+HepB,CDA-Razavi,FALSE,25,hepb_cases_dec_cirrh,,,,,
+HepB,CDA-Razavi,FALSE,26,hepb_cases_hcc,,,,,
+HepB,CDA-Razavi,FALSE,20,hepb_deaths_acute,,,,,
+HepB,CDA-Razavi,FALSE,21,hepb_deaths_dec_cirrh,,,,,
+HepB,CDA-Razavi,FALSE,22,hepb_deaths_hcc,,,,,
+HepB,CDA-Razavi,FALSE,37,hepb_infections_acute,,,,,
+HepB,IC-Hallett,FALSE,24,hepb_cases_acute_severe,,,,,
+HepB,IC-Hallett,FALSE,25,hepb_cases_dec_cirrh,,,,,
+HepB,IC-Hallett,FALSE,26,hepb_cases_hcc,,,,,
+HepB,IC-Hallett,FALSE,20,hepb_deaths_acute,,,,,
+HepB,IC-Hallett,FALSE,21,hepb_deaths_dec_cirrh,,,,,
+HepB,IC-Hallett,FALSE,22,hepb_deaths_hcc,,,,,
+HepB,IC-Hallett,FALSE,37,hepb_infections_acute,,,,,
+HepB,Li,TRUE,30,hepb_cases_chronic,chronic hepatitis,1,8.96284,year,0.178
+HepB,Li,TRUE,28,hepb_cases_fulminant,fulminant hepatitis,1,12,day,0.051
+HepB,Li,TRUE,20,hepb_deaths_acute,deaths from acute infection,1,1000,year,1
+HepB,Li,TRUE,22,hepb_deaths_hcc,deaths HCC,1,1000,year,1
+HepB,Li,TRUE,22,hepb_deaths_hcc,HCC cases,1,1.35,year,0.451
+HepB,Li,TRUE,23,hepb_deaths_total_cirrh,deaths from cirrhosis,1,1000,year,1
+Hib,JHU-Tam,TRUE,14,cases_men,cases Meningitis,1,0.04,year,0.133
+Hib,JHU-Tam,TRUE,14,cases_men,Sequelae: Cognitive impairment,0.014,1000,year,0.043
+Hib,JHU-Tam,TRUE,14,cases_men,Sequelae: Deafness,0.045,1000,year,0.027
+Hib,JHU-Tam,TRUE,14,cases_men,Sequelae: Seizure disorder,0.021,1000,year,0.552
+Hib,JHU-Tam,TRUE,14,cases_men,Sequelae: Motor deficit ,0.017,1000,year,0.61
+Hib,JHU-Tam,TRUE,11,cases_pneumo,cases Pneumonia,1,0.02,year,0.051
+Hib,JHU-Tam,TRUE,11,cases_pneumo,Sequelae: Restrictive lung disease ,0.06,1000,year,0.019
+Hib,JHU-Tam,TRUE,16,deaths_men,dearhs from Meningitis,1,1000,year,1
+Hib,JHU-Tam,TRUE,13,deaths_pneumo,deaths from Pneumonia,1,1000,year,1
+Hib,LSHTM-Clark,FALSE,1,cases,,,,,
+Hib,LSHTM-Clark,FALSE,6,deaths,,,,,
+HPV,Harvard-Sweet,FALSE,1,cases,,,,,
+HPV,Harvard-Sweet,FALSE,6,deaths,,,,,
+HPV,LSHTM-Jit,FALSE,1,cases,,,,,
+HPV,LSHTM-Jit,FALSE,6,deaths,,,,,
+JE,OUCRU-Clapham,FALSE,1,cases,,,,,
+JE,OUCRU-Clapham,FALSE,6,deaths,,,,,
+Measles,LSHTM-Jit,FALSE,1,cases,permanent_encephalitis,0.001675,1000,year,0.637
+Measles,LSHTM-Jit,FALSE,1,cases,severe cases,1,14,day,0.133
+Measles,LSHTM-Jit,FALSE,6,deaths,deaths,1,1000,year,1
+Measles,PSU-Ferrari,TRUE,1,cases,permanent_encephalitis,0.001675,1000,year,0.637
+Measles,PSU-Ferrari,TRUE,1,cases,severe cases,1,14,day,0.133
+Measles,PSU-Ferrari,TRUE,6,deaths,deaths,1,1000,year,1
+MenA,Cambridge-Trotter,FALSE,1,cases,,,,,
+MenA,Cambridge-Trotter,FALSE,6,deaths,,,,,
+MenA,KPW-Jackson,FALSE,1,cases,,,,,
+MenA,KPW-Jackson,FALSE,6,deaths,,,,,
+PCV,JHU-Tam,TRUE,14,cases_men,cases Meningitis,1,0.04,year,0.133
+PCV,JHU-Tam,TRUE,14,cases_men,Sequelae: Cognitive impairment,0.014,1000,year,0.043
+PCV,JHU-Tam,TRUE,14,cases_men,Sequelae: Deafness,0.045,1000,year,0.027
+PCV,JHU-Tam,TRUE,14,cases_men,Sequelae: Seizure disorder,0.021,1000,year,0.552
+PCV,JHU-Tam,TRUE,14,cases_men,Sequelae: Motor deficit ,0.017,1000,year,0.61
+PCV,JHU-Tam,TRUE,11,cases_pneumo,cases Pneumonia,1,0.02,year,0.051
+PCV,JHU-Tam,TRUE,11,cases_pneumo,Sequelae: Restrictive lung disease ,0.06,1000,year,0.019
+PCV,JHU-Tam,TRUE,16,deaths_men,dearhs from Meningitis,1,1000,year,1
+PCV,JHU-Tam,TRUE,13,deaths_pneumo,deaths from Pneumonia,1,1000,year,1
+PCV,LSHTM-Clark,FALSE,1,cases,,,,,
+PCV,LSHTM-Clark,FALSE,6,deaths,,,,,
+Rota,JHU-Tam,TRUE,1,cases,severe diarrhea,1,0.01,year,0.247
+Rota,JHU-Tam,TRUE,6,deaths,deaths,1,1000,year,1
+Rota,LSHTM-Clark,FALSE,1,cases,,,,,
+Rota,LSHTM-Clark,FALSE,6,deaths,,,,,
+Rubella,PHE-Vynnycky,FALSE,34,rubella_cases_congenital,,,,,
+Rubella,PHE-Vynnycky,FALSE,35,rubella_deaths_congenital,,,,,
+Rubella,PHE-Vynnycky,FALSE,36,rubella_infections,,,,,
+YF,IC-Garske,FALSE,1,cases,,,,,
+YF,IC-Garske,FALSE,6,deaths,,,,,
