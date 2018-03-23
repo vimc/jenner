@@ -1,6 +1,7 @@
 ### jenner 0.0.13
  * VIMC-1400 dalys calculation
- 
+ * VIMC-1607 correct a bug for reporting suspicious campaign data
+
 ### jenner 0.0.11
  * VIMC-1380 method 2 impact calculation  
  * Currently impact calculation is assisted by .csv recipe; this will be changed when recipe is imported montagu
