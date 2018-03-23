@@ -25,7 +25,7 @@ calculate_dalys <- function(con, dalys_src, touchstone_name, year_min, year_max,
     burden_outcomes <- sql_in(unique(
       dalys_parameters$burden_outcome_id[dalys_parameters$burden_estimate_set_id == sets[i]]
     ),text_item = FALSE)
-    dalys_out[[i]] <- calculate_dalys1(con, life_table, sets[i], burden_outcomes[i], year_min, year_max)
+    dalys_out[[i]] <- calculate_dalys1(con, life_table, sets[i], burden_outcomes, year_min, year_max)
   }
   # output
   dat <- do.call(rbind, dalys_out)
