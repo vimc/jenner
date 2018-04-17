@@ -16,19 +16,17 @@ test_that("dalys_calculation", {
   })
 
   # parameters - we are testing against Measles - Jit
-  #dalys_src <- read_csv(system.file("dalys_parameters.csv", package = "jenner", mustWork = TRUE))
   touchstone_name <- "201710gavi"
   touchstone <- "201710gavi-2" # at this moment, touchstone is manually filled
   modelling_group <- "PSU-Ferrari"
   year_min <- 2015
   year_max <- 2020
-  #dalys_src <- dalys_src[dalys_src$modelling_group == modelling_group, ]
   dalys_parameters <- create_dalys_parameters(con, touchstone_name, vimc_dalys_only = TRUE)
   dalys_parameters <- dalys_parameters[dalys_parameters$modelling_group == modelling_group, ]
   burden_estimate_sets <- sql_in(unique(dalys_parameters$burden_estimate_set_id), text_item = FALSE)
   burden_outcomes <- sql_in(unique(dalys_parameters$burden_outcome_id), text_item = FALSE)
 
-  ##mannual calculation
+  ##manual calculation
   life_table <- create_dalys_life_table(con, touchstone_name, year_min, year_max)
 
   dat0 <- DBI::dbGetQuery(con, paste(sprintf("SELECT * FROM burden_estimate
