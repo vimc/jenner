@@ -16,14 +16,15 @@ test_that("dalys_calculation", {
   })
 
   # parameters - we are testing against Measles - Jit
-  dalys_src <- read_csv(system.file("dalys_parameters.csv", package = "jenner", mustWork = TRUE))
+  #dalys_src <- read_csv(system.file("dalys_parameters.csv", package = "jenner", mustWork = TRUE))
   touchstone_name <- "201710gavi"
   touchstone <- "201710gavi-2" # at this moment, touchstone is manually filled
   modelling_group <- "PSU-Ferrari"
   year_min <- 2015
   year_max <- 2020
-  dalys_src <- dalys_src[dalys_src$modelling_group == modelling_group, ]
-  dalys_parameters <- create_dalys_parameters(con, dalys_src = dalys_src, touchstone_name, vimc_dalys_only = TRUE)
+  #dalys_src <- dalys_src[dalys_src$modelling_group == modelling_group, ]
+  dalys_parameters <- create_dalys_parameters(con, touchstone_name, vimc_dalys_only = TRUE)
+  dalys_parameters <- dalys_parameters[dalys_parameters$modelling_group == modelling_group, ]
   burden_estimate_sets <- sql_in(unique(dalys_parameters$burden_estimate_set_id), text_item = FALSE)
   burden_outcomes <- sql_in(unique(dalys_parameters$burden_outcome_id), text_item = FALSE)
 
@@ -45,7 +46,7 @@ test_that("dalys_calculation", {
   dat0 <- aggregate(dalys ~ burden_estimate_set + country + year + age, data = v, sum, na.rm = TRUE)
   dat0 <- dat0[order(dat0$burden_estimate_set, dat0$country, dat0$year, dat0$age),]
   ## run function
-  dat <- jenner::calculate_dalys(con, dalys_src, touchstone_name, year_min, year_max)
+  dat <- jenner::calculate_dalys(con, touchstone_name, year_min, year_max, modelling_group = modelling_group)
   dat <- dat[order(dat$country, dat$year, dat$age),]
   expect_equal (dat$burden_estimate_set, dat$value, dat0$dalys)
   #saveRDS(dat, "jenner-test-data/dalys_calculation/PSU-Ferrari.rds")

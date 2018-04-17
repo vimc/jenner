@@ -12,9 +12,17 @@
 ##' @param vimc_dalys_only set to be TRUE if we are only interested in Ferrari, Li and LiST (201710gavi)
 ##'
 ##' @export
-calculate_dalys <- function(con, dalys_src, touchstone_name, year_min = 2000, year_max = 2030, vimc_dalys_only = TRUE) {
+calculate_dalys <- function(con, touchstone_name, year_min = 2000, year_max = 2030, vimc_dalys_only = TRUE, modelling_group = NULL) {
   ## [make temporary dalys parameter table]
-  dalys_parameters <- create_dalys_parameters(con, dalys_src = dalys_src, touchstone_name, vimc_dalys_only)
+  dalys_parameters <- create_dalys_parameters(con, touchstone_name, vimc_dalys_only)
+  if (!is.null(modelling_group)) {
+    i <- modelling_group %in% dalys_parameters$modelling_group
+    if (any(!i)) {
+      stop("unknown modelling group")
+    } else {
+      dalys_parameters <- dalys_parameters[dalys_parameters$modelling_group %in% modelling_group, ]
+    }
+  }
   ## [make remaining life expectancy table] - this will take some time
   life_table <- create_dalys_life_table(con, touchstone_name, year_min, year_max)
 
@@ -29,7 +37,8 @@ calculate_dalys <- function(con, dalys_src, touchstone_name, year_min = 2000, ye
   dat <- dat[cols]
 }
 
-create_dalys_parameters <- function(con, touchstone_name = "201710gavi", dalys_src, vimc_dalys_only) {
+create_dalys_parameters <- function(con, touchstone_name = "201710gavi", vimc_dalys_only) {
+  dalys_src <- read_csv(system.file("dalys_parameters.csv", package = "jenner", mustWork = TRUE))
   ## subsetting those for which VIMC has to calculate DALYs - vimc_dalys = TRUE
   if (vimc_dalys_only) {
     dalys_src <- dalys_src[dalys_src$vimc_dalys, ]
@@ -110,16 +119,16 @@ calculate_dalys1 <- function(con, life_table, burden_estiamte_set_id, burden_out
   message(sprintf("calculating dalys for burden_estimate_set %s", burden_estiamte_set_id))
   # burden_estimates
   sql <- paste("SELECT tab1.*, tab2.* FROM",
-    "(SELECT burden_estimate_set, burden_estimate.country, year, age, burden_outcome, value as burden",
-    "FROM burden_estimate",
-    "WHERE burden_estimate_set = $1",
-    sprintf("AND burden_outcome IN %s", burden_outcomes),
-    "AND year BETWEEN $2 AND $3) as tab1",
-    "LEFT JOIN",
-    "(SELECT * FROM dalys_parameters",
-    "WHERE burden_estimate_set_id = $1) as tab2",
-    "ON tab1.burden_estimate_set = tab2.burden_estimate_set_id",
-    "AND tab1.burden_outcome = tab2.burden_outcome_id "
+               "(SELECT burden_estimate_set, burden_estimate.country, year, age, burden_outcome, value as burden",
+               "FROM burden_estimate",
+               "WHERE burden_estimate_set = $1",
+               sprintf("AND burden_outcome IN %s", burden_outcomes),
+               "AND year BETWEEN $2 AND $3) as tab1",
+               "LEFT JOIN",
+               "(SELECT * FROM dalys_parameters",
+               "WHERE burden_estimate_set_id = $1) as tab2",
+               "ON tab1.burden_estimate_set = tab2.burden_estimate_set_id",
+               "AND tab1.burden_outcome = tab2.burden_outcome_id "
   )
   v <- DBI::dbGetQuery(con, sql, list(burden_estiamte_set_id, year_min, year_max))
   message("finish reading from db")

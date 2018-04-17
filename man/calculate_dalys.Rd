@@ -4,15 +4,12 @@
 \alias{calculate_dalys}
 \title{DALYs calculation}
 \usage{
-calculate_dalys(con, dalys_src, touchstone_name, year_min = 2000,
-  year_max = 2030, vimc_dalys_only = TRUE)
+calculate_dalys(con, touchstone_name, year_min = 2000, year_max = 2030,
+  vimc_dalys_only = TRUE, modelling_group = NULL)
 }
 \arguments{
 \item{con}{You can be \code{readonly} user to run this function.
 But if you need to import dalys for Ferrari, Li and LiST (201710gavi), you can use \code{import} user.}
-
-\item{dalys_src}{Dalys calcualtion parameters. This is currently a csv file in orderly_report i1400.
-We will surely move that file to model_documentation once it is complete.}
 
 \item{touchstone_name}{touchstone for which dalys are calcualted}
 
@@ -21,6 +18,9 @@ We will surely move that file to model_documentation once it is complete.}
 \item{year_max}{maximum year}
 
 \item{vimc_dalys_only}{set to be TRUE if we are only interested in Ferrari, Li and LiST (201710gavi)}
+
+\item{dalys_src}{Dalys calcualtion parameters. This is currently a csv file in orderly_report i1400.
+We will surely move that file to model_documentation once it is complete.}
 }
 \description{
 Calculate dalys
