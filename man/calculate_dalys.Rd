@@ -4,8 +4,8 @@
 \alias{calculate_dalys}
 \title{DALYs calculation}
 \usage{
-calculate_dalys(con, dalys_src, touchstone_name, year_min, year_max,
-  vimc_dalys_only = TRUE)
+calculate_dalys(con, dalys_src, touchstone_name, year_min = 2000,
+  year_max = 2030, vimc_dalys_only = TRUE)
 }
 \arguments{
 \item{con}{You can be \code{readonly} user to run this function.
