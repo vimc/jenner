@@ -19,8 +19,7 @@ But if you need to import dalys for Ferrari, Li and LiST (201710gavi), you can u
 
 \item{vimc_dalys_only}{set to be TRUE if we are only interested in Ferrari, Li and LiST (201710gavi)}
 
-\item{dalys_src}{Dalys calcualtion parameters. This is currently a csv file in orderly_report i1400.
-We will surely move that file to model_documentation once it is complete.}
+\item{modelling_group}{This parameter makes the calcualtion more flexible, specify a vector of modelling_group(s) that you are interested in.}
 }
 \description{
 Calculate dalys

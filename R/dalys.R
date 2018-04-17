@@ -4,12 +4,11 @@
 ##'
 ##' @param con You can be \code{readonly} user to run this function.
 ##' But if you need to import dalys for Ferrari, Li and LiST (201710gavi), you can use \code{import} user.
-##' @param dalys_src Dalys calcualtion parameters. This is currently a csv file in orderly_report i1400.
-##' We will surely move that file to model_documentation once it is complete.
 ##' @param touchstone_name touchstone for which dalys are calcualted
 ##' @param year_min minimal year
 ##' @param year_max maximum year
 ##' @param vimc_dalys_only set to be TRUE if we are only interested in Ferrari, Li and LiST (201710gavi)
+##' @param modelling_group This parameter makes the calcualtion more flexible, specify a vector of modelling_group(s) that you are interested in.
 ##'
 ##' @export
 calculate_dalys <- function(con, touchstone_name, year_min = 2000, year_max = 2030, vimc_dalys_only = TRUE, modelling_group = NULL) {
