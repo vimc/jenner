@@ -1,3 +1,7 @@
+### jenner 0.0.14
+ * VIMC-1400 dalys calculation
+ * VIMC-1607 correct a bug for reporting suspicious campaign data
+
 ### jenner 0.0.13
  * VIMC-1611 constrain the number of countries for HepB impact calculation - because different scenarios have different number of countries 
 

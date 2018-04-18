@@ -394,7 +394,7 @@ fix_coverage_fvps <- function(con, touchstone_name = "201710gavi", year_min = 20
   # report problems - fvps >> pop
   tab$diff <- (tab$target - tab$target_cohortS) / tab$target_cohortS
   if (report_suspecious_coverage) {
-    utils::write.csv(tab[tab$diff > 1., ], "suspicious_campaign_coverage.csv", row.names = FALSE)
+    utils::write.csv(tab[is.finite(tab$diff) & tab$diff > 1., ], "suspicious_campaign_coverage.csv", row.names = FALSE)
   }
   ## 6. calculate age level coverage
   tab$coverage <- tab$fvps / (tab$population+1) # plus one to avoid 0 pop for old age
