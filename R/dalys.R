@@ -33,7 +33,7 @@ calculate_dalys <- function(con, touchstone_name, year_min = 2000, year_max = 20
   dat <- do.call(rbind, dalys_out)
   dat$burden_outcome <- DBI::dbGetQuery(con, "SELECT id FROM burden_outcome WHERE code = 'dalys'")$id
   cols <- c("burden_estimate_set", "country", "year", "burden_outcome", "value", "age")
-  dat <- dat[cols]
+  dat[cols]
 }
 
 create_dalys_parameters <- function(con, touchstone_name = "201710gavi", vimc_dalys_only) {
@@ -92,7 +92,7 @@ create_dalys_life_table <- function(con, touchstone_name = "201710gavi", year_mi
 interpolate_year <- function(dat, year_min = 2000, year_max = 2101) {
   ## expand life table regarding year - from 5year interval to 1year
   years <- year_min:year_max
-  f <- splinefun(x = dat$year, y = dat$value, method = "natural") #natural spline
+  f <- stats::splinefun(x = dat$year, y = dat$value, method = "natural") #natural spline
   interp <- data_frame(year = years)
   interp$value <- f(years)
   interp$country <- dat$country[[1]]
@@ -105,7 +105,7 @@ interpolate_age <- function(dat) {
   ## expand life table regarding age - from 5year interval to 1year
   ages <- 1:100
   age_from2 <- c(2.5, seq(7,97,5), 110)
-  f <- splinefun(x = age_from2, y = dat$value, method = "monoH.FC") #monotone Hermite spline - population of any given cohort decreases strictly from birth to all-gone
+  f <- stats::splinefun(x = age_from2, y = dat$value, method = "monoH.FC") #monotone Hermite spline - population of any given cohort decreases strictly from birth to all-gone
   interp <- data_frame(age = ages)
   interp$value <- f(ages)
   interp$country <- dat$country[[1]]
@@ -142,7 +142,7 @@ calculate_dalys1 <- function(con, life_table, burden_estiamte_set_id, burden_out
   # calculate dalys
   v$value <- v$burden * v$adjusted_weight * v$adjusted_duration
   #aggregate to return output in the same structure as burden_estiamte
-  dat <- aggregate(value ~ burden_estimate_set + country + year + age, data = v, sum, na.rm = TRUE)
+  dat <- stats::aggregate(value ~ burden_estimate_set + country + year + age, data = v, sum, na.rm = TRUE)
 }
 
 duration_weighting <- function(period) {
