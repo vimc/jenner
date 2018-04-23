@@ -49,10 +49,11 @@ import_test_data_impact_method2 <- function(con, con_test, modelling_group = "PS
   ### year range is 2020 - 2030 (fvps and burden) for routine
   ## when calculate impact:
   ## do routine only - because campaign impact uses all coverage and all impact, too big for a test
-  sql_burden <- paste(sprintf("SELECT * FROM burden_estimate
+  sql_burden <- paste(sprintf("SELECT burden_estimate.* FROM burden_estimate
+                                      JOIN country ON country.nid = burden_estimate.country
                               WHERE burden_estimate_set
                               IN %s", sql_in(ids, text_item =FALSE)),
-                      sprintf("AND country IN %s", countries),
+                      sprintf("AND country.id IN %s", countries),
                       sprintf("AND year BETWEEN $1 AND $2")
   )
   burden_lite <- DBI::dbGetQuery(con, sql_burden, list(year_min, year_max))
@@ -62,4 +63,6 @@ import_test_data_impact_method2 <- function(con, con_test, modelling_group = "PS
   DBI::dbWriteTable(con_test, "burden_estimate", burden_lite, overwrite = TRUE)
   DBI::dbWriteTable(con_test, "temporary_coverage_fvps", input_lite, overwrite = TRUE)
   DBI::dbWriteTable(con_test, "vaccine_routine_age", vaccine_routine_age, overwrite = TRUE)
+  country <- DBI::dbGetQuery(con, sprintf("select * from country where id in %s", countries))
+  DBI::dbWriteTable(con_test, "country", country, overwrite = TRUE)
 }

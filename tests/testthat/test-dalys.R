@@ -17,7 +17,7 @@ test_that("dalys_calculation", {
 
   # parameters - we are testing against Measles - Jit
   touchstone_name <- "201710gavi"
-  touchstone <- "201710gavi-2" # at this moment, touchstone is manually filled
+  touchstone <- "201710gavi-5" # at this moment, touchstone is manually filled
   modelling_group <- "PSU-Ferrari"
   year_min <- 2015
   year_max <- 2020
@@ -29,7 +29,8 @@ test_that("dalys_calculation", {
   ##manual calculation
   life_table <- create_dalys_life_table(con, touchstone_name, year_min, year_max)
 
-  dat0 <- DBI::dbGetQuery(con, paste(sprintf("SELECT * FROM burden_estimate
+  dat0 <- DBI::dbGetQuery(con, paste(sprintf("SELECT burden_estimate_set, country.id AS country, year, burden_outcome, value, age FROM burden_estimate
+                                      JOIN country ON country.nid = burden_estimate.country
                                       WHERE burden_estimate_set IN %s", burden_estimate_sets),
                                      sprintf("AND burden_outcome IN %s", burden_outcomes),
                                      "AND year between $1 AND $2"), list(year_min, year_max))
