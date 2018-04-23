@@ -118,8 +118,9 @@ calculate_dalys1 <- function(con, life_table, burden_estiamte_set_id, burden_out
   message(sprintf("calculating dalys for burden_estimate_set %s", burden_estiamte_set_id))
   # burden_estimates
   sql <- paste("SELECT tab1.*, tab2.* FROM",
-               "(SELECT burden_estimate_set, burden_estimate.country, year, age, burden_outcome, value as burden",
+               "(SELECT burden_estimate_set, country.id AS country, year, age, burden_outcome, value as burden",
                "FROM burden_estimate",
+               "JOIN country ON country.nid = burden_estimate.country",
                "WHERE burden_estimate_set = $1",
                sprintf("AND burden_outcome IN %s", burden_outcomes),
                "AND year BETWEEN $2 AND $3) as tab1",
