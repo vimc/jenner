@@ -33,7 +33,7 @@ database_connection <- function(location = "science", user = "readonly",
   if (is.null(group)) {
     password <- if (user == "vimc") "changeme" else user
   } else {
-    password <- vault_read(sprintf("/secret/%s/database/users/%s", group, user),
+    password <- vault_read(sprintf("/secret/database/%s/users/%s", group, user),
                            "password")
   }
   ret <- DBI::dbConnect(RPostgres::Postgres(),
