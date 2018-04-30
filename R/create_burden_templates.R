@@ -1,6 +1,19 @@
-
+##' Creat burden estimate templates
+##' @title Creat burden estimate templates
+##'
+##' @param files filenames, it has to contain the following three files
+##' "Country_Disease_Table.csv", "model_meta.csv" and "model_outcomes.csv"
+##'
+##' @param files_path the directory that contains those files above
+##'
+##' @param assert_files needed meta files
+##' "Country_Disease_Table.csv", "model_meta.csv" and "model_outcomes.csv"
+##'
+##' @param central_templates_only TRUE if you only need central burden templates, usually for open call. But it depend on Tini's input.
+##'  Set to FALSE as default, which outputs both central and stochastic templates
+##'
+##' @export
 create_burden_template <- function(files, files_path, assert_files = c("Country_Disease_Table.csv", "model_meta.csv", "model_outcomes.csv"), central_templates_only = FALSE) {
-
   assert_has_files(files, assert_files)
   files <- paste0(files_path, files)
 
