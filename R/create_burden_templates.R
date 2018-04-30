@@ -42,7 +42,7 @@ create_burden_template <- function(files, files_path, assert_files = c("Country_
 # function adds new rows to dataframe with contents of value_insert
 # to the column column_name
 
-insert_dataframe = function(data,column_name,value_insert){
+insert_dataframe <- function(data,column_name,value_insert) {
 
   length_values <- length(value_insert)
 
@@ -53,7 +53,7 @@ insert_dataframe = function(data,column_name,value_insert){
 
   data1 <- data
 
-  for(i in 2:length_values){
+  for(i in 2:length_values) {
     data1[, column_name] <- value_insert[i]
     data <- rbind(data,data1)
   }
@@ -64,7 +64,7 @@ insert_dataframe = function(data,column_name,value_insert){
 
 # inserts country name into every line of data frame for each country iso code
 
-country_function <- function(k,country_n,country_ISOcode,country_data){
+country_function <- function(k, country_n, country_ISOcode, country_data) {
 
   country_name_rep <- rep(country_n[k],length(country_data[country_data$country == country_ISOcode[k], ]$country))
   return(country_name_rep)
@@ -74,18 +74,18 @@ country_function <- function(k,country_n,country_ISOcode,country_data){
 # outer wrapper function that produces the csv files
 # that selects the models associated with each disease
 
-model_select_function <- function(j){
+model_select_function <- function(j) {
 
   model_name <- unique(model_meta_data[model_meta_data$disease == disease_name[j], ]$modelling_group)
 
-  sapply(1:length(model_name),generate_csv,model_name,j)
+  sapply(1:length(model_name), generate_csv, model_name, j)
 
 }
 
 # inner wrapper function that produces the csv files
 # this function has no return
 
-generate_csv <- function(i,model_name,j){
+generate_csv <- function(i, model_name, j) {
 
   country_data <- data.frame(disease = disease_name[j])
 
@@ -98,7 +98,7 @@ generate_csv <- function(i,model_name,j){
 
   country_data$run_id <- ""
 
-  if(disease_name[j] == "HPV"){
+  if (disease_name[j] == "HPV") {
 
     age_values <- c(age_min:age_max)
     age_column_name<-c("age")
@@ -111,65 +111,67 @@ generate_csv <- function(i,model_name,j){
 
     age_min_k <- age_min + 1
 
-    for(k in age_min_k:age_max){
+    for(k in age_min_k:age_max) {
 
-      country_data1<-HPV_generate_csv(k,j,disease_name,age_min,age_max,year_end)
+      country_data1<-HPV_generate_csv(k, j, disease_name, age_min, age_max, year_end)
 
-      country_data <- rbind(country_data,country_data1)
+      country_data <- rbind(country_data, country_data1)
       rm(country_data1)
 
-      country_data <- country_data[order(country_data$age),]
+      country_data <- country_data[order(country_data$age), ]
     }
 
   }
 
-  if(disease_name[j] != "HPV"){
+  if (disease_name[j] != "HPV") {
 
     year_till <- year_end + age_max
-    if(year_till > 2100){year_till <- 2100}
+    if (year_till > 2100) {
+      year_till <- 2100
+    }
 
     age_values <- c(age_min:age_max)
     age_column_name<-c("age")
     year_values <- c(year_start:year_till)
     year_column_name<-c("year")
 
-    country_data <- insert_dataframe(country_data,year_column_name,year_values)
+    country_data <- insert_dataframe(country_data, year_column_name, year_values)
 
-    country_data <- insert_dataframe(country_data,age_column_name,age_values)
+    country_data <- insert_dataframe(country_data, age_column_name, age_values)
 
   }
 
-  country_column_name <-c("country")
+  country_column_name <- c("country")
 
-  country_data <- insert_dataframe(country_data,country_column_name,country_ISOcode)
+  country_data <- insert_dataframe(country_data, country_column_name, country_ISOcode)
 
-  b<-lapply(1:length(country_n),country_function,country_n,country_ISOcode,country_data)
+  b<-lapply(1:length(country_n), country_function, country_n, country_ISOcode, country_data)
 
   country_data$country_name <- unlist(b)
 
   outcome_name <- unique(model_outcomes[model_outcomes$disease == "standard" & model_outcomes$model == "standard", ]$outcome)
 
-  if(disease_name[j] == "Hib3" & model_name[i] == "JHU-Tam"){
+  if (disease_name[j] == "Hib3" & model_name[i] == "JHU-Tam") {
     outcome_name <- unique(model_outcomes[model_outcomes$disease == disease_name[j] & model_outcomes$model == model_name[i], ]$outcome)
   }
 
-  if(disease_name[j] == "HepB" & model_name[i] == "IC-Hallett"){
+  if (disease_name[j] == "HepB" & model_name[i] == "IC-Hallett") {
     outcome_name <- unique(model_outcomes[model_outcomes$disease == disease_name[j] & model_outcomes$model == model_name[i], ]$outcome)
   }
 
-  if(disease_name[j] == "HepB" & model_name[i] == "CDA-Razavi"){
+  if (disease_name[j] == "HepB" & model_name[i] == "CDA-Razavi") {
     outcome_name <- unique(model_outcomes[model_outcomes$disease == disease_name[j] & model_outcomes$model == model_name[i], ]$outcome)
   }
 
-  if(disease_name[j] == "HepB" & model_name[i] == "Li"){
+  if (disease_name[j] == "HepB" & model_name[i] == "Li") {
     outcome_name <- unique(model_outcomes[model_outcomes$disease == disease_name[j] & model_outcomes$model == model_name[i], ]$outcome)
   }
 
-  if(disease_name[j] == "Rubella" & model_name[i] == "PHE-Vynnycky"){
+  if (disease_name[j] == "Rubella" & model_name[i] == "PHE-Vynnycky") {
     outcome_name <- unique(model_outcomes[model_outcomes$disease == disease_name[j] & model_outcomes$model == model_name[i], ]$outcome)
   }
 
-  for(l in seq_along(outcome_name)){
+  for(l in seq_along(outcome_name)) {
     country_data[, paste0(outcome_name[l])] <- ""
   }
 
@@ -190,23 +192,23 @@ generate_csv <- function(i,model_name,j){
 # function that generates the triangular form of the data (between 2031 to around 2130)
 # needed for the HPV burden estimate templates
 
-HPV_generate_csv <- function(k,j,disease_name,age_min,age_max,year_end){
+HPV_generate_csv <- function(k,j,disease_name,age_min,age_max,year_end) {
 
   country_data1 <- data.frame(disease = disease_name[j])
   country_data1$run_id <- ""
 
   age_values <- c(k:age_max)
-  age_column_name<-c("age")
+  age_column_name <- c("age")
   year_values <- c(year_end-age_min+k)
-  year_column_name<-c("year")
+  year_column_name <- c("year")
 
   country_data1$year <- year_values
 
-  if(length(age_values)>1){
+  if (length(age_values) > 1) {
     country_data1 <- insert_dataframe(country_data1,age_column_name,age_values)
   }
 
-  if(length(age_values)==1){
+  if (length(age_values) == 1) {
     country_data1$age <- age_max
   }
 
@@ -261,7 +263,7 @@ find_model_outcomes <- function(disease_curr,
   outcomes_curr <- model_outcomes %>%
     filter(disease == disease_curr & model == modelling_group_curr) %>%
     select(outcome)
-  if(nrow(outcomes_curr) == 0) { ## use the standard outcomes:
+  if (nrow(outcomes_curr) == 0) { ## use the standard outcomes:
     outcomes_curr <- model_outcomes %>%
       filter(disease == "standard" & model == "standard") %>%
       select(outcome)
@@ -281,7 +283,7 @@ write_template_files <- function(model_meta_line,
 
   ## knocking out the bottom triangle post 2030 - needs to be done for
   ## List, Trivac and HPV:
-  if(model_meta_line$disease == "HPV" |
+  if (model_meta_line$disease == "HPV" |
      model_meta_line$model_name %in% c("TRIVAC", "LiST")) {
     out <- knock_out_triangle(out, model_meta_line, year_end)
   }
@@ -305,16 +307,16 @@ write_template_files <- function(model_meta_line,
 
   ## writing the central template file:
   filename1 <- sprintf("central_burden_template_%s-%s.csv",
-                      model_meta_line$disease,
-                      model_meta_line$modelling_group)
+                       model_meta_line$disease,
+                       model_meta_line$modelling_group)
 
   write.csv(out, filename1, row.names = FALSE)
-  if ( !central_templates_only ) {
+  if (!central_templates_only ) {
     ## adapting the file to the stochastic output:
     out <- cbind(disease = out$disease, run_id = "", out[, -1])
     filename2 <- sprintf("stochastic_burden_template_%s-%s.csv",
-                        model_meta_line$disease,
-                        model_meta_line$modelling_group)
+                         model_meta_line$disease,
+                         model_meta_line$modelling_group)
 
     write.csv(out, filename2, row.names = FALSE)
     return(list(filename1, filename2))
@@ -338,19 +340,19 @@ knock_out_triangle <- function(out, model_meta_line, year_end) {
 
 #### From Nick's check_function.R
 check_central_columns_filled <- function(dat, cols_filled) {
-  if(sum(is.na(match(cols_filled, names(dat)))) != 0)
+  if (sum(is.na(match(cols_filled, names(dat)))) != 0)
     warning("Not all columns that should be filled in are available.")
 
-  if(sum(is.na(dat[, cols_filled])) != 0)
+  if (sum(is.na(dat[, cols_filled])) != 0)
     warning("Missing entries in some columns that should be filled in.")
 
 }
 
 check_central_disease <- function(dat, disease_curr) {
   tt = table(dat$disease, useNA = "ifany")
-  if(length(tt) != 1)
+  if (length(tt) != 1)
     warning("More or less than a single disease present.")
-  if(names(tt) != disease_curr)
+  if (names(tt) != disease_curr)
     warning("disease in file does not match filename.")
 }
 
@@ -362,16 +364,16 @@ check_central_year <- function(dat,
   year_range <- model_meta %>%
     select(year_min, year_max)
 
-  if(min(dat$year) != year_range$year_min)
+  if (min(dat$year) != year_range$year_min)
     warning("First year not as given in model_meta file.")
-  if(max(dat$year) != year_range$year_max)
+  if (max(dat$year) != year_range$year_max)
     warning("Last year not as given in model_meta file.")
 
-  tt = table(dat$year)
-  if(!all(names(tt) == year_range$year_min : year_range$year_max))
+  tt <- table(dat$year)
+  if (!all(names(tt) == year_range$year_min : year_range$year_max))
     warning("Not all years in the specified year range appear.")
 
-  if(length(table(tt)) != 1) {
+  if (length(table(tt)) != 1) {
 
     tmp <- dat %>%
       group_by(age, year) %>%
@@ -394,17 +396,17 @@ check_central_age <- function(dat,
   age_range <- model_meta %>%
     select(burden_min_age, burden_max_age)
 
-  if(min(dat$age) != age_range$burden_min_age)
+  if (min(dat$age) != age_range$burden_min_age)
     warning("First age not as given in model_meta file.")
-  if(max(dat$age) != age_range$burden_max_age) {
+  if (max(dat$age) != age_range$burden_max_age) {
     warning("Last age not as given in model_meta file.")
   }
 
   tt = table(dat$age)
-  if(!all(names(tt) == age_range$burden_min_age : age_range$burden_max_age))
+  if (!all(names(tt) == age_range$burden_min_age : age_range$burden_max_age))
     warning("Not all years in the specified year range appear.")
 
-  if(length(table(tt)) != 1)
+  if (length(table(tt)) != 1)
     warning("There are not the same number of entries for each age.")
   ## this could still be ok - for instance for HPV.
 
@@ -427,23 +429,23 @@ check_central_country <- function(dat,
     select(country, country_name)
 
   tt <- table(dat$country)
-  if(length(tt) != n_countries)
+  if (length(tt) != n_countries)
     warning(sprintf("Number of countries = %d, should be %d.",
                     length(tt), n_countries))
 
   ## to the countries match what's pulled of Montagu?
-  if(sum(is.na(match(names(tt), countries$country))) != 0)
+  if (sum(is.na(match(names(tt), countries$country))) != 0)
     warning("There are countries in the .csv file that are not listed on Montagu for this disease and touchstone.")
-  if(sum(is.na(match(countries$country, names(tt)))) != 0)
+  if (sum(is.na(match(countries$country, names(tt)))) != 0)
     warning("There are countries listed in Montagu for this disease and touchstone that are missing in the .csv.")
 
-  if(length(table(tt)) != 1)
+  if (length(table(tt)) != 1)
     warning("The number of rows per country varies between countries.")
 
   ## checking country names and country ISO codes:
   ttn <- table(table(dat$country, dat$country_name))
   ## this should be mostly 0, but have n_country entries of some other number.
-  if(names(ttn)[1] != "0" | ttn[2] != n_countries)
+  if (names(ttn)[1] != "0" | ttn[2] != n_countries)
     warning("The country names and countries don't match up.")
 
 
@@ -453,11 +455,11 @@ compare_central_stochastic_columns <- function(dat, dat_stochastic) {
 
   ## comparing columns of the central and stochastic files:
   mm = match(names(dat_stochastic), names(dat))
-  if(sum(is.na(mm)) != 1) {
+  if (sum(is.na(mm)) != 1) {
     warning("Columns in the central and stochastic files do not match up.")
   } else {
     new_col <- names(dat_stochastic[is.na(mm)])
-    if(new_col != "run_id")
+    if (new_col != "run_id")
       warning("Additional column in stochastic file is `%s`, not `run_id`.")
   }
 
@@ -465,11 +467,11 @@ compare_central_stochastic_columns <- function(dat, dat_stochastic) {
 
 compare_central_stochastic_rows <- function(dat, dat_stochastic, cols_filled) {
 
-  if(nrow(dat) != nrow(dat_stochastic))
+  if (nrow(dat) != nrow(dat_stochastic))
     warning("number of rows in central and stochastic files does not match.")
 
 
-  if(!all(dat_stochastic[, cols_filled] == dat[, cols_filled]))
+  if (!all(dat_stochastic[, cols_filled] == dat[, cols_filled]))
     warning("stochastic and central files are not aligned.")
 
 
@@ -489,8 +491,8 @@ check_model_files <- function(model_meta_line,
   file_stochastic <- sprintf("stochastic_burden_template_%s-%s.csv",
                              disease_curr, modelling_group_curr)
 
-  dat <- read.csv(file_central, stringsAsFactors = TRUE)
-  dat_stochastic <- read.csv(file_stochastic, stringsAsFactors = TRUE)
+  dat <- read_csv(file_central)
+  dat_stochastic <- read_csv(file_stochastic)
 
   ## checking the central file:
   ## columns that should be filled in:
@@ -507,13 +509,13 @@ check_model_files <- function(model_meta_line,
 
   ## the number of filled columns that are expected but missing:
   n_col_mis <- sum(is.na(match(cols_filled, names(dat))))
-  if(n_col_mis != 0)
+  if (n_col_mis != 0)
     warning(sprintf("There are %d pre-filled columns missing among those expected (%s).",
                     n_col_mis, paste(cols_filled, collapse = ", ")))
 
   ## number of missing entries in the columns that should be filled:
   n_mis_entries <- sum(colSums(is.na(dat[, cols_filled])))
-  if(n_mis_entries != 0)
+  if (n_mis_entries != 0)
     warning(sprintf("There are %d entries missing missing among those expected in columns %s.",
                     n_col_mis, paste(cols_filled, collapse = ", ")))
 
@@ -523,7 +525,7 @@ check_model_files <- function(model_meta_line,
                                        model_outcomes)
   ## the number of outcomes that are expected but missing:
   n_mismatched_outcomes <- sum(is.na(match(outcomes_curr$outcome, names(dat))))
-  if(n_mismatched_outcomes != 0)
+  if (n_mismatched_outcomes != 0)
     warning(sprintf("There are %d outcomes missing of the expected outcomes (%s).",
                     n_mismatched_outcomes, paste(outcomes_curr$outcome, collapse = ", ")))
 
