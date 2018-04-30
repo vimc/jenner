@@ -1,3 +1,6 @@
+### jenner 0.0.15
+ * VIMC-1728 Create burden estimate templates in jenner 
+ 
 ### jenner 0.0.14
  * VIMC-1400 dalys calculation
  * VIMC-1607 correct a bug for reporting suspicious campaign data
