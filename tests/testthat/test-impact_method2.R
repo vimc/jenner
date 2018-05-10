@@ -43,7 +43,7 @@ test_that("impact_calculation, method1", {
   skip_if_no_reference_data()
   ##saveRDS(a, "jenner-test-data/impact_calculation/method1.rds")
   expect_known_value(a, "jenner-test-data/impact_calculation/method1.rds",
-                     update = FALSE)
+                     update = FALSE, tolerance = 1e-5)
 })
 
 test_that("impact_calculation, method2", {
@@ -111,7 +111,7 @@ test_that("impact_calculation, method2", {
   skip_if_no_reference_data()
   ##saveRDS(a, "jenner-test-data/impact_calculation/method2.rds")
   expect_known_value(a, "jenner-test-data/impact_calculation/method2.rds",
-                     update = FALSE)
+                     update = FALSE, tolerance = 1e-6)
 })
 
 test_that("impact_calculation, method2-HepB-specific", {
@@ -178,6 +178,6 @@ test_that("impact_calculation, method2-HepB-specific", {
   skip_if_no_reference_data()
   ##saveRDS(a, "jenner-test-data/impact_calculation/method2-hepb.rds")
   expect_known_value(a, "jenner-test-data/impact_calculation/method2-hepb.rds",
-                     update = FALSE)
+                     update = FALSE, tolerance = 1e-6)
 })
 

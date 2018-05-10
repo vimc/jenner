@@ -50,5 +50,5 @@ test_that("dalys_calculation", {
   expect_equal (dat$burden_estimate_set, dat$value, dat0$dalys)
   #saveRDS(dat, "jenner-test-data/dalys_calculation/PSU-Ferrari.rds")
   expect_known_value(dat, "jenner-test-data/dalys_calculation/PSU-Ferrari.rds",
-                     update = FALSE)
+                     update = FALSE, tolerance = 1e-6)
 })
