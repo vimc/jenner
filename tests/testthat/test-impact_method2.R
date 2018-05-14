@@ -12,7 +12,7 @@ test_that("impact_calculation, method1", {
   ## build test data
   message("Can only test routine at the moment.")
   pine <- c("PAK", "IND", "NGA", "ETH")
-  modelling_group <- "Harvard-Sweet"
+  modelling_group <- "LSHTM-Jit"
   vaccine_focal <- "HPV"
   vaccine_base <- "HPV"
   year_min <- 2020
@@ -58,7 +58,7 @@ test_that("impact_calculation, method2", {
   ## build test data
   message("Can only test routine at the moment.")
   pine <- c("PAK", "IND", "NGA", "ETH")
-  modelling_group <- "Harvard-Sweet"
+  modelling_group <- "LSHTM-Jit"
   vaccine_focal <- "HPV"
   vaccine_base <- "HPV"
   year_min <- 2020
