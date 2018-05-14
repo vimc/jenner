@@ -24,3 +24,4 @@ JOIN scenario_coverage_set
   ON scenario_coverage_set.scenario = scenario.id
 JOIN coverage_set
   ON coverage_set.id = scenario_coverage_set.coverage_set
+WHERE current_burden_estimate_set IS NOT NULL

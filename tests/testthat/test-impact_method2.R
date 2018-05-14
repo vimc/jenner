@@ -12,7 +12,7 @@ test_that("impact_calculation, method1", {
   ## build test data
   message("Can only test routine at the moment.")
   pine <- c("PAK", "IND", "NGA", "ETH")
-  modelling_group <- "Harvard-Sweet"
+  modelling_group <- "LSHTM-Jit"
   vaccine_focal <- "HPV"
   vaccine_base <- "HPV"
   year_min <- 2020
@@ -26,7 +26,8 @@ test_that("impact_calculation, method1", {
 
   import_test_data_impact_method2(con = con, con_test = con_test, modelling_group = modelling_group, vaccine_focal = vaccine_focal, vaccine_base = vaccine_base, year_min = year_min, year_max = year_max)
 
-  burden <- DBI::dbReadTable(con_test, "burden_estimate")
+  burden <- DBI::dbGetQuery(con_test, "SELECT burden_estimate_set, country.id AS country, year, burden_outcome, value, age FROM burden_estimate
+                            JOIN country ON country.nid = burden_estimate.country")
   ## mannually calculate impact
   tot_impact <- merge(meta2, burden, by.x = c("burden_estimate_set_id", "burden_outcome_id"), by.y = c("burden_estimate_set", "burden_outcome"))
   tot_impact$value <- tot_impact$value * tot_impact$coef
@@ -42,7 +43,7 @@ test_that("impact_calculation, method1", {
   skip_if_no_reference_data()
   ##saveRDS(a, "jenner-test-data/impact_calculation/method1.rds")
   expect_known_value(a, "jenner-test-data/impact_calculation/method1.rds",
-                     update = FALSE)
+                     update = FALSE, tolerance = 1e-6)
 })
 
 test_that("impact_calculation, method2", {
@@ -57,7 +58,7 @@ test_that("impact_calculation, method2", {
   ## build test data
   message("Can only test routine at the moment.")
   pine <- c("PAK", "IND", "NGA", "ETH")
-  modelling_group <- "Harvard-Sweet"
+  modelling_group <- "LSHTM-Jit"
   vaccine_focal <- "HPV"
   vaccine_base <- "HPV"
   year_min <- 2020
@@ -68,7 +69,8 @@ test_that("impact_calculation, method2", {
   meta2 <- meta[meta$modelling_group == modelling_group & meta$vaccine == vaccine_focal & meta$activity_type == "routine", ]
 
   import_test_data_impact_method2(con = con, con_test = con_test, modelling_group = modelling_group, vaccine_focal = vaccine_focal, vaccine_base = vaccine_base, year_min = year_min, year_max = year_max)
-  burden <- DBI::dbReadTable(con_test, "burden_estimate")
+  burden <- DBI::dbGetQuery(con_test, "SELECT burden_estimate_set, country.id AS country, year, burden_outcome, value, age FROM burden_estimate
+                            JOIN country ON country.nid = burden_estimate.country")
   fvps <- DBI::dbReadTable(con_test, "temporary_coverage_fvps")
   fvps <- fvps[fvps$activity_type == "routine", ]
 
@@ -109,7 +111,7 @@ test_that("impact_calculation, method2", {
   skip_if_no_reference_data()
   ##saveRDS(a, "jenner-test-data/impact_calculation/method2.rds")
   expect_known_value(a, "jenner-test-data/impact_calculation/method2.rds",
-                     update = FALSE)
+                     update = FALSE, tolerance = 1e-6)
 })
 
 test_that("impact_calculation, method2-HepB-specific", {
@@ -134,7 +136,8 @@ test_that("impact_calculation, method2-HepB-specific", {
   meta2 <- meta[meta$modelling_group == modelling_group & meta$vaccine == vaccine_focal & meta$baseline == "hepb-no-vaccination", ]
 
   import_test_data_impact_method2(con = con, con_test = con_test, modelling_group = modelling_group, vaccine_focal = vaccine_focal, vaccine_base = vaccine_base, year_min = year_min, year_max = year_max)
-  burden <- DBI::dbReadTable(con_test, "burden_estimate")
+  burden <- DBI::dbGetQuery(con_test, "SELECT burden_estimate_set, country.id AS country, year, burden_outcome, value, age FROM burden_estimate
+                            JOIN country ON country.nid = burden_estimate.country")
   fvps <- DBI::dbReadTable(con_test, "temporary_coverage_fvps")
   fvps <- fvps[fvps$activity_type == "routine", ]
 
@@ -175,6 +178,6 @@ test_that("impact_calculation, method2-HepB-specific", {
   skip_if_no_reference_data()
   ##saveRDS(a, "jenner-test-data/impact_calculation/method2-hepb.rds")
   expect_known_value(a, "jenner-test-data/impact_calculation/method2-hepb.rds",
-                     update = FALSE)
+                     update = FALSE, tolerance = 1e-6)
 })
 

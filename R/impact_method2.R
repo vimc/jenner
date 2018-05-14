@@ -125,33 +125,37 @@ make_impact <- function(con, index, year_min, year_max, routine_tot_rate_shape =
   if(disease == "HepB") {
     focal_countries  <- DBI::dbGetQuery(con,
                                         paste("SELECT focal_countries.country FROM",
-                                              "(SELECT DISTINCT country",
+                                              "(SELECT DISTINCT country.id AS country",
                                               "FROM burden_estimate",
+                                              "JOIN country ON country.nid = burden_estimate.country",
                                               sprintf("WHERE burden_estimate_set = %s",focal$burden_estimate_set_id),
                                               ") AS focal_countries",
                                               "INNER JOIN",
-                                              "(SELECT DISTINCT country",
+                                              "(SELECT DISTINCT country.id AS country",
                                               "FROM burden_estimate",
+                                              "JOIN country ON country.nid = burden_estimate.country",
                                               sprintf("WHERE burden_estimate_set = %s",base$burden_estimate_set_id),
                                               ") AS base_countries",
                                               "ON focal_countries.country = base_countries.country"
                                         ))
-    countries <- paste(sprintf("AND country IN %s", sql_in(focal_countries$country)))
+    countries <- paste(sprintf("AND country.id IN %s", sql_in(focal_countries$country)))
   } else {
     countries <- "\t"
   }
 
 
   sql_1 <- paste("SELECT tmp.country, sum(tmp.value) AS tot_impact",
-                 "FROM (SELECT country, year, age, value",
+                 "FROM (SELECT country.id AS country, year, age, value",
                  "FROM burden_estimate",
+                 "JOIN country ON country.nid = burden_estimate.country",
                  sprintf("WHERE burden_estimate_set = %s",base$burden_estimate_set_id),
                  countries,
                  shape,
                  sprintf("AND burden_outcome IN %s ", outcomes),
                  "UNION ALL",
-                 "SELECT country, year, age, value*(-1) AS value",
+                 "SELECT country.id AS country, year, age, value*(-1) AS value",
                  "FROM burden_estimate",
+                 "JOIN country ON country.nid = burden_estimate.country",
                  sprintf("WHERE burden_estimate_set = %s",focal$burden_estimate_set_id),
                  countries,
                  shape,
@@ -275,33 +279,37 @@ make_impact_method1 <- function(con, index) {
   if(disease == "HepB") {
     focal_countries  <- DBI::dbGetQuery(con,
                                         paste("SELECT focal_countries.country FROM",
-                                              "(SELECT DISTINCT country",
+                                              "(SELECT DISTINCT country.id AS country",
                                               "FROM burden_estimate",
+                                              "JOIN country ON country.nid = burden_estimate.country",
                                               sprintf("WHERE burden_estimate_set = %s",focal$burden_estimate_set_id),
                                               ") AS focal_countries",
                                               "INNER JOIN",
-                                              "(SELECT DISTINCT country",
+                                              "(SELECT DISTINCT country.id AS country",
                                               "FROM burden_estimate",
+                                              "JOIN country ON country.nid = burden_estimate.country",
                                               sprintf("WHERE burden_estimate_set = %s",base$burden_estimate_set_id),
                                               ") AS base_countries",
                                               "ON focal_countries.country = base_countries.country"
                                         ))
-    countries <- paste(sprintf("AND country IN %s", sql_in(focal_countries$country)))
+    countries <- paste(sprintf("AND country.id IN %s", sql_in(focal_countries$country)))
   } else {
     countries <- "\t"
   }
 
   sql <- paste("SELECT tmp.country, tmp.year, tmp.age, sum(tmp.value) AS impact",
-               "FROM (SELECT country, year, age, value",
+               "FROM (SELECT country.id AS country, year, age, value",
                "FROM burden_estimate",
+               "JOIN country ON country.nid = burden_estimate.country",
                sprintf("WHERE burden_estimate_set = %s",base$burden_estimate_set_id),
                countries,
                sprintf("AND year BETWEEN %s", 2000),
                sprintf(" AND %s", 2100),
                sprintf("AND burden_outcome IN %s ", outcomes),
                "UNION ALL",
-               "SELECT country, year, age, value*(-1) AS value",
+               "SELECT country.id AS country, year, age, value*(-1) AS value",
                "FROM burden_estimate",
+               "JOIN country ON country.nid = burden_estimate.country",
                sprintf("WHERE burden_estimate_set = %s",focal$burden_estimate_set_id),
                countries,
                sprintf("AND year BETWEEN %s", 2000),
