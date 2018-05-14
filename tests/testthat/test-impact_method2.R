@@ -43,7 +43,7 @@ test_that("impact_calculation, method1", {
   skip_if_no_reference_data()
   ##saveRDS(a, "jenner-test-data/impact_calculation/method1.rds")
   expect_known_value(a, "jenner-test-data/impact_calculation/method1.rds",
-                     update = FALSE, tolerance = 1e-5)
+                     update = FALSE, tolerance = 1e-6)
 })
 
 test_that("impact_calculation, method2", {
