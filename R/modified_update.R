@@ -10,7 +10,7 @@
 ##'   this off of
 ##'
 ##' @export
-modified_update_calculate <- function(con, touchstone_name_mod, touchstone_use, method = "method1") {
+modified_update_calculate <- function(con, touchstone_name_mod, touchstone_use, method = "method2") {
   year_min <- 2001
   year_max <- 2030
   
@@ -23,6 +23,12 @@ modified_update_calculate <- function(con, touchstone_name_mod, touchstone_use, 
   touchstone_mod <- touchstone_mod[which.max(touchstone_mod$version[i]), ]
   modup_by_itself <- any(touchstone_name_mod == touchstone_use)
   meta <- mu_prepare(con, touchstone_mod$id, modup_by_itself = modup_by_itself)
+  
+  ## we are going to do mothod2 version 2
+  ## this method do original modup2 for total support, and then derive gavi_support by filtering per-year gavi_support
+  if(method == "method2_v2") {
+    meta <- meta[meta$support_type == "total", ]
+  }
   meta <- mu_impact_metadata(meta, touchstone_use)
   
   meta$touchstone_mod <-
@@ -326,7 +332,8 @@ mu_build_data <- function(con, index, meta, pop) {
   }
   dat <- merge_in(dat, mu_fix_coverage(d_cov_new),
                   c(coverage_new = "coverage",
-                    coverage_target_new = "target"))
+                    coverage_target_new = "target",
+                    gavi_support_new = "gavi_support"))
   
   
   
@@ -469,7 +476,7 @@ mu_impact_metadata <- function(meta, touchstone_use) {
 mu_scale <- function(name, d, method = "method2") {
   ## This chunck becomes simpler, since only method 2 is used throughout. - Not any more, we need method 1 now.
   ## This is method 1.
-  if (method != "method2") {
+  if (method == "method1") {
     # by default use impact_new = impact_old / coverage_old * coverage_new
     ret <- d[[name]] / d$coverage_old * d$coverage_new
     

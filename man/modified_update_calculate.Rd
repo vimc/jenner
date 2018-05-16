@@ -4,7 +4,8 @@
 \alias{modified_update_calculate}
 \title{Do a modified update}
 \usage{
-modified_update_calculate(con, touchstone_name_mod, touchstone_use)
+modified_update_calculate(con, touchstone_name_mod, touchstone_use,
+  method = "method2")
 }
 \arguments{
 \item{con}{Database connection}

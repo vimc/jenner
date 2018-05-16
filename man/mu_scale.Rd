@@ -4,7 +4,7 @@
 \alias{mu_scale}
 \title{Calculate updated impact}
 \usage{
-mu_scale(name, d)
+mu_scale(name, d, method = "method2")
 }
 \arguments{
 \item{name}{Impact type: deaths_averted or cases_averted}
