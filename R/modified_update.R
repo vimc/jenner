@@ -23,7 +23,10 @@ modified_update_calculate <- function(con, touchstone_name_mod, touchstone_use, 
   touchstone_mod <- touchstone_mod[which.max(touchstone_mod$version[i]), ]
   modup_by_itself <- any(touchstone_name_mod == touchstone_use)
   meta <- mu_prepare(con, touchstone_mod$id, modup_by_itself = modup_by_itself)
-  
+  ## 201403gavi - SDF9 - does not have MCV1 coverage, we need to get rid of it here to avoid error
+  if (touchstone_name_mod == "201403gavi") {
+    meta <- meta[meta$vaccine != "MCV1", ]
+  }
   ## we are going to do mothod2 version 2
   ## this method do original modup2 for total support, and then derive gavi_support by filtering per-year gavi_support
   if(method == "method2_v2") {
@@ -321,8 +324,7 @@ mu_build_data <- function(con, index, meta, pop) {
   
   ## 4. new coverage
   if (is.na(x$coverage_set_new)) {
-    #stop("Import error: no new coverage found")
-    d_cov_new <- d_cov_old
+    stop("Import error: no new coverage found")
   } else {
     if(meta$touchstone_mod$touchstone_name == meta$group$touchstone_name[meta$group$index == index])  {
       d_cov_new <- d_cov_old
