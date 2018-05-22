@@ -10,6 +10,8 @@ mu_scale(name, d, method = "method2")
 \item{name}{Impact type: deaths_averted or cases_averted}
 
 \item{d}{Data: use impact_rate_tot (method 2)}
+
+\item{method}{two options: method1 and method2}
 }
 \description{
 Calculate updated impact

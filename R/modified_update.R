@@ -9,8 +9,13 @@
 ##' @param touchstone_use Name of the touchstone that we are basing
 ##'   this off of
 ##'
+##' @param method two options: method1, method2
+##' method2_v2 is different from method2 in that, it takes per-year-gavi-level as an imput for gavi impact  
+##' 
+##' @param version two options: v1 and v2
+##' 
 ##' @export
-modified_update_calculate <- function(con, touchstone_name_mod, touchstone_use, method = "method2") {
+modified_update_calculate <- function(con, touchstone_name_mod, touchstone_use, method = "method2", version = "v2") {
   year_min <- 2001
   year_max <- 2030
   
@@ -23,13 +28,13 @@ modified_update_calculate <- function(con, touchstone_name_mod, touchstone_use, 
   touchstone_mod <- touchstone_mod[which.max(touchstone_mod$version[i]), ]
   modup_by_itself <- any(touchstone_name_mod == touchstone_use)
   meta <- mu_prepare(con, touchstone_mod$id, modup_by_itself = modup_by_itself)
-  ## 201403gavi - SDF9 - does not have MCV1 coverage, we need to get rid of it here to avoid error
+  ## 201403gavi - SDF9 - does not have MCV1 coverage, we need to get rid of it to avoid triggering error message
   if (touchstone_name_mod == "201403gavi") {
     meta <- meta[meta$vaccine != "MCV1", ]
   }
   ## we are going to do mothod2 version 2
   ## this method do original modup2 for total support, and then derive gavi_support by filtering per-year gavi_support
-  if(method == "method2_v2") {
+  if(method == "method2" & version == "v2") {
     meta <- meta[meta$support_type == "total", ]
   }
   meta <- mu_impact_metadata(meta, touchstone_use)
@@ -63,6 +68,32 @@ modified_update_calculate <- function(con, touchstone_name_mod, touchstone_use, 
   data$cases_averted_new <- mu_scale("cases_averted", data, method)
   
   meta$data <- data
+  
+  if(version == "v2") {
+    ## with version 2, gavi impact is filtered from total impact by per-year-gavi-level
+    group <- meta$group
+    impacts <- meta$impacts
+    
+    v <- group
+    v$support_type <- "gavi"
+    v$index <- max(v$index) + v$index
+    meta$group  <- rbind(group, v)
+    
+    v <- impacts
+    v$index <- max(v$index) + v$index
+    meta$impacts <- rbind(impacts, v)
+    
+    v <- data
+    i <- !is.na(v$gavi_support_new) & !v$gavi_support_new
+    v$coverage_new[i] <- 0.
+    v$coverage_target_new[i] <- 0.
+    v$target_pop_given_new[i] <- 0.
+    v$fvps_new[i] <- 0.
+    v$deaths_averted_new[i] <- 0.
+    v$cases_averted_new[i] <- 0.
+    meta$data <- rbind(data, v)
+  }
+  
   meta
 }
 
@@ -474,6 +505,7 @@ mu_impact_metadata <- function(meta, touchstone_use) {
 ##'
 ##' @param d Data: use impact_rate_tot (method 2)
 ##'
+##' @param method two options: method1 and method2
 ##' @export
 mu_scale <- function(name, d, method = "method2") {
   ## This chunck becomes simpler, since only method 2 is used throughout. - Not any more, we need method 1 now.
