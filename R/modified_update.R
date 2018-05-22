@@ -85,9 +85,14 @@ modified_update_calculate <- function(con, touchstone_name_mod, touchstone_use, 
     
     v <- data
     v$index <- max(v$index) + v$index
+    i <- !is.na(v$gavi_support) & !v$gavi_support
+    v$coverage_old[i] <- 0.
+    v$fvps[i] <- 0.
+    v$deaths_averted[i] <- 0.
+    v$cases_averted[i] <- 0.
+    
     i <- !is.na(v$gavi_support_new) & !v$gavi_support_new
     v$coverage_new[i] <- 0.
-    v$coverage_target_new[i] <- 0.
     v$fvps_new[i] <- 0.
     v$deaths_averted_new[i] <- 0.
     v$cases_averted_new[i] <- 0.
@@ -351,7 +356,7 @@ mu_build_data <- function(con, index, meta, pop) {
   d_cov_old <- DBI::dbGetQuery(con, sql, list(x$coverage_set, year_max2))
   dat <-
     merge_in(dat, mu_fix_coverage(d_cov_old),
-             c(coverage_old = "coverage", coverage_target = "target"))
+             c(coverage_old = "coverage", coverage_target = "target", gavi_support = "gavi_support"))
   
   ## 4. new coverage
   if (is.na(x$coverage_set_new)) {
