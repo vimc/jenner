@@ -16,6 +16,9 @@
 ##' 
 ##' @export
 modified_update_calculate <- function(con, touchstone_name_mod, touchstone_use, method = "method2", version = "v2") {
+  if(method != "method2" & version == "v2") {
+    stop("version 2 can only be applied to method 2.")
+  }
   year_min <- 2001
   year_max <- 2030
   
