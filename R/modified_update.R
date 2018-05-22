@@ -84,10 +84,10 @@ modified_update_calculate <- function(con, touchstone_name_mod, touchstone_use, 
     meta$impacts <- rbind(impacts, v)
     
     v <- data
+    v$index <- max(v$index) + v$index
     i <- !is.na(v$gavi_support_new) & !v$gavi_support_new
     v$coverage_new[i] <- 0.
     v$coverage_target_new[i] <- 0.
-    v$target_pop_given_new[i] <- 0.
     v$fvps_new[i] <- 0.
     v$deaths_averted_new[i] <- 0.
     v$cases_averted_new[i] <- 0.
