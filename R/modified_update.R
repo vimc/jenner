@@ -182,6 +182,7 @@ modified_update_summary_output <- function(con, res, path_meta) {
   cols <- c(country = "country",
             year = "year",
             coverage = "coverage_old",
+            gavi_support = "gavi_support",
             population = "target_pop_given",
             population_estimated = "target_pop_estimated",
             deaths_averted_rate = "deaths_averted_rate",
@@ -191,6 +192,7 @@ modified_update_summary_output <- function(con, res, path_meta) {
             cases_averted = "cases_averted",
             cases_averted_rate = "cases_averted_rate")
   cols_update <- c(coverage = "coverage_new",
+                   gavi_support = "gavi_support_new",
                    deaths_averted = "deaths_averted_new",
                    cases_averted = "cases_averted_new",
                    fvps = "fvps_new",
