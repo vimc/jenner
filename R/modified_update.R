@@ -16,7 +16,12 @@
 ##' 
 ##' @export
 modified_update_calculate <- function(con, touchstone_name_mod, touchstone_use, method = "method2", version = "v2") {
-  if(method != "method2" & version == "v2") {
+  ### current method and version we have
+  ### method 1 version 1 - impact new = impact old / coverage old * coverage new
+  ### method 2 version 1 - Rich develpped this in July 2017
+  ### method 2 version 2 - in version 2, total impact is the same as version 1, 
+  ###                     gavi impact is a subset of total impact by filtering per-year-gavi-level 
+  if (method != "method2" & version == "v2") {
     stop("version 2 can only be applied to method 2.")
   }
   year_min <- 2001
@@ -27,6 +32,8 @@ modified_update_calculate <- function(con, touchstone_name_mod, touchstone_use, 
                " WHERE touchstone_name = $1",
                sep = "\n")
   touchstone_mod <- DBI::dbGetQuery(con, sql, touchstone_name_mod)
+  ### touchstone 201510gavi-42 is imported from Rshiny, it contains Rubella only
+  ### It is not a target touchstone we are interested in.
   i <- touchstone_mod$id != '201510gavi-42'
   touchstone_mod <- touchstone_mod[which.max(touchstone_mod$version[i]), ]
   modup_by_itself <- any(touchstone_name_mod == touchstone_use)
@@ -37,7 +44,7 @@ modified_update_calculate <- function(con, touchstone_name_mod, touchstone_use, 
   }
   ## we are going to do mothod2 version 2
   ## this method do original modup2 for total support, and then derive gavi_support by filtering per-year gavi_support
-  if(method == "method2" & version == "v2") {
+  if (method == "method2" & version == "v2") {
     meta <- meta[meta$support_type == "total", ]
   }
   meta <- mu_impact_metadata(meta, touchstone_use)
@@ -72,7 +79,7 @@ modified_update_calculate <- function(con, touchstone_name_mod, touchstone_use, 
   
   meta$data <- data
   
-  if(version == "v2") {
+  if (version == "v2") {
     ## with version 2, gavi impact is filtered from total impact by per-year-gavi-level
     group <- meta$group
     impacts <- meta$impacts
@@ -249,7 +256,7 @@ mu_prepare <- function(con, touchstone_new, modup_by_itself = FALSE) {
   ## this duplication later.
   ## sometimes we do modup for touchstone_old = touchstone_new
   ## the if-else clause is important to deal with this
-  if(modup_by_itself) {
+  if (modup_by_itself) {
     touchstone_new2 <- NULL
   } else {
     touchstone_new2 <- touchstone_new
@@ -367,7 +374,7 @@ mu_build_data <- function(con, index, meta, pop) {
   if (is.na(x$coverage_set_new)) {
     stop("Import error: no new coverage found")
   } else {
-    if(meta$touchstone_mod$touchstone_name == meta$group$touchstone_name[meta$group$index == index])  {
+    if (meta$touchstone_mod$touchstone_name == meta$group$touchstone_name[meta$group$index == index])  {
       d_cov_new <- d_cov_old
     } else {
       d_cov_new <- DBI::dbGetQuery(con, sql, list(x$coverage_set_new, year_max2))
@@ -424,9 +431,9 @@ mu_build_data <- function(con, index, meta, pop) {
   i <- is_blank(dat$fvps) & !is_blank(dat$coverage_old)
   if (any(i)) {
     message("Creating synthetic fvps for ", x$model)
-    if((x$activity_type == "campaign")){
+    if ((x$activity_type == "campaign")){
       dat$fvps[i] <- dat$coverage_old[i] * dat$coverage_target[i]
-    }else{
+    } else {
       dat$fvps[i] <- dat$coverage_old[i] * dat$pop_routine[i]
     }
   }
@@ -469,7 +476,7 @@ mu_build_data <- function(con, index, meta, pop) {
       stop("modified update error")
   }
   #For analysis purpose, a touchstone can be 'updated' by itself - assumes equal fvps
-  if(meta$touchstone_mod$touchstone_name == meta$group$touchstone_name[meta$group$index == index])
+  if (meta$touchstone_mod$touchstone_name == meta$group$touchstone_name[meta$group$index == index])
     dat$fvps_new <- dat$fvps
   ## drop excess temporary things
   dat$.code <- NULL
@@ -518,7 +525,7 @@ mu_impact_metadata <- function(meta, touchstone_use) {
 ##' @param method two options: method1 and method2
 ##' @export
 mu_scale <- function(name, d, method = "method2") {
-  ## This chunck becomes simpler, since only method 2 is used throughout. - Not any more, we need method 1 now.
+  ## AS we need method 1 now. mu_scale includes both method 1 and method 2 now
   ## This is method 1.
   if (method == "method1") {
     # by default use impact_new = impact_old / coverage_old * coverage_new
