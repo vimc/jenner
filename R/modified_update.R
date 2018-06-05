@@ -9,19 +9,22 @@
 ##' @param touchstone_use Name of the touchstone that we are basing
 ##'   this off of
 ##'
-##' @param method two options: method1, method2
+##' @param method two options: 1 = method1, 2 = method2
 ##' method2_v2 is different from method2 in that, it takes per-year-gavi-level as an imput for gavi impact  
 ##' 
-##' @param version two options: v1 and v2
+##' @param version two options: 1 = v1 and 2 = v2
 ##' 
 ##' @export
-modified_update_calculate <- function(con, touchstone_name_mod, touchstone_use, method = "method2", version = "v2") {
+modified_update_calculate <- function(con, touchstone_name_mod, touchstone_use, method = 2, version = 1) {
   ### current method and version we have
-  ### method 1 version 1 - impact new = impact old / coverage old * coverage new
-  ### method 2 version 1 - Rich develpped this in July 2017
-  ### method 2 version 2 - in version 2, total impact is the same as version 1, 
-  ###                     gavi impact is a subset of total impact by filtering per-year-gavi-level 
-  if (method != "method2" & version == "v2") {
+  ### method = 1 version = 1: impact new = impact old / coverage old * coverage new (or impact rate * fvps when coverage old in (NA/0))
+  ### method = 2 version = 1: Rich develpped this in July 2017
+  ### method = 2 version = 2: in version 2, total impact is the same as version 1, 
+  ###                         gavi impact is a subset of total impact by filtering per-year-gavi-level 
+  if (!(method %in% 1:2)) {
+    stop("currently, only method 1 and 2 have been developed.")
+  }
+  if (method != 2 & version == 2) {
     stop("version 2 can only be applied to method 2.")
   }
   year_min <- 2001
@@ -44,7 +47,7 @@ modified_update_calculate <- function(con, touchstone_name_mod, touchstone_use, 
   }
   ## we are going to do mothod2 version 2
   ## this method do original modup2 for total support, and then derive gavi_support by filtering per-year gavi_support
-  if (method == "method2" & version == "v2") {
+  if (method == 2 & version == 2) {
     meta <- meta[meta$support_type == "total", ]
   }
   meta <- mu_impact_metadata(meta, touchstone_use)
@@ -79,7 +82,7 @@ modified_update_calculate <- function(con, touchstone_name_mod, touchstone_use, 
   
   meta$data <- data
   
-  if (version == "v2") {
+  if (version == 2) {
     ## with version 2, gavi impact is filtered from total impact by per-year-gavi-level
     group <- meta$group
     impacts <- meta$impacts
@@ -524,10 +527,10 @@ mu_impact_metadata <- function(meta, touchstone_use) {
 ##'
 ##' @param method two options: method1 and method2
 ##' @export
-mu_scale <- function(name, d, method = "method2") {
+mu_scale <- function(name, d, method = 2) {
   ## AS we need method 1 now. mu_scale includes both method 1 and method 2 now
   ## This is method 1.
-  if (method == "method1") {
+  if (method == 1) {
     # by default use impact_new = impact_old / coverage_old * coverage_new
     ret <- d[[name]] / d$coverage_old * d$coverage_new
     

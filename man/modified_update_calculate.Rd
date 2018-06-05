@@ -5,7 +5,7 @@
 \title{Do a modified update}
 \usage{
 modified_update_calculate(con, touchstone_name_mod, touchstone_use,
-  method = "method2", version = "v2")
+  method = 2, version = 1)
 }
 \arguments{
 \item{con}{Database connection}
@@ -16,10 +16,10 @@ that we are creating}
 \item{touchstone_use}{Name of the touchstone that we are basing
 this off of}
 
-\item{method}{two options: method1, method2
+\item{method}{two options: 1 = method1, 2 = method2
 method2_v2 is different from method2 in that, it takes per-year-gavi-level as an imput for gavi impact}
 
-\item{version}{two options: v1 and v2}
+\item{version}{two options: 1 = v1 and 2 = v2}
 }
 \description{
 Do a modified update
