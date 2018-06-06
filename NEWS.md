@@ -1,3 +1,5 @@
+### jenner 0.0.16
+ * VIMC-1738 modup method 1, method 2 verison 2 (gavi impact filtered from total impact by per-year-gavi-level)
 
 ### jenner 0.0.15
  * VIMC-14628 impact_method2 sql modification post Wes' touchstone fast forward
