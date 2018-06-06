@@ -12,20 +12,10 @@
 ##' @param method two options: 1 = method1, 2 = method2
 ##' method2_v2 is different from method2 in that, it takes per-year-gavi-level as an imput for gavi impact  
 ##' 
-##' @param version two options: 1 = v1 and 2 = v2
-##' 
 ##' @export
-modified_update_calculate <- function(con, touchstone_name_mod, touchstone_use, method = 2, version = 1) {
-  ### current method and version we have
-  ### method = 1 version = 1: impact new = impact old / coverage old * coverage new (or impact rate * fvps when coverage old in (NA/0))
-  ### method = 2 version = 1: Rich develpped this in July 2017
-  ### method = 2 version = 2: in version 2, total impact is the same as version 1, 
-  ###                         gavi impact is a subset of total impact by filtering per-year-gavi-level 
+modified_update_calculate <- function(con, touchstone_name_mod, touchstone_use, method = 2) {
   if (!(method %in% 1:2)) {
     stop("currently, only method 1 and 2 have been developed.")
-  }
-  if (method != 2 & version == 2) {
-    stop("version 2 can only be applied to method 2.")
   }
   year_min <- 2001
   year_max <- 2030
@@ -44,11 +34,6 @@ modified_update_calculate <- function(con, touchstone_name_mod, touchstone_use, 
   ## 201403gavi - SDF9 - does not have MCV1 coverage, we need to get rid of it to avoid triggering error message
   if (touchstone_name_mod == "201403gavi") {
     meta <- meta[meta$vaccine != "MCV1", ]
-  }
-  ## we are going to do mothod2 version 2
-  ## this method do original modup2 for total support, and then derive gavi_support by filtering per-year gavi_support
-  if (method == 2 & version == 2) {
-    meta <- meta[meta$support_type == "total", ]
   }
   meta <- mu_impact_metadata(meta, touchstone_use)
   
@@ -81,36 +66,6 @@ modified_update_calculate <- function(con, touchstone_name_mod, touchstone_use, 
   data$cases_averted_new <- mu_scale("cases_averted", data, method)
   
   meta$data <- data
-  
-  if (version == 2) {
-    ## with version 2, gavi impact is filtered from total impact by per-year-gavi-level
-    group <- meta$group
-    impacts <- meta$impacts
-    
-    v <- group
-    v$support_type <- "gavi"
-    v$index <- max(v$index) + v$index
-    meta$group  <- rbind(group, v)
-    
-    v <- impacts
-    v$index <- max(v$index) + v$index
-    meta$impacts <- rbind(impacts, v)
-    
-    v <- data
-    v$index <- max(v$index) + v$index
-    i <- !is.na(v$gavi_support) & !v$gavi_support
-    v$coverage_old[i] <- 0.
-    v$fvps[i] <- 0.
-    v$deaths_averted[i] <- 0.
-    v$cases_averted[i] <- 0.
-    
-    i <- !is.na(v$gavi_support_new) & !v$gavi_support_new
-    v$coverage_new[i] <- 0.
-    v$fvps_new[i] <- 0.
-    v$deaths_averted_new[i] <- 0.
-    v$cases_averted_new[i] <- 0.
-    meta$data <- rbind(data, v)
-  }
   
   meta
 }
@@ -192,7 +147,6 @@ modified_update_summary_output <- function(con, res, path_meta) {
   cols <- c(country = "country",
             year = "year",
             coverage = "coverage_old",
-            gavi_support = "gavi_support",
             population = "target_pop_given",
             population_estimated = "target_pop_estimated",
             deaths_averted_rate = "deaths_averted_rate",
@@ -202,7 +156,6 @@ modified_update_summary_output <- function(con, res, path_meta) {
             cases_averted = "cases_averted",
             cases_averted_rate = "cases_averted_rate")
   cols_update <- c(coverage = "coverage_new",
-                   gavi_support = "gavi_support_new",
                    deaths_averted = "deaths_averted_new",
                    cases_averted = "cases_averted_new",
                    fvps = "fvps_new",
@@ -371,7 +324,7 @@ mu_build_data <- function(con, index, meta, pop) {
   d_cov_old <- DBI::dbGetQuery(con, sql, list(x$coverage_set, year_max2))
   dat <-
     merge_in(dat, mu_fix_coverage(d_cov_old),
-             c(coverage_old = "coverage", coverage_target = "target", gavi_support = "gavi_support"))
+             c(coverage_old = "coverage", coverage_target = "target"))
   
   ## 4. new coverage
   if (is.na(x$coverage_set_new)) {
@@ -385,8 +338,7 @@ mu_build_data <- function(con, index, meta, pop) {
   }
   dat <- merge_in(dat, mu_fix_coverage(d_cov_new),
                   c(coverage_new = "coverage",
-                    coverage_target_new = "target",
-                    gavi_support_new = "gavi_support"))
+                    coverage_target_new = "target"))
   
   
   
