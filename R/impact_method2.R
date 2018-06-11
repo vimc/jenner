@@ -363,7 +363,7 @@ fix_coverage_fvps <- function(con, touchstone_name = "201710gavi", year_min = 20
   ## 1. touchstone specification
   # given touchstone name, use the latest version touchstone
   version <- DBI::dbGetQuery(con, "SELECT MAX(touchstone.version) as version FROM touchstone
-                             WHERE touchstone_name = $1", touchstone_name)
+                             WHERE touchstone_name = $1 AND version != 42", touchstone_name)
   touchstone <- DBI::dbGetQuery(con, "SELECT id FROM touchstone
                                 WHERE touchstone_name = $1
                                 AND version = $2", list(touchstone_name, version$version))

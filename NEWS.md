@@ -1,6 +1,8 @@
-
+### jenner 0.0.16
+ * VIMC-1831 ignore touchstone version -42, so that fix_coverage_fvps can be reusable for other touchstones
+ 
 ### jenner 0.0.15
- * VIMC-14628 impact_method2 sql modification post Wes' touchstone fast forward
+ * VIMC-1684 impact_method2 sql modification post Wes' touchstone fast forward
 
 ### jenner 0.0.13
  * VIMC-1611 constrain the number of countries for HepB impact calculation - because different scenarios have different number of countries 
