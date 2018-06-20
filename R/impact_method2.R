@@ -20,6 +20,9 @@ impact_calculation <- function(con, meta, year_min = 2000, year_max = 2030, age_
   if(age_max < 9) {
     meta <- meta[meta$disease != "HPV", ]
   }
+  if(age_max < 15) {
+    meta <- meta[meta$disease != "Rubella", ]
+  }
   ## impact calculation
   meta2 <- split(meta, meta$index)
   if (method == "method1") {
