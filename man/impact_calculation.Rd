@@ -5,7 +5,8 @@
 \title{Impact Calculation (method 2)}
 \usage{
 impact_calculation(con, meta, year_min = 2000, year_max = 2030,
-  routine_tot_rate_shape = "trace_cohort", method = "method2")
+  age_max = 100, routine_tot_rate_shape = "trace_cohort",
+  method = "method2")
 }
 \arguments{
 \item{con}{Database connection.  You will need to be \code{readonly} user
@@ -16,6 +17,8 @@ to run this function.}
 \item{year_min}{minimal year of vaccination}
 
 \item{year_max}{maximal year year of vaccination}
+
+\item{age_max}{maximum age considered, eg. age_max = 4 for under 5s}
 
 \item{routine_tot_rate_shape}{This parameter determines how we chop off the year-age matrix to calculate impact rates
 campaign is stratiforward, use all fvps and all burden estimates to calculate impact rate. So no need to specify.
