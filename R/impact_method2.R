@@ -17,6 +17,9 @@
 ##' @export
 impact_calculation <- function(con, meta, year_min = 2000, year_max = 2030, age_max = 100, routine_tot_rate_shape = "trace_cohort", method = "method2") {
   if(nrow(meta) == 0L) stop("No active recipe found in 'meta'!")
+  if(age_max < 9) {
+    meta <- meta[meta$disease != "HPV", ]
+  }
   ## impact calculation
   meta2 <- split(meta, meta$index)
   if (method == "method1") {
