@@ -21,7 +21,8 @@ modified_update_calculate <- function(con, touchstone_name_mod, touchstone_use) 
   touchstone_mod <- DBI::dbGetQuery(con, sql, touchstone_name_mod)
     i <- touchstone_mod$id != '201510gavi-42'
     touchstone_mod <- touchstone_mod[which.max(touchstone_mod$version[i]), ]
-  meta <- mu_prepare(con, touchstone_mod$id)
+  modup_by_itself <- any(touchstone_name_mod == touchstone_use)
+  meta <- mu_prepare(con, touchstone_mod$id, modup_by_itself = modup_by_itself)
   meta <- mu_impact_metadata(meta, touchstone_use)
 
   meta$touchstone_mod <-
@@ -192,9 +193,16 @@ modified_update_summary_output <- function(con, res, path_meta) {
   ret
 }
 
-mu_prepare <- function(con, touchstone_new) {
+mu_prepare <- function(con, touchstone_new, modup_by_itself = FALSE) {
   ## NOTE: duplicated from orderly - could pull out there and remove
   ## this duplication later.
+  ## sometimes we do modup for touchstone_old = touchstone_new
+  ## the if-else clause is important to deal with this
+  if(modup_by_itself) {
+    touchstone_new2 <- NULL
+  } else {
+    touchstone_new2 <- touchstone_new
+  }
   temporary_view <- function(name, sql) {
     sprintf("CREATE TEMPORARY VIEW v_%s AS\n%s", name, sql)
   }
@@ -202,7 +210,8 @@ mu_prepare <- function(con, touchstone_new) {
                           mustWork = TRUE)
   read_sql <- function(name) {
     txt <- read_file(file.path(path_sql, paste0(name, ".sql")))
-    whisker::whisker.render(txt, list(touchstone_new = touchstone_new))
+    whisker::whisker.render(txt, list(touchstone_new2 = touchstone_new2, 
+                                      touchstone_new = touchstone_new))
   }
 
   views <- c("migrate_coverage", "burden_fvps", "impact", "coverage",
@@ -487,7 +496,7 @@ mu_fix_coverage <- function(d) {
   d_fix <- d[fix, ]
   i <- code[fix]
 
-  tmp <- d_fix[tapply(seq_along(i), i, head, 1), ]
+  tmp <- d_fix[tapply(seq_along(i), i, utils::head, 1), ]
   tmp$target <- unname(tapply(d_fix$target, i, sum, na.rm = TRUE))
   reached <- tapply(d_fix$coverage * d_fix$target, i, sum, na.rm = TRUE)
   tmp$coverage <- unname(reached / tmp$target)
@@ -540,6 +549,8 @@ mu_calculate_rate <- function(name, dat, window, n_years) {
 
 ##' Look for introduction year and add to summary output
 ##' @title Find year of introduction
+##'
+##' @param con Database connection
 ##'
 ##' @param dat Data: the list output from the modup
 ##'

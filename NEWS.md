@@ -1,3 +1,25 @@
+### jenner 0.0.16
+ * VIMC-1831 ignore touchstone version -42, so that fix_coverage_fvps can be reusable for other touchstones
+ 
+### jenner 0.0.15
+ * VIMC-1684 impact_method2 sql modification post Wes' touchstone fast forward
+
+### jenner 0.0.13
+ * VIMC-1611 constrain the number of countries for HepB impact calculation - because different scenarios have different number of countries 
+
+### jenner 0.0.12
+ * VIMC-1591 add more routine vaccine age 
+ * VIMC-1591 undo the constrain on coverage_old when touchstone_new = touchstone_old
+ * VIMC-1591 add three columns in the output for method2 impact calculation - population, fvps and coverage
+ 
+### jenner 0.0.11
+ * VIMC-1380 method 2 impact calculation  
+ * Currently impact calculation is assisted by .csv recipe; this will be changed when recipe is imported montagu
+ * Both direct impact caculation and method2 (re-allocate impact by fvps * da_rate) are provided
+
+### jenner 0.0.10
+ * Fix bug with `insert_values_into` where `key` was given - this probably broke with the RPostgres upgrade (VIMC-1467)
+
 ### jenner 0.0.9
  * (VIMC-1302): Remove the work done for (VIMC-1266). Because of mr_measles migration, no longer need to treat mr_measles as a special case.
  * (VIMC-1302): Add a function to generate year of introduction in summary outputs. Avoided touching existing functions. Instead, this function is exported and can be called for reports.

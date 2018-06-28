@@ -1,14 +1,19 @@
 Package: jenner
 Title: Internal Montagu Helpers
-Version: 0.0.9
+Version: 0.0.16
 Description: Helpers for Montagu.
 License: MIT + file LICENSE
 Author: Rich FitzJohn
 Maintainer: Rich FitzJohn <rich.fitzjohn@gmail.com>
 Imports:
+    DBI,
     RcppRoll,
     RPostgres,
     vaultr,
     whisker,
     yaml
 RoxygenNote: 6.0.1
+Suggests:
+    RSQLite,
+    testthat (>= 1.0.2)
+Encoding: UTF-8

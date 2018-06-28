@@ -7,6 +7,8 @@
 mu_year_introduction(con, dat, dat_summary)
 }
 \arguments{
+\item{con}{Database connection}
+
 \item{dat}{Data: the list output from the modup}
 
 \item{dat_summary}{Data: the summary output from the modup}
