@@ -93,6 +93,10 @@ make_impact <- function(con, index, year_min, year_max, age_max, routine_tot_rat
   vaccine <- unique(index$vaccine)
   disease <- unique(index$disease)
   activity_type <- unique(index$activity_type)
+  ## as we are combining Rubella routine and campaign, need to consider both activities now
+  if(disease == "Rubella") {
+    activity_type <- c("routine", "campaign")
+  }
   # burden outcomes used for impact calculation
   outcomes <- sql_in(unique(index$burden_outcome_id), text_item = FALSE)
   # vaccine_routine_age is used to define birth_cohort
@@ -181,7 +185,7 @@ make_impact <- function(con, index, year_min, year_max, age_max, routine_tot_rat
   ## Rubella routine and HepB_BD are two special cases
   ## Rubella = RCV1 + RCV2
   ## HepB_BD = HepB_BD + HepB_BD_home
-  if (vaccine == "Rubella" & activity_type == "routine") {
+  if (vaccine == "Rubella") {
     vaccine_sql <- "WHERE vaccine IN ('Rubella', 'RCV2')"
   } else if (vaccine == "HepB_BD_both") {
     vaccine_sql <- "WHERE vaccine IN ('HepB_BD', 'HepB_BD_home')"
@@ -202,7 +206,7 @@ make_impact <- function(con, index, year_min, year_max, age_max, routine_tot_rat
   }
   sql_2 <- paste("SELECT * FROM temporary_coverage_fvps",
                  vaccine_sql,
-                 sprintf("AND activity_type = '%s'", activity_type),
+                 sprintf("AND activity_type IN %s", jenner:::sql_in(activity_type, text_item = TRUE)),
                  sprintf("AND country IN %s", sql_in(unique(tot_impact$country))),
                  shape, sep="\n")
   dat <- DBI::dbGetQuery(con, sql_2)
