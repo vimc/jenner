@@ -13,7 +13,6 @@
 ##' Becuase all impacts (years 2000-2100) are derived from campaigns between 2000 and 2030.
 ##' Routine is more complicated. We either trance birth cohort between 2000-2030 or trance all birth cohorts between 2000-2100.
 ##' @param method impact calculation method - chose from method1 and method2
-##' impact outcome can be provided as age specific if simplified=FALSE
 ##' @export
 impact_calculation <- function(con, meta, year_min = 2000, year_max = 2030, age_max = 100, routine_tot_rate_shape = "trace_cohort", method = "method2") {
   if(nrow(meta) == 0L) stop("No active recipe found in 'meta'!")
@@ -94,7 +93,7 @@ make_impact <- function(con, index, year_min, year_max, age_max, routine_tot_rat
   disease <- unique(index$disease)
   activity_type <- unique(index$activity_type)
   ## as we are combining Rubella routine and campaign, need to consider both activities now
-  if(disease == "Rubella") {
+  if (disease == "Rubella") {
     activity_type <- c("routine", "campaign")
   }
   # burden outcomes used for impact calculation
@@ -118,7 +117,7 @@ make_impact <- function(con, index, year_min, year_max, age_max, routine_tot_rat
   # which are shape specific for routine and campaign
   ## 2.1 total impact
   ## the shape is activity_type specific and vacine specific for routine
-  if (activity_type == "campaign"){
+  if (disease != "Rubella" & "campaign" %in% activity_type){
     shape <- paste(sprintf("AND year BETWEEN %s", 2000),
                    sprintf(" AND %s", 2100),
                    sprintf("AND age BETWEEN 0"),
@@ -193,7 +192,7 @@ make_impact <- function(con, index, year_min, year_max, age_max, routine_tot_rat
     vaccine_sql <- sprintf("WHERE vaccine = '%s'", vaccine)
   }
 
-  if (activity_type == "campaign"){
+  if (disease != "Rubella" & "campaign" %in% activity_type){
     shape <- paste(sprintf("AND year BETWEEN %s", 2000),
                    sprintf(" AND %s", 2030), sep="\n")
   }else{

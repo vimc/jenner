@@ -25,8 +25,7 @@ campaign is stratiforward, use all fvps and all burden estimates to calculate im
 Becuase all impacts (years 2000-2100) are derived from campaigns between 2000 and 2030.
 Routine is more complicated. We either trance birth cohort between 2000-2030 or trance all birth cohorts between 2000-2100.}
 
-\item{method}{impact calculation method - chose from method1 and method2
-impact outcome can be provided as age specific if simplified=FALSE}
+\item{method}{impact calculation method - chose from method1 and method2}
 }
 \description{
 Calcualte impact with method2 that allocate impact by fvps*impact_rate
