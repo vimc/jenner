@@ -1,3 +1,6 @@
+### jenner 0.0.17
+ * VIMC-1758 constrain gavi_support_level to bestminus and gavi, so that fix_coverage_fvps function can be flexibly used for interim update
+
 ### jenner 0.0.16
  * VIMC-1831 ignore touchstone version -42, so that fix_coverage_fvps can be reusable for other touchstones
  
