@@ -37,7 +37,7 @@ JOIN demographic_statistic_type
   ON demographic_statistic_type.id = demographic_statistic.demographic_statistic_type
 JOIN gender
   ON gender.id = demographic_statistic.gender
-WHERE touchstone_demographic_dataset.touchstone = $1
+WHERE touchstone_demographic_dataset.touchstone = $4
 %2s
   AND demographic_statistic_type.code = 'int_pop'
   AND year BETWEEN $2 AND $3) AS un_population
