@@ -353,21 +353,33 @@ make_impact_method1 <- function(con, index) {
 ##' @param pine this is for testthat. we only grab data for pine countries if true
 ##' @param write_table If true, create a temporary table; otherwise return a dataframe
 ##' @param report_suspecious_coverage switch on/off the reporting of suspecious coverage
+##' @param touchstone_pop population touchstone, this is for the modups
+##' where fvps are calculated using a coverage touchstone and a population touchstone
 ##' @export
-fix_coverage_fvps <- function(con, touchstone_name = "201710gavi", year_min = 2000, year_max = 2100, pine = FALSE, write_table = TRUE, report_suspecious_coverage = FALSE) {
+fix_coverage_fvps <- function(con, touchstone_name = "201710gavi", year_min = 2000, year_max = 2100,
+                              pine = FALSE, write_table = TRUE, report_suspecious_coverage = FALSE, touchstone_pop = NULL) {
   ### This function convert input data - coverage and UNWPP
   ### i.e. input data by country, year and age
   message("Preparing temporary table <temporary_coverage_fvps>")
   message("In progress ...")
 
-  ## 1. touchstone specification
+  ## 1. touchstone specification - coverage touchstone
   # given touchstone name, use the latest version touchstone
   version <- DBI::dbGetQuery(con, "SELECT MAX(touchstone.version) as version FROM touchstone
                              WHERE touchstone_name = $1 AND version != 42", touchstone_name)
   touchstone <- DBI::dbGetQuery(con, "SELECT id FROM touchstone
                                 WHERE touchstone_name = $1
                                 AND version = $2", list(touchstone_name, version$version))
-
+  ## 1. touchstone specification - population touchstone
+  if (is.null(touchstone_pop)) {
+    touchstone_pop <- touchstone
+  } else {
+    version <- DBI::dbGetQuery(con, "SELECT MAX(touchstone.version) as version FROM touchstone
+                             WHERE touchstone_name = $1 AND version != 42", touchstone_pop)
+    touchstone_pop <- DBI::dbGetQuery(con, "SELECT id FROM touchstone
+                                WHERE touchstone_name = $1
+                                AND version = $2", list(touchstone_pop, version$version))
+  }
   ## 2. creat a number table. It will be used to duplicate input data by [age_from, age_to]
   i <- data.frame(i = 1:101, stringsAsFactors = FALSE)
   DBI::dbWriteTable(con, "num", i, temporary = TRUE, overwrite=TRUE)
@@ -382,7 +394,7 @@ fix_coverage_fvps <- function(con, touchstone_name = "201710gavi", year_min = 20
   } else {
     sql <- sprintf(sql, "\t", "\t")
   }
-  tab <- DBI::dbGetQuery(con, sql, list(touchstone$id, year_min, year_max))
+  tab <- DBI::dbGetQuery(con, sql, list(touchstone$id, year_min, year_max, touchstone_pop$id))
 
   ## 4. construct population for each vaccination activity using UN pop -
   # this is needed to convert campaign coverage from target_pop level to UN pop level

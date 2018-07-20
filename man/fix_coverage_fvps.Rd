@@ -6,7 +6,7 @@
 \usage{
 fix_coverage_fvps(con, touchstone_name = "201710gavi", year_min = 2000,
   year_max = 2100, pine = FALSE, write_table = TRUE,
-  report_suspecious_coverage = FALSE)
+  report_suspecious_coverage = FALSE, touchstone_pop = NULL)
 }
 \arguments{
 \item{con}{Database connection.  You will need to be \code{readonly} user
@@ -23,6 +23,9 @@ to run this function.}
 \item{write_table}{If true, create a temporary table; otherwise return a dataframe}
 
 \item{report_suspecious_coverage}{switch on/off the reporting of suspecious coverage}
+
+\item{touchstone_pop}{population touchstone, this is for the modups
+where fvps are calculated using a coverage touchstone and a population touchstone}
 }
 \description{
 Provide age-specific coverage-un_pop-fvps
