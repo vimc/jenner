@@ -13,19 +13,27 @@
 ##' Routine is more complicated. We either trance birth cohort between 2000-2030 or trance all birth cohorts between 2000-2100.
 ##' @param method impact calculation method - chose from method1 and method2
 ##' impact outcome can be provided as age specific if simplified=FALSE
+##' @param age_max maximum age considered, eg. age_max = 4 for under 5s
 ##' @export
-impact_calculation <- function(con, meta, year_min = 2000, year_max = 2030, routine_tot_rate_shape = "trace_cohort", method = "method2") {
+impact_calculation <- function(con, meta, year_min = 2000, year_max = 2030,
+                               routine_tot_rate_shape = "trace_cohort", method = "method2", age_max = 100) {
   if(nrow(meta) == 0L) stop("No active recipe found in 'meta'!")
+  if(age_max < 9) {
+    meta <- meta[meta$disease != "HPV", ]
+  }
+  if(age_max < 15) {
+    meta <- meta[meta$disease != "Rubella", ]
+  }
   ## impact calculation
   meta2 <- split(meta, meta$index)
   if (method == "method1") {
     ## method 1
     impact <- lapply(meta2, function(i)
-      make_impact_method1(con, i))
+      make_impact_method1(con, i, year_min, year_max, age_max))
   } else {
     ## method 2
     impact <- lapply(meta2, function(i)
-      make_impact(con, i, year_min, year_max, routine_tot_rate_shape))
+      make_impact(con, i, year_min, year_max, routine_tot_rate_shape, age_max))
   }
 
   ## return output
@@ -72,7 +80,7 @@ prepare_recipe <- function(con, recipe = "impact.csv") {
   meta
 }
 
-make_impact <- function(con, index, year_min, year_max, routine_tot_rate_shape = "trace_cohort") {
+make_impact <- function(con, index, year_min, year_max, routine_tot_rate_shape = "trace_cohort", age_max) {
   # This is method 2 impact calcualtion
   message(sprintf("building impact for index %s", unique(index$index)))
 
@@ -109,13 +117,19 @@ make_impact <- function(con, index, year_min, year_max, routine_tot_rate_shape =
   ## the shape is activity_type specific and vacine specific for routine
   if (activity_type == "campaign"){
     shape <- paste(sprintf("AND year BETWEEN %s", 2000),
-                   sprintf(" AND %s", 2100), sep="\n")
+                   sprintf(" AND %s", 2100),
+                   sprintf("AND age BETWEEN 0"),
+                   sprintf(" AND %s", age_max), sep="\n")
   }else{
     if (routine_tot_rate_shape == "trace_cohort"){
       shape <- paste(sprintf("AND (year-age) BETWEEN %s", cohort_min),
-                     sprintf(" AND %s", cohort_max), sep="\n")
+                     sprintf(" AND %s", cohort_max),
+                     sprintf("AND age BETWEEN 0"),
+                     sprintf(" AND %s", age_max), sep="\n")
     } else {
-      shape <- paste(sprintf("AND (year-age) >= %s", cohort_min))
+      shape <- paste(sprintf("AND (year-age) >= %s", cohort_min),
+                     sprintf("AND age BETWEEN 0"),
+                     sprintf(" AND %s", age_max), sep="\n")
     }
   }
   # For hepb, differnt scenarios have differt number of countries,
@@ -253,7 +267,7 @@ make_impact <- function(con, index, year_min, year_max, routine_tot_rate_shape =
   return( list(impact_full = impact1, impact_simplified = impact2) )
 }
 
-make_impact_method1 <- function(con, index) {
+make_impact_method1 <- function(con, index, year_min, year_max, age_max) {
   # This function provides method1 imapct, it is direct calculation from scenarios without re-allocating with respect to fvps_added
   # And it will be total impact only, as we are not running seperately no-gavi scenarios
   # It is provided for reporting purpose
@@ -303,8 +317,10 @@ make_impact_method1 <- function(con, index) {
                "JOIN country ON country.nid = burden_estimate.country",
                sprintf("WHERE burden_estimate_set = %s",base$burden_estimate_set_id),
                countries,
-               sprintf("AND year BETWEEN %s", 2000),
-               sprintf(" AND %s", 2100),
+               sprintf("AND year BETWEEN %s", year_min),
+               sprintf(" AND %s", year_max),
+               sprintf("AND age BETWEEN 0"),
+               sprintf(" AND %s", age_max),
                sprintf("AND burden_outcome IN %s ", outcomes),
                "UNION ALL",
                "SELECT country.id AS country, year, age, value*(-1) AS value",
@@ -312,8 +328,10 @@ make_impact_method1 <- function(con, index) {
                "JOIN country ON country.nid = burden_estimate.country",
                sprintf("WHERE burden_estimate_set = %s",focal$burden_estimate_set_id),
                countries,
-               sprintf("AND year BETWEEN %s", 2000),
-               sprintf(" AND %s", 2100),
+               sprintf("AND year BETWEEN %s", year_min),
+               sprintf(" AND %s", year_max),
+               sprintf("AND age BETWEEN 0"),
+               sprintf(" AND %s", age_max),
                sprintf("AND burden_outcome IN %s ) AS tmp", outcomes),
                "GROUP BY tmp.country, tmp.year, tmp.age", sep="\n")
   dat <- DBI::dbGetQuery(con, sql)
