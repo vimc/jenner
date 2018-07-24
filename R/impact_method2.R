@@ -29,7 +29,7 @@ impact_calculation <- function(con, meta, year_min = 2000, year_max = 2030,
   if (method == "method1") {
     ## method 1
     impact <- lapply(meta2, function(i)
-      make_impact_method1(con, i, year_min, year_max, age_max))
+      make_impact_method1(con, i, age_max))
   } else {
     ## method 2
     impact <- lapply(meta2, function(i)
@@ -267,7 +267,7 @@ make_impact <- function(con, index, year_min, year_max, routine_tot_rate_shape =
   return( list(impact_full = impact1, impact_simplified = impact2) )
 }
 
-make_impact_method1 <- function(con, index, year_min, year_max, age_max) {
+make_impact_method1 <- function(con, index, age_max) {
   # This function provides method1 imapct, it is direct calculation from scenarios without re-allocating with respect to fvps_added
   # And it will be total impact only, as we are not running seperately no-gavi scenarios
   # It is provided for reporting purpose
@@ -317,8 +317,8 @@ make_impact_method1 <- function(con, index, year_min, year_max, age_max) {
                "JOIN country ON country.nid = burden_estimate.country",
                sprintf("WHERE burden_estimate_set = %s",base$burden_estimate_set_id),
                countries,
-               sprintf("AND year BETWEEN %s", year_min),
-               sprintf(" AND %s", year_max),
+               sprintf("AND year BETWEEN %s", 2000),
+               sprintf(" AND %s", 2100),
                sprintf("AND age BETWEEN 0"),
                sprintf(" AND %s", age_max),
                sprintf("AND burden_outcome IN %s ", outcomes),
@@ -328,8 +328,8 @@ make_impact_method1 <- function(con, index, year_min, year_max, age_max) {
                "JOIN country ON country.nid = burden_estimate.country",
                sprintf("WHERE burden_estimate_set = %s",focal$burden_estimate_set_id),
                countries,
-               sprintf("AND year BETWEEN %s", year_min),
-               sprintf(" AND %s", year_max),
+               sprintf("AND year BETWEEN %s", 2000),
+               sprintf(" AND %s", 2100),
                sprintf("AND age BETWEEN 0"),
                sprintf(" AND %s", age_max),
                sprintf("AND burden_outcome IN %s ) AS tmp", outcomes),
