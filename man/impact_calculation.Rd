@@ -5,7 +5,8 @@
 \title{Impact Calculation (method 2)}
 \usage{
 impact_calculation(con, meta, year_min = 2000, year_max = 2030,
-  routine_tot_rate_shape = "trace_cohort", method = "method2")
+  routine_tot_rate_shape = "trace_cohort", method = "method2",
+  age_max = 100)
 }
 \arguments{
 \item{con}{Database connection.  You will need to be \code{readonly} user
@@ -24,6 +25,8 @@ Routine is more complicated. We either trance birth cohort between 2000-2030 or 
 
 \item{method}{impact calculation method - chose from method1 and method2
 impact outcome can be provided as age specific if simplified=FALSE}
+
+\item{age_max}{maximum age considered, eg. age_max = 4 for under 5s}
 }
 \description{
 Calcualte impact with method2 that allocate impact by fvps*impact_rate

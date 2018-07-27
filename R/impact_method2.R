@@ -13,19 +13,27 @@
 ##' Routine is more complicated. We either trance birth cohort between 2000-2030 or trance all birth cohorts between 2000-2100.
 ##' @param method impact calculation method - chose from method1 and method2
 ##' impact outcome can be provided as age specific if simplified=FALSE
+##' @param age_max maximum age considered, eg. age_max = 4 for under 5s
 ##' @export
-impact_calculation <- function(con, meta, year_min = 2000, year_max = 2030, routine_tot_rate_shape = "trace_cohort", method = "method2") {
-  if(nrow(meta) == 0L) stop("No active recipe found in 'meta'!")
+impact_calculation <- function(con, meta, year_min = 2000, year_max = 2030,
+                               routine_tot_rate_shape = "trace_cohort", method = "method2", age_max = 100) {
+  if (nrow(meta) == 0L) stop("No active recipe found in 'meta'!")
+  if (age_max < 9) {
+    meta <- meta[meta$disease != "HPV", ]
+  }
+  if (age_max < 15) {
+    meta <- meta[meta$disease != "Rubella", ]
+  }
   ## impact calculation
   meta2 <- split(meta, meta$index)
   if (method == "method1") {
     ## method 1
     impact <- lapply(meta2, function(i)
-      make_impact_method1(con, i))
+      make_impact_method1(con, i, age_max))
   } else {
     ## method 2
     impact <- lapply(meta2, function(i)
-      make_impact(con, i, year_min, year_max, routine_tot_rate_shape))
+      make_impact(con, i, year_min, year_max, routine_tot_rate_shape, age_max))
   }
 
   ## return output
@@ -72,7 +80,7 @@ prepare_recipe <- function(con, recipe = "impact.csv") {
   meta
 }
 
-make_impact <- function(con, index, year_min, year_max, routine_tot_rate_shape = "trace_cohort") {
+make_impact <- function(con, index, year_min, year_max, routine_tot_rate_shape = "trace_cohort", age_max) {
   # This is method 2 impact calcualtion
   message(sprintf("building impact for index %s", unique(index$index)))
 
@@ -95,7 +103,7 @@ make_impact <- function(con, index, year_min, year_max, routine_tot_rate_shape =
   cohort_max <- year_max
   # MCV2 and HPV are different
   vaccine_routine_age <- DBI::dbGetQuery(con, "SELECT vaccine, age FROM vaccine_routine_age")
-  if(vaccine %in% c("MCV2", "HPV")) {
+  if (vaccine %in% c("MCV2", "HPV")) {
     cohort_min <- year_min - vaccine_routine_age$age[vaccine_routine_age$vaccine == vaccine]
     cohort_max <- year_max - vaccine_routine_age$age[vaccine_routine_age$vaccine == vaccine]
   }
@@ -109,20 +117,26 @@ make_impact <- function(con, index, year_min, year_max, routine_tot_rate_shape =
   ## the shape is activity_type specific and vacine specific for routine
   if (activity_type == "campaign"){
     shape <- paste(sprintf("AND year BETWEEN %s", 2000),
-                   sprintf(" AND %s", 2100), sep="\n")
+                   sprintf(" AND %s", 2100),
+                   sprintf("AND age BETWEEN 0"),
+                   sprintf(" AND %s", age_max), sep = "\n")
   }else{
     if (routine_tot_rate_shape == "trace_cohort"){
       shape <- paste(sprintf("AND (year-age) BETWEEN %s", cohort_min),
-                     sprintf(" AND %s", cohort_max), sep="\n")
+                     sprintf(" AND %s", cohort_max),
+                     sprintf("AND age BETWEEN 0"),
+                     sprintf(" AND %s", age_max), sep = "\n")
     } else {
-      shape <- paste(sprintf("AND (year-age) >= %s", cohort_min))
+      shape <- paste(sprintf("AND (year-age) >= %s", cohort_min),
+                     sprintf("AND age BETWEEN 0"),
+                     sprintf(" AND %s", age_max), sep = "\n")
     }
   }
   # For hepb, differnt scenarios have differt number of countries,
   # therefore we need to constrain on counties that go into impact calculation
   # this stopifnot error message should not showup, because each index is linked to only one disease
   stopifnot(length(disease) == 1)
-  if(disease == "HepB") {
+  if (disease == "HepB") {
     focal_countries  <- DBI::dbGetQuery(con,
                                         paste("SELECT focal_countries.country FROM",
                                               "(SELECT DISTINCT country.id AS country",
@@ -160,7 +174,7 @@ make_impact <- function(con, index, year_min, year_max, routine_tot_rate_shape =
                  countries,
                  shape,
                  sprintf("AND burden_outcome IN %s ) AS tmp", outcomes),
-                 "GROUP BY tmp.country", sep="\n")
+                 "GROUP BY tmp.country", sep = "\n")
   tot_impact <- DBI::dbGetQuery(con, sql_1)
   tot_impact$.code <- tot_impact$country
 
@@ -178,11 +192,11 @@ make_impact <- function(con, index, year_min, year_max, routine_tot_rate_shape =
 
   if (activity_type == "campaign"){
     shape <- paste(sprintf("AND year BETWEEN %s", 2000),
-                   sprintf(" AND %s", 2030), sep="\n")
+                   sprintf(" AND %s", 2030), sep = "\n")
   }else{
     if (routine_tot_rate_shape == "trace_cohort"){
       shape <- paste(sprintf("AND year BETWEEN %s", year_min),
-                     sprintf(" AND %s", year_max), sep="\n")
+                     sprintf(" AND %s", year_max), sep = "\n")
     } else {
       shape <- paste(sprintf("AND year >= %s", year_min))
     }
@@ -191,7 +205,7 @@ make_impact <- function(con, index, year_min, year_max, routine_tot_rate_shape =
                  vaccine_sql,
                  sprintf("AND activity_type = '%s'", activity_type),
                  sprintf("AND country IN %s", sql_in(unique(tot_impact$country))),
-                 shape, sep="\n")
+                 shape, sep = "\n")
   dat <- DBI::dbGetQuery(con, sql_2)
   dat$.code <- dat$country
   tot_fvps <- stats::aggregate(fvps ~ .code, data = dat, sum, na.rm=TRUE)
@@ -253,7 +267,7 @@ make_impact <- function(con, index, year_min, year_max, routine_tot_rate_shape =
   return( list(impact_full = impact1, impact_simplified = impact2) )
 }
 
-make_impact_method1 <- function(con, index) {
+make_impact_method1 <- function(con, index, age_max) {
   # This function provides method1 imapct, it is direct calculation from scenarios without re-allocating with respect to fvps_added
   # And it will be total impact only, as we are not running seperately no-gavi scenarios
   # It is provided for reporting purpose
@@ -276,7 +290,7 @@ make_impact_method1 <- function(con, index) {
   # therefore we need to constrain on counties that go into impact calculation
   # this stopifnot error message should not showup, because each index is linked to only one disease
   stopifnot(length(disease) == 1)
-  if(disease == "HepB") {
+  if (disease == "HepB") {
     focal_countries  <- DBI::dbGetQuery(con,
                                         paste("SELECT focal_countries.country FROM",
                                               "(SELECT DISTINCT country.id AS country",
@@ -305,6 +319,8 @@ make_impact_method1 <- function(con, index) {
                countries,
                sprintf("AND year BETWEEN %s", 2000),
                sprintf(" AND %s", 2100),
+               sprintf("AND age BETWEEN 0"),
+               sprintf(" AND %s", age_max),
                sprintf("AND burden_outcome IN %s ", outcomes),
                "UNION ALL",
                "SELECT country.id AS country, year, age, value*(-1) AS value",
@@ -314,8 +330,10 @@ make_impact_method1 <- function(con, index) {
                countries,
                sprintf("AND year BETWEEN %s", 2000),
                sprintf(" AND %s", 2100),
+               sprintf("AND age BETWEEN 0"),
+               sprintf(" AND %s", age_max),
                sprintf("AND burden_outcome IN %s ) AS tmp", outcomes),
-               "GROUP BY tmp.country, tmp.year, tmp.age", sep="\n")
+               "GROUP BY tmp.country, tmp.year, tmp.age", sep = "\n")
   dat <- DBI::dbGetQuery(con, sql)
 
   ## 6. impact output: 1) full impact - impact by year and age/cohort 2) simplified impact - impact by year / cohort
@@ -386,7 +404,7 @@ fix_coverage_fvps <- function(con, touchstone_name = "201710gavi", year_min = 20
 
   ## 3. select minimal needed input data from db and make it age stratified - gender specific (modup is not considering gender)
   sql <- read_sql(file_name = "impact_method2_metadata/coverage_pop.sql")
-  if(pine) {
+  if (pine) {
     ## pine + PHL: add PHL because HepB scenarios may not have any pine countries
     countries <- c("PAK", "IND", "NGA", "ETH", "PHL")
     v <- sprintf("AND country IN %s", sql_in(countries))
@@ -400,7 +418,7 @@ fix_coverage_fvps <- function(con, touchstone_name = "201710gavi", year_min = 20
   # this is needed to convert campaign coverage from target_pop level to UN pop level
   # we need this to allocate campaign fvps to each targeted age
   tab$.code <- paste(tab$vaccine, tab$activity_type, tab$country,
-                     tab$year, tab$gavi_support, tab$gender, tab$coverage,sep="><")
+                     tab$year, tab$gavi_support, tab$gender, tab$coverage, sep = "><")
   target_cohortS <- stats::aggregate(population ~ .code, data = tab, sum, na.rm = TRUE)
   tab <- merge_in(tab, target_cohortS, c(target_cohortS = "population"))
 
@@ -429,7 +447,7 @@ fix_coverage_fvps <- function(con, touchstone_name = "201710gavi", year_min = 20
 
   ## 8. make a local temporary table
   ## so that we only manipulate pop-coverage-fvps once
-  if(write_table){
+  if (write_table){
     DBI::dbWriteTable(con, "temporary_coverage_fvps", tab, temporary = TRUE, overwrite = TRUE)
     message("Temporary table created - Success!")
   } else {
