@@ -1,3 +1,6 @@
+### jenner 0.0.19
+ * Required by VIMC-1892.Allows impact calcualation to include maxium age of interest.
+ 
 ### jenner 0.0.18
  * VIMC-1976 allow differnt coverage touchstone and population touchstone, so that fix_coverage_fvps function can be flexibly used for interim update
  
