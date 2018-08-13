@@ -1,5 +1,6 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^Makefile$
+^modup_doc\.md$
 ^\.travis\.yml$
 ^TODO\.md$
