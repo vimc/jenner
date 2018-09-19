@@ -379,8 +379,8 @@ mu_build_data <- function(con, index, meta, pop) {
     }
   }
 
-  dat <- mu_calculate_rate("deaths", dat, window, n_years)
-  dat <- mu_calculate_rate("cases", dat, window, n_years)
+  dat <- mu_calculate_rate("deaths", dat, window, n_years, x$activity_type)
+  dat <- mu_calculate_rate("cases", dat, window, n_years, x$activity_type)
 
   ## And another quantity needed
   ##
@@ -511,25 +511,33 @@ mu_fix_coverage <- function(d) {
   ret[order(ret$coverage_set, ret$country, ret$year), ]
 }
 
-mu_calculate_rate <- function(name, dat, window, n_years) {
+mu_calculate_rate <- function(name, dat, window, n_years, activity_type) {
   v_averted <- sprintf("%s_averted", name)
   v_inst <- sprintf("%s_averted_rate_inst", name)
   v_avg <- sprintf("%s_averted_rate_avg", name)
   v_tot <- sprintf("%s_averted_rate_tot", name)
   v_use <- sprintf("%s_averted_rate", name)
   v_type <- sprintf("%s_averted_rate_type", name)
-
-  dat[[v_inst]] <- dat[[v_averted]] / dat$fvps
+  ## there are cases where there are fvps but blank deaths/cases averted, whcih cause under-estimation of impact rates
+  ## in these cases, we should remove fvps from impact rates calculation.
+  ## a small trick for this is here:
+  d <- dat
+  if(activity_type == "routine") {
+    i <- is.na(d[[v_averted]]) & !is_blank(d$fvps)
+    d$fvps[i] <- 0
+  }
+  
+  dat[[v_inst]] <- d[[v_averted]] / d$fvps
   dat[[v_inst]][
-    is_blank(dat$fvps) & !is_blank(dat[[v_averted]])] <- NA
+    is_blank(dat$fvps) & !is_blank(d[[v_averted]])] <- NA
 
   dat[[v_avg]] <-
-    roll_sum_by(dat[[v_averted]], window, n_years) /
-    roll_sum_by(dat$fvps, window, n_years)
+    roll_sum_by(d[[v_averted]], window, n_years) /
+    roll_sum_by(d$fvps, window, n_years)
 
   dat[[v_tot]] <-
-    roll_sum_by(dat[[v_averted]], Inf, n_years) /
-    roll_sum_by(dat$fvps, Inf, n_years)
+    roll_sum_by(d[[v_averted]], Inf, n_years) /
+    roll_sum_by(d$fvps, Inf, n_years)
 
   ## Some cases don't have any non-NA rates
   type <- rep(NA, nrow(dat))
