@@ -518,7 +518,7 @@ mu_calculate_rate <- function(name, dat, window, n_years, activity_type) {
   v_tot <- sprintf("%s_averted_rate_tot", name)
   v_use <- sprintf("%s_averted_rate", name)
   v_type <- sprintf("%s_averted_rate_type", name)
-  ## there are cases where there are fvps but blank deaths/cases averted, whcih cause under-estimation of impact rates
+  ## there are fvps but blank deaths/cases averted, which cause under-estimation of impact rates
   ## in these cases, we should remove fvps from impact rates calculation.
   ## a small trick for this is here:
   d <- dat
