@@ -1,3 +1,6 @@
+### jenner 0.0.20
+ * Required by VIMC-2172. Fixing native impact rates (routine) where there are fvps given, but NA deaths averted, which casued under-estimation of impact rates.
+ 
 ### jenner 0.0.19
  * Required by VIMC-1892.Allows impact calcualation to include maxium age of interest.
  

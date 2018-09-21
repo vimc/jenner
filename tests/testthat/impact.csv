@@ -108,11 +108,11 @@ index,touchstone,modelling_group,disease,vaccine,impact_outcome,activity_type,na
 107,201710gavi-5,LSHTM-Clark,Rota,Rota,dalys_averted,routine,dalys_averted_total_routine,rota-routine-gavi,rota-no-vaccination,dalys,TRUE,FALSE,
 108,201710gavi-5,LSHTM-Clark,Rota,Rota,deaths_averted,routine,deaths_averted_total_routine,rota-routine-gavi,rota-no-vaccination,deaths,TRUE,FALSE,
 109,201710gavi-5,PHE-Vynnycky,Rubella,Rubella,cases_averted,campaign,cases_averted_total_campaign,rubella-campaign-gavi,rubella-routine-no-vaccination,rubella_cases_congenital,TRUE,FALSE,
-110,201710gavi-5,PHE-Vynnycky,Rubella,Rubella,cases_averted,routine,cases_averted_total_routine,rubella-routine-gavi,rubella-campaign-gavi,rubella_cases_congenital,TRUE,FALSE,"RCV1 is treated as focal, not RCV2"
+110,201710gavi-5,PHE-Vynnycky,Rubella,Rubella,cases_averted,routine,cases_averted_total_routine,rubella-rcv2-gavi,rubella-campaign-gavi,rubella_cases_congenital,TRUE,FALSE,"RCV1 is treated as focal, not RCV2"
 111,201710gavi-5,PHE-Vynnycky,Rubella,Rubella,dalys_averted,campaign,dalys_averted_total_campaign,rubella-campaign-gavi,rubella-routine-no-vaccination,dalys,TRUE,FALSE,
-112,201710gavi-5,PHE-Vynnycky,Rubella,Rubella,dalys_averted,routine,dalys_averted_total_routine,rubella-routine-gavi,rubella-campaign-gavi,dalys,TRUE,FALSE,"RCV1 is treated as focal, not RCV2"
+112,201710gavi-5,PHE-Vynnycky,Rubella,Rubella,dalys_averted,routine,dalys_averted_total_routine,rubella-rcv2-gavi,rubella-campaign-gavi,dalys,TRUE,FALSE,"RCV1 is treated as focal, not RCV2"
 113,201710gavi-5,PHE-Vynnycky,Rubella,Rubella,deaths_averted,campaign,deaths_averted_total_campaign,rubella-campaign-gavi,rubella-routine-no-vaccination,rubella_deaths_congenital,TRUE,FALSE,
-114,201710gavi-5,PHE-Vynnycky,Rubella,Rubella,deaths_averted,routine,deaths_averted_total_routine,rubella-routine-gavi,rubella-campaign-gavi,rubella_deaths_congenital,TRUE,FALSE,"RCV1 is treated as focal, not RCV2"
+114,201710gavi-5,PHE-Vynnycky,Rubella,Rubella,deaths_averted,routine,deaths_averted_total_routine,rubella-rcv2-gavi,rubella-campaign-gavi,rubella_deaths_congenital,TRUE,FALSE,"RCV1 is treated as focal, not RCV2"
 115,201710gavi-5,IC-Garske,YF,YF,cases_averted,campaign,cases_averted_total_campaign,yf-preventive-gavi,yf-no-vaccination,cases,TRUE,FALSE,
 116,201710gavi-5,IC-Garske,YF,YF,cases_averted,routine,cases_averted_total_routine,yf-routine-gavi,yf-preventive-gavi,cases,TRUE,FALSE,
 117,201710gavi-5,IC-Garske,YF,YF,dalys_averted,campaign,dalys_averted_total_campaign,yf-preventive-gavi,yf-no-vaccination,dalys,TRUE,FALSE,
