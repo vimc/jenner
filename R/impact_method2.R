@@ -182,7 +182,7 @@ make_impact <- function(con, index, year_min, year_max, routine_tot_rate_shape =
   ## Rubella routine and HepB_BD are two special cases
   ## Rubella = RCV1 + RCV2
   ## HepB_BD = HepB_BD + HepB_BD_home
-  if (vaccine == "Rubella" & activity_type == "routine") {
+  if (vaccine == "Rubella" & activity_type == "routine" & index$modelling_group == "PHE-Vynnycky" & index$touchstone == "201710gavi-5") {
     vaccine_sql <- "WHERE vaccine IN ('Rubella', 'RCV2')"
   } else if (vaccine == "HepB_BD_both") {
     vaccine_sql <- "WHERE vaccine IN ('HepB_BD', 'HepB_BD_home')"
