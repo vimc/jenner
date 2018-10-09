@@ -9,7 +9,12 @@ database_connection(location = "science", user = "readonly",
 }
 \arguments{
 \item{location}{One of "science", "production", "uat" or
-"localhost".  Be \emph{very} careful if using production}
+"localhost".  Be \emph{very} careful if using production.  If
+\code{NULL}, then the location is set by the
+\code{MONTAGU_DB_HOST} environment variable.  For running in
+import scripts you can arrange to set that to the value of the
+shell command \code{hostname} (e.g. \code{export
+MONTAGU_DB_HOST=$(hostname)}).}
 
 \item{user}{Username to connect as}
 
