@@ -1,3 +1,6 @@
+### jenner 0.0.21
+ * Required by VIMC-2255. Constrain Rubella routine total_fvps to be RCV1+RCV2 for 201710gavi/PHE model only; scenarios in later touchstones should have RCV1 and RCV2 evaluated seperately.
+ 
 ### jenner 0.0.20
  * Required by VIMC-2172. Fixing native impact rates (routine) where there are fvps given, but NA deaths averted, which casued under-estimation of impact rates.
  

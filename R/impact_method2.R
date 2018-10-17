@@ -180,9 +180,9 @@ make_impact <- function(con, index, year_min, year_max, routine_tot_rate_shape =
 
   ## 2.2 total_fvps
   ## Rubella routine and HepB_BD are two special cases
-  ## Rubella = RCV1 + RCV2
+  ## Rubella = RCV1 + RCV2 -> this only applies to 201710gavi model run; scenarios in later touchstones should have RCV1 and RCV2 evaluated seperately.
   ## HepB_BD = HepB_BD + HepB_BD_home
-  if (vaccine == "Rubella" & activity_type == "routine" & index$modelling_group == "PHE-Vynnycky" & index$touchstone == "201710gavi-5") {
+  if (vaccine == "Rubella" & activity_type == "routine" & index$modelling_group[1L] == "PHE-Vynnycky" & index$touchstone[1L] == "201710gavi-5") {
     vaccine_sql <- "WHERE vaccine IN ('Rubella', 'RCV2')"
   } else if (vaccine == "HepB_BD_both") {
     vaccine_sql <- "WHERE vaccine IN ('HepB_BD', 'HepB_BD_home')"
