@@ -242,7 +242,7 @@ project_coverage1 <- function(dat, year_from, year_proj_from, year_to, meta) {
   if (meta[[1]]$activity_type == "routine") {
     year <- year_proj_from:year_to
     tmp <- proj_cov(tmp, year)
-    rule_3 <- tmp$coverage[tmp$year == year_proj_from - 1]
+    rule_3 <- max(tmp$coverage[tmp$year < year_proj_from], na.rm = TRUE)
     tmp <- cap_cov(tmp, rule, rule_3)
   }
 

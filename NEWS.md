@@ -1,3 +1,6 @@
+### jenner 0.0.22
+ * VIMC-2382. Updating future projection constrain.
+
 ### jenner 0.0.21
  * Required by VIMC-2255. Constrain Rubella routine total_fvps to be RCV1+RCV2 for 201710gavi/PHE model only; scenarios in later touchstones should have RCV1 and RCV2 evaluated seperately.
  
