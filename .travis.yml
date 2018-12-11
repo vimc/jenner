@@ -3,4 +3,4 @@
 language: R
 sudo: false
 cache: packages
-r_github_packages: vimc/vaultr@refactor
+r_github_packages: vimc/vaultr
