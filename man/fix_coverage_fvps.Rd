@@ -27,6 +27,8 @@ to run this function.}
 
 \item{touchstone_pop}{population touchstone, this is for the modups
 where fvps are calculated using a coverage touchstone and a population touchstone}
+
+\item{gavi_support_levels}{specify gavi_support_levels that apply to the touchstone_name you are looking at}
 }
 \description{
 Provide age-specific coverage-un_pop-fvps
