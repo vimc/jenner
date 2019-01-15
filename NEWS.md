@@ -1,4 +1,4 @@
-### jenner 0.0.23
+### jenner 0.0.24
  * VIMC-2492. Expand fix_coverage_fvps to allow specified gavi_support_levels
 
 ### jenner 0.0.22
