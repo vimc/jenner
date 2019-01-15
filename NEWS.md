@@ -1,3 +1,9 @@
+### jenner 0.0.24
+ * VIMC-2492. Expand fix_coverage_fvps to allow specified gavi_support_levels
+
+### jenner 0.0.23
+ * VIMC-2446. Support updated vaultr in jenner 
+
 ### jenner 0.0.22
  * VIMC-2382. Updating future projection constrain.
 

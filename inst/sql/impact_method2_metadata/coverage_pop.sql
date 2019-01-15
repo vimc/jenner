@@ -20,8 +20,8 @@ JOIN gender
 JOIN num
   ON num.i <= (age_to - age_from + 1)
 WHERE touchstone = $1
-AND gavi_support_level IN ('with', 'bestminus')
 %1s
+%2s
   AND vaccine NOT IN ('none', 'DTP3')
   AND year BETWEEN $2 AND $3) As coverage_fvps
 ----------------------------------------------------------------------------------
@@ -38,7 +38,7 @@ JOIN demographic_statistic_type
 JOIN gender
   ON gender.id = demographic_statistic.gender
 WHERE touchstone_demographic_dataset.touchstone = $4
-%2s
+%3s
   AND demographic_statistic_type.code = 'int_pop'
   AND year BETWEEN $2 AND $3) AS un_population
 ----------------------------------------------------------------------------------

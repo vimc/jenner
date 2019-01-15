@@ -373,9 +373,10 @@ make_impact_method1 <- function(con, index, age_max) {
 ##' @param report_suspecious_coverage switch on/off the reporting of suspecious coverage
 ##' @param touchstone_pop population touchstone, this is for the modups
 ##' where fvps are calculated using a coverage touchstone and a population touchstone
+##' @param gavi_support_levels specify gavi_support_levels that apply to the touchstone_name you are looking at
 ##' @export
 fix_coverage_fvps <- function(con, touchstone_name = "201710gavi", year_min = 2000, year_max = 2100,
-                              pine = FALSE, write_table = TRUE, report_suspecious_coverage = FALSE, touchstone_pop = NULL) {
+                              pine = FALSE, write_table = TRUE, report_suspecious_coverage = FALSE, touchstone_pop = NULL, gavi_support_levels = c("with", "bestminus")) {
   ### This function convert input data - coverage and UNWPP
   ### i.e. input data by country, year and age
   message("Preparing temporary table <temporary_coverage_fvps>")
@@ -393,10 +394,10 @@ fix_coverage_fvps <- function(con, touchstone_name = "201710gavi", year_min = 20
     touchstone_pop <- touchstone
   } else {
     version <- DBI::dbGetQuery(con, "SELECT MAX(touchstone.version) as version FROM touchstone
-                             WHERE touchstone_name = $1 AND version != 42", touchstone_pop)
+                               WHERE touchstone_name = $1 AND version != 42", touchstone_pop)
     touchstone_pop <- DBI::dbGetQuery(con, "SELECT id FROM touchstone
-                                WHERE touchstone_name = $1
-                                AND version = $2", list(touchstone_pop, version$version))
+                                      WHERE touchstone_name = $1
+                                      AND version = $2", list(touchstone_pop, version$version))
   }
   ## 2. creat a number table. It will be used to duplicate input data by [age_from, age_to]
   i <- data.frame(i = 1:101, stringsAsFactors = FALSE)
@@ -404,13 +405,14 @@ fix_coverage_fvps <- function(con, touchstone_name = "201710gavi", year_min = 20
 
   ## 3. select minimal needed input data from db and make it age stratified - gender specific (modup is not considering gender)
   sql <- read_sql(file_name = "impact_method2_metadata/coverage_pop.sql")
+  z <- sprintf("AND gavi_support_level IN %s", sql_in(gavi_support_levels))
   if (pine) {
     ## pine + PHL: add PHL because HepB scenarios may not have any pine countries
     countries <- c("PAK", "IND", "NGA", "ETH", "PHL")
     v <- sprintf("AND country IN %s", sql_in(countries))
-    sql <- sprintf(sql, v, v)
+    sql <- sprintf(sql, z, v, v)
   } else {
-    sql <- sprintf(sql, "\t", "\t")
+    sql <- sprintf(sql, z, "\t", "\t")
   }
   tab <- DBI::dbGetQuery(con, sql, list(touchstone$id, year_min, year_max, touchstone_pop$id))
 
@@ -453,7 +455,7 @@ fix_coverage_fvps <- function(con, touchstone_name = "201710gavi", year_min = 20
   } else {
     tab
   }
-}
+  }
 
 impact_output <- function(impact, method) {
   ## bind output
