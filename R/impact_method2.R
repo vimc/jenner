@@ -404,10 +404,10 @@ fix_coverage_fvps <- function(con, touchstone_name = "201710gavi", year_min = 20
   
   ## 3. select minimal needed input data from db and make it age stratified - gender specific (modup is not considering gender)
   sql <- read_sql(file_name = "impact_method2_metadata/coverage_pop.sql")
+  z <- sprintf("AND gavi_support_level IN %s", sql_in(gavi_support_levels))
   if (pine) {
     ## pine + PHL: add PHL because HepB scenarios may not have any pine countries
     countries <- c("PAK", "IND", "NGA", "ETH", "PHL")
-    z <- sprintf("AND gavi_support_level IN %s", sql_in(gavi_support_levels))
     v <- sprintf("AND country IN %s", sql_in(countries))
     sql <- sprintf(sql, z, v, v)
   } else {
