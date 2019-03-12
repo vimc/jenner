@@ -4,7 +4,8 @@
 \alias{project_coverage}
 \title{Project coverage}
 \usage{
-project_coverage(dat, year_project_from, year_from = 1980, year_to = 2100)
+project_coverage(dat, year_project_from, year_from = 1980,
+  year_to = 2100)
 }
 \arguments{
 \item{dat}{Data with columns...}

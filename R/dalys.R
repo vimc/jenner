@@ -9,9 +9,18 @@
 ##' @param year_max maximum year
 ##' @param vimc_dalys_only set to be TRUE if we are only interested in Ferrari, Li and LiST (201710gavi)
 ##' @param modelling_group This parameter makes the calcualtion more flexible, specify a vector of modelling_group(s) that you are interested in.
+##' @param stochastic_data If this is not NULL, then instead of querying the database for the burden
+##' estimate set, use the specified stochastic_data, which must be a data frame containing the columns
+##' "burden_estimate_set", "country", "year", "age", "burden_outcome" and "burden". The burden_estimate_set
+##' should refer to the central burden estimate set for that group, which daly parameters related to.
+##' "country" is the 3-character representation. "year" and "age" are trivial; "burden_outcome" is the
+##' integer code for the burden, for each line, and "burden" is the data value.
 ##'
 ##' @export
-calculate_dalys <- function(con, touchstone_name, year_min = 2000, year_max = 2030, vimc_dalys_only = TRUE, modelling_group = NULL) {
+calculate_dalys <- function(con, touchstone_name, year_min = 2000, year_max = 2030,
+                            vimc_dalys_only = TRUE, modelling_group = NULL,
+                            stochastic_data = NULL) {
+
   ## [make temporary dalys parameter table]
   dalys_parameters <- create_dalys_parameters(con, touchstone_name, vimc_dalys_only)
   if (!is.null(modelling_group)) {
@@ -28,7 +37,7 @@ calculate_dalys <- function(con, touchstone_name, year_min = 2000, year_max = 20
   sets <- unique(dalys_parameters$burden_estimate_set_id)
   dalys_out <- lapply(sets, function(i) calculate_dalys1(con, life_table, i,
                                                          sql_in(unique(dalys_parameters$burden_outcome_id[dalys_parameters$burden_estimate_set_id == i]), text_item = FALSE),
-                                                         year_min, year_max))
+                                                         year_min, year_max, stochastic_data))
   # output
   dat <- do.call(rbind, dalys_out)
   dat$burden_outcome <- DBI::dbGetQuery(con, "SELECT id FROM burden_outcome WHERE code = 'dalys'")$id
@@ -114,24 +123,99 @@ interpolate_age <- function(dat) {
   interp
 }
 
-calculate_dalys1 <- function(con, life_table, burden_estiamte_set_id, burden_outcomes, year_min, year_max) {
-  message(sprintf("calculating dalys for burden_estimate_set %s", burden_estiamte_set_id))
+
+get_dalys_data_db <- function(con, burden_estimate_set_id,
+                              burden_outcomes, year_min, year_max) {
+
+  message(sprintf("calculating dalys for burden_estimate_set %s",
+                  burden_estimate_set_id))
+
   # burden_estimates
-  sql <- paste("SELECT tab1.*, tab2.* FROM",
-               "(SELECT burden_estimate_set, country.id AS country, year, age, burden_outcome, value as burden",
-               "FROM burden_estimate",
-               "JOIN country ON country.nid = burden_estimate.country",
-               "WHERE burden_estimate_set = $1",
-               sprintf("AND burden_outcome IN %s", burden_outcomes),
-               "AND year BETWEEN $2 AND $3) as tab1",
-               "LEFT JOIN",
-               "(SELECT * FROM dalys_parameters",
-               "WHERE burden_estimate_set_id = $1) as tab2",
-               "ON tab1.burden_estimate_set = tab2.burden_estimate_set_id",
-               "AND tab1.burden_outcome = tab2.burden_outcome_id "
+
+  sql <- paste(
+    "SELECT tab1.*, tab2.* FROM",
+    "  (  SELECT burden_estimate_set, country.id AS country, ",
+    "            year, age, ",
+    "            burden_outcome, value as burden",
+    "       FROM burden_estimate",
+    "       JOIN country ON country.nid = burden_estimate.country",
+    "      WHERE burden_estimate_set = $1",
+    sprintf("AND burden_outcome IN %s", burden_outcomes),
+    "        AND year BETWEEN $2 AND $3",
+    "  ) as tab1",
+    "LEFT JOIN",
+    "  (  SELECT * FROM dalys_parameters",
+    "      WHERE burden_estimate_set_id = $1) as tab2",
+    "         ON tab1.burden_estimate_set = tab2.burden_estimate_set_id",
+    "        AND tab1.burden_outcome = tab2.burden_outcome_id "
   )
-  v <- DBI::dbGetQuery(con, sql, list(burden_estiamte_set_id, year_min, year_max))
+
+  v <- DBI::dbGetQuery(con, sql, list(burden_estimate_set_id, year_min, year_max))
   message("finish reading from db")
+  v
+}
+
+get_dalys_data_stochastic <- function(con, data, burden_estimate_surrogate,
+                                      burden_outcomes, year_min, year_max) {
+
+  # Convert chars "(a,b)" to vector of a, b
+
+  burden_outcomes <- gsub("\\(", "", burden_outcomes)
+  burden_outcomes <- gsub("\\)", "", burden_outcomes)
+  burden_outcomes <- as.integer(unlist(strsplit(burden_outcomes, ",")))
+
+  # Check the input data frame a bit
+
+  expected_cols <- c("burden_estimate_set", "country", "year",
+                      "age", "burden_outcome", "burden")
+  for (e in expected_cols) {
+    if (!e %in% names(data)) {
+      stop(sprintf("Error - missing column '%s' in data", e))
+    }
+  }
+
+  # Filter input by outcomes and years
+
+  v <- data[data$burden_estimate_set == burden_estimate_surrogate &
+            data$burden_outcome %in% burden_outcomes &
+            data$year >= year_min &
+            data$year <= year_max, ]
+
+  # Fetch dalys parameters for the "central estimate set" which we're
+  # told the stochastic data relates to.
+
+  dp <- DBI::dbGetQuery(con, "SELECT * FROM dalys_parameters
+                               WHERE burden_estimate_set_id = $1",
+                                          burden_estimate_surrogate)
+
+  # Left Join - for each line in dp, column-bind all the burdens with
+  # matching outcome to it. Then rbind everything together.
+
+  new_data <- NULL
+  for (dpi in seq_len(nrow(dp))) {
+    new_data <- rbind(new_data,
+      cbind(v[v$burden_outcome == dp$burden_outcome_id[dpi],],
+            dp[dpi, ]))
+  }
+
+  new_data
+}
+
+calculate_dalys1 <- function(con, life_table, burden_estimate_set_id,
+                             burden_outcomes, year_min, year_max,
+                             stochastic_data = NULL) {
+
+  message(sprintf("calculating dalys for burden_estimate_set %s",
+                  burden_estimate_set_id))
+
+  if (is.null(stochastic_data)) {
+    v <- get_dalys_data_db(con, burden_estimate_set_id, burden_outcomes,
+                           year_min, year_max)
+  } else {
+
+    v <- get_dalys_data_stochastic(con, data, burden_estimate_set_id,
+                                   burden_outcomes, year_min, year_max)
+  }
 
   # match dalys parameters
   v$.code <- paste(v$country, v$year, v$age, sep = "-")
@@ -143,7 +227,7 @@ calculate_dalys1 <- function(con, life_table, burden_estiamte_set_id, burden_out
   # calculate dalys
   v$value <- v$burden * v$adjusted_weight * v$adjusted_duration
   #aggregate to return output in the same structure as burden_estiamte
-  dat <- stats::aggregate(value ~ burden_estimate_set + country + year + age, data = v, sum, na.rm = TRUE)
+  stats::aggregate(value ~ burden_estimate_set + country + year + age, data = v, sum, na.rm = TRUE)
 }
 
 duration_weighting <- function(period) {
@@ -158,4 +242,3 @@ duration_weighting <- function(period) {
   w[d] <- 1./365
   w
 }
-
