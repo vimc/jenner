@@ -35,10 +35,9 @@ calculate_dalys <- function(con, touchstone_name, year_min = 2000, year_max = 20
   life_table <- create_dalys_life_table(con, touchstone_name, year_min, year_max)
 
   sets <- unique(dalys_parameters$burden_estimate_set_id)
-  dalys_out <- lapply(sets, function(i)
-    calculate_dalys1(con, life_table, i,
-      sql_in(unique(dalys_parameters$burden_outcome_id[dalys_parameters$burden_estimate_set_id == i]), text_item = FALSE),
-      year_min, year_max, stochastic_data))
+  dalys_out <- lapply(sets, function(i) calculate_dalys1(con, life_table, i,
+                                                         sql_in(unique(dalys_parameters$burden_outcome_id[dalys_parameters$burden_estimate_set_id == i]), text_item = FALSE),
+                                                         year_min, year_max, stochastic_data))
   # output
   dat <- do.call(rbind, dalys_out)
   dat$burden_outcome <- DBI::dbGetQuery(con, "SELECT id FROM burden_outcome WHERE code = 'dalys'")$id
