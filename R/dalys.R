@@ -213,7 +213,7 @@ calculate_dalys1 <- function(con, life_table, burden_estimate_set_id,
                            year_min, year_max)
   } else {
 
-    v <- get_dalys_data_stochastic(con, data, burden_estimate_set_id,
+    v <- get_dalys_data_stochastic(con, stochastic_data, burden_estimate_set_id,
                                    burden_outcomes, year_min, year_max)
   }
 
