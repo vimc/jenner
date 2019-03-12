@@ -5,7 +5,8 @@
 \title{DALYs calculation}
 \usage{
 calculate_dalys(con, touchstone_name, year_min = 2000, year_max = 2030,
-  vimc_dalys_only = TRUE, modelling_group = NULL)
+  vimc_dalys_only = TRUE, modelling_group = NULL,
+  stochastic_data = NULL)
 }
 \arguments{
 \item{con}{You can be \code{readonly} user to run this function.
@@ -20,6 +21,13 @@ But if you need to import dalys for Ferrari, Li and LiST (201710gavi), you can u
 \item{vimc_dalys_only}{set to be TRUE if we are only interested in Ferrari, Li and LiST (201710gavi)}
 
 \item{modelling_group}{This parameter makes the calcualtion more flexible, specify a vector of modelling_group(s) that you are interested in.}
+
+\item{stochastic_data}{If this is not NULL, then instead of querying the database for the burden
+estimate set, use the specified stochastic_data, which must be a data frame containing the columns
+"burden_estimate_set", "country", "year", "age", "burden_outcome" and "burden". The burden_estimate_set
+should refer to the central burden estimate set for that group, which daly parameters related to.
+"country" is the 3-character representation. "year" and "age" are trivial; "burden_outcome" is the
+integer code for the burden, for each line, and "burden" is the data value.}
 }
 \description{
 Calculate dalys

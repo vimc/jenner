@@ -1,3 +1,6 @@
+### jenner 0.0.25
+ * VIMC-2750. Allow dalys calculation from a data frame, without querying burdens from database
+
 ### jenner 0.0.24
  * VIMC-2492. Expand fix_coverage_fvps to allow specified gavi_support_levels
 
