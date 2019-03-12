@@ -204,30 +204,38 @@ get_dalys_data_stochastic <- function(con, data, burden_estimate_surrogate,
 calculate_dalys1 <- function(con, life_table, burden_estimate_set_id,
                              burden_outcomes, year_min, year_max,
                              stochastic_data = NULL) {
+  bes <- burden_estimate_set_id
+  result <- NULL
+  if (!is.null(stochastic_data)) {
+    bes <- unique(stochastic_data$burden_estimate_set)
 
-  message(sprintf("calculating dalys for burden_estimate_set %s",
-                  burden_estimate_set_id))
-
-  if (is.null(stochastic_data)) {
-    v <- get_dalys_data_db(con, burden_estimate_set_id, burden_outcomes,
-                           year_min, year_max)
-  } else {
-
-    v <- get_dalys_data_stochastic(con, stochastic_data, burden_estimate_set_id,
-                                   burden_outcomes, year_min, year_max)
   }
+  if (burden_estimate_set_id %in% bes) {
+    message(sprintf("calculating dalys for burden_estimate_set %s",
+                    burden_estimate_set_id))
 
-  # match dalys parameters
-  v$.code <- paste(v$country, v$year, v$age, sep = "-")
-  v <- merge(v, life_table, by = ".code", all.x = TRUE)
-  # make condition-sepcific adjusted duration
-  v$adjusted_duration <- v$duration
-  j <- v$remainning_life_exp < v$duration
-  v$adjusted_duration[j] <- v$remainning_life_exp[j]
-  # calculate dalys
-  v$value <- v$burden * v$adjusted_weight * v$adjusted_duration
-  #aggregate to return output in the same structure as burden_estiamte
-  stats::aggregate(value ~ burden_estimate_set + country + year + age, data = v, sum, na.rm = TRUE)
+    if (is.null(stochastic_data)) {
+      v <- get_dalys_data_db(con, burden_estimate_set_id, burden_outcomes,
+                             year_min, year_max)
+    } else {
+
+      v <- get_dalys_data_stochastic(con, stochastic_data, burden_estimate_set_id,
+                                     burden_outcomes, year_min, year_max)
+    }
+
+    # match dalys parameters
+    v$.code <- paste(v$country, v$year, v$age, sep = "-")
+    v <- merge(v, life_table, by = ".code", all.x = TRUE)
+    # make condition-sepcific adjusted duration
+    v$adjusted_duration <- v$duration
+    j <- v$remainning_life_exp < v$duration
+    v$adjusted_duration[j] <- v$remainning_life_exp[j]
+    # calculate dalys
+    v$value <- v$burden * v$adjusted_weight * v$adjusted_duration
+    #aggregate to return output in the same structure as burden_estiamte
+    result <- stats::aggregate(value ~ burden_estimate_set + country + year + age, data = v, sum, na.rm = TRUE)
+  }
+  result
 }
 
 duration_weighting <- function(period) {
