@@ -24,7 +24,7 @@
 ##' @export
 calculate_dalys <- function(con, touchstone_name, year_min = 2000, year_max = 2030,
                             vimc_dalys_only = TRUE, modelling_group = NULL,
-                            stochastic_data = NULL, daly_parameters = NULL,
+                            stochastic_data = NULL, dalys_parameters = NULL,
                             life_table = NULL) {
 
   ## [make temporary dalys parameter table]
