@@ -1,3 +1,6 @@
+### jenner 0.0.26
+ * VIMC-2755. Allow dalys life table and parameter objects to be reused for subsequent runs. (For stochastic performance)
+
 ### jenner 0.0.25
  * VIMC-2750. Allow dalys calculation from a data frame, without querying burdens from database
 

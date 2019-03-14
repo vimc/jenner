@@ -1,5 +1,5 @@
 ##' Calculate dalys
-##'
+##' @rdname calculate_dalys
 ##' @title DALYs calculation
 ##'
 ##' @param con You can be \code{readonly} user to run this function.
@@ -15,14 +15,23 @@
 ##' should refer to the central burden estimate set for that group, which daly parameters related to.
 ##' "country" is the 3-character representation. "year" and "age" are trivial; "burden_outcome" is the
 ##' integer code for the burden, for each line, and "burden" is the data value.
-##'
+##' @param dalys_parameters Leave as NULL, for single calls to calculate_dalys, but for many calls,
+##' for example stochastic runs, call create_dalys_parameters first, and pass the result as an
+##' argument here to speed things up.
+##' @param life_table Leave as NULL, for single calls to calculate_dalys, but for many calls,
+##' for example stochastic runs, call create_dalys_life_table first, and pass the result as an
+##' argument here to speed things up significantly.
 ##' @export
 calculate_dalys <- function(con, touchstone_name, year_min = 2000, year_max = 2030,
                             vimc_dalys_only = TRUE, modelling_group = NULL,
-                            stochastic_data = NULL) {
+                            stochastic_data = NULL, daly_parameters = NULL,
+                            life_table = NULL) {
 
   ## [make temporary dalys parameter table]
-  dalys_parameters <- create_dalys_parameters(con, touchstone_name, vimc_dalys_only)
+  if (is.null(dalys_parameters)) {
+    dalys_parameters <- create_dalys_parameters(con, touchstone_name, vimc_dalys_only)
+  }
+
   if (!is.null(modelling_group)) {
     i <- modelling_group %in% dalys_parameters$modelling_group
     if (any(!i)) {
@@ -32,7 +41,9 @@ calculate_dalys <- function(con, touchstone_name, year_min = 2000, year_max = 20
     }
   }
   ## [make remaining life expectancy table] - this will take some time
-  life_table <- create_dalys_life_table(con, touchstone_name, year_min, year_max)
+  if (is.null(life_table)) {
+    life_table <- create_dalys_life_table(con, touchstone_name, year_min, year_max)
+  }
 
   sets <- unique(dalys_parameters$burden_estimate_set_id)
   dalys_out <- lapply(sets, function(i) calculate_dalys1(con, life_table, i,
@@ -45,6 +56,9 @@ calculate_dalys <- function(con, touchstone_name, year_min = 2000, year_max = 20
   dat[cols]
 }
 
+##' @inherit calculate_dalys
+##' @rdname calculate_dalys
+##' @export
 create_dalys_parameters <- function(con, touchstone_name = "201710gavi", vimc_dalys_only) {
   dalys_src <- read_csv(system.file("dalys_parameters.csv", package = "jenner", mustWork = TRUE))
   ## subsetting those for which VIMC has to calculate DALYs - vimc_dalys = TRUE
@@ -71,6 +85,9 @@ create_dalys_parameters <- function(con, touchstone_name = "201710gavi", vimc_da
   dalys_src[cols]
 }
 
+##' @inherit calculate_dalys
+##' @rdname calculate_dalys
+##' @export
 create_dalys_life_table <- function(con, touchstone_name = "201710gavi", year_min = 2000, year_max = 2030) {
   message("Creating touchstone specific life table - remaining life expectancy by country, year and age")
   sql <- read_sql(file_name = "dalys_calculation/raw_remaining_life_expectancy.sql")
