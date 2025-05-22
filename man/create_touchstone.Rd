@@ -4,8 +4,14 @@
 \alias{create_touchstone}
 \title{Create a new touchstone}
 \usage{
-create_touchstone(con, dat, demography_from = NULL, path_meta = "meta",
-  transaction = TRUE, dry_run = TRUE)
+create_touchstone(
+  con,
+  dat,
+  demography_from = NULL,
+  path_meta = "meta",
+  transaction = TRUE,
+  dry_run = TRUE
+)
 }
 \arguments{
 \item{con}{Database connection.  You will need to be the

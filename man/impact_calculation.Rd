@@ -4,9 +4,15 @@
 \alias{impact_calculation}
 \title{Impact Calculation (method 2)}
 \usage{
-impact_calculation(con, meta, year_min = 2000, year_max = 2030,
-  routine_tot_rate_shape = "trace_cohort", method = "method2",
-  age_max = 100)
+impact_calculation(
+  con,
+  meta,
+  year_min = 2000,
+  year_max = 2030,
+  routine_tot_rate_shape = "trace_cohort",
+  method = "method2",
+  age_max = 100
+)
 }
 \arguments{
 \item{con}{Database connection.  You will need to be \code{readonly} user
@@ -20,7 +26,7 @@ to run this function.}
 
 \item{routine_tot_rate_shape}{This parameter determines how we chop off the year-age matrix to calculate impact rates
 campaign is stratiforward, use all fvps and all burden estimates to calculate impact rate. So no need to specify.
-Becuase all impacts (years 2000-2100) are derived from campaigns between 2000 and 2030.
+Becuase all impacts (years 2000-2100) are derived from campaigns between 2000 and 2030 (relaxed for Cholera).
 Routine is more complicated. We either trance birth cohort between 2000-2030 or trance all birth cohorts between 2000-2100.}
 
 \item{method}{impact calculation method - chose from method1 and method2

@@ -6,15 +6,26 @@
 \alias{create_dalys_life_table}
 \title{DALYs calculation}
 \usage{
-calculate_dalys(con, touchstone_name, year_min = 2000, year_max = 2030,
-  vimc_dalys_only = TRUE, modelling_group = NULL,
-  stochastic_data = NULL, dalys_parameters = NULL, life_table = NULL)
+calculate_dalys(
+  con,
+  touchstone_name,
+  year_min = 2000,
+  year_max = 2030,
+  vimc_dalys_only = TRUE,
+  modelling_group = NULL,
+  stochastic_data = NULL,
+  dalys_parameters = NULL,
+  life_table = NULL
+)
 
-create_dalys_parameters(con, touchstone_name = "201710gavi",
-  vimc_dalys_only)
+create_dalys_parameters(con, touchstone_name = "201710gavi", vimc_dalys_only)
 
-create_dalys_life_table(con, touchstone_name = "201710gavi",
-  year_min = 2000, year_max = 2030)
+create_dalys_life_table(
+  con,
+  touchstone_name = "201710gavi",
+  year_min = 2000,
+  year_max = 2030
+)
 }
 \arguments{
 \item{con}{You can be \code{readonly} user to run this function.

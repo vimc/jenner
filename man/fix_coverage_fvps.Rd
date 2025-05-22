@@ -4,10 +4,17 @@
 \alias{fix_coverage_fvps}
 \title{Impact Calculation (method 2)}
 \usage{
-fix_coverage_fvps(con, touchstone_name = "201710gavi", year_min = 2000,
-  year_max = 2100, pine = FALSE, write_table = TRUE,
-  report_suspecious_coverage = FALSE, touchstone_pop = NULL,
-  gavi_support_levels = c("with", "bestminus"))
+fix_coverage_fvps(
+  con,
+  touchstone_name = "201710gavi",
+  year_min = 2000,
+  year_max = 2100,
+  pine = FALSE,
+  write_table = TRUE,
+  report_suspecious_coverage = FALSE,
+  touchstone_pop = NULL,
+  gavi_support_levels = c("with", "bestminus")
+)
 }
 \arguments{
 \item{con}{Database connection.  You will need to be \code{readonly} user

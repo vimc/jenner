@@ -4,8 +4,12 @@
 \alias{database_connection}
 \title{Connect to database}
 \usage{
-database_connection(location = "science", user = "readonly",
-  local_port = NULL, local_password_group = "science")
+database_connection(
+  location = "science",
+  user = "readonly",
+  local_port = NULL,
+  local_password_group = "science"
+)
 }
 \arguments{
 \item{location}{One of "science", "production", "uat" or
