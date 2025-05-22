@@ -56,7 +56,6 @@ calculate_dalys <- function(con, touchstone_name, year_min = 2000, year_max = 20
   dat[cols]
 }
 
-##' @inherit calculate_dalys
 ##' @rdname calculate_dalys
 ##' @export
 create_dalys_parameters <- function(con, touchstone_name = "201710gavi", vimc_dalys_only) {
@@ -85,7 +84,6 @@ create_dalys_parameters <- function(con, touchstone_name = "201710gavi", vimc_da
   dalys_src[cols]
 }
 
-##' @inherit calculate_dalys
 ##' @rdname calculate_dalys
 ##' @export
 create_dalys_life_table <- function(con, touchstone_name = "201710gavi", year_min = 2000, year_max = 2030) {

@@ -1,3 +1,6 @@
+## jenner 0.0.27
+* vimc-7551. Allow campaign year to be extended beyond 2030.
+
 ### jenner 0.0.26
  * VIMC-2755. Allow dalys life table and parameter objects to be reused for subsequent runs. (For stochastic performance)
 

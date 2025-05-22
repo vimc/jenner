@@ -9,7 +9,7 @@
 ##' @param year_max maximal year year of vaccination
 ##' @param routine_tot_rate_shape This parameter determines how we chop off the year-age matrix to calculate impact rates
 ##' campaign is stratiforward, use all fvps and all burden estimates to calculate impact rate. So no need to specify.
-##' Becuase all impacts (years 2000-2100) are derived from campaigns between 2000 and 2030.
+##' Becuase all impacts (years 2000-2100) are derived from campaigns between 2000 and 2030 (relaxed for Cholera).
 ##' Routine is more complicated. We either trance birth cohort between 2000-2030 or trance all birth cohorts between 2000-2100.
 ##' @param method impact calculation method - chose from method1 and method2
 ##' impact outcome can be provided as age specific if simplified=FALSE
@@ -192,7 +192,7 @@ make_impact <- function(con, index, year_min, year_max, routine_tot_rate_shape =
 
   if (activity_type == "campaign"){
     shape <- paste(sprintf("AND year BETWEEN %s", 2000),
-                   sprintf(" AND %s", 2030), sep = "\n")
+                   sprintf(" AND %s", year_max), sep = "\n")
   }else{
     if (routine_tot_rate_shape == "trace_cohort"){
       shape <- paste(sprintf("AND year BETWEEN %s", year_min),
