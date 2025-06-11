@@ -3,3 +3,4 @@
 ^Makefile$
 ^\.travis\.yml$
 ^TODO\.md$
+^\.github$
