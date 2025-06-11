@@ -1,6 +1,9 @@
 # jenner
 
-[![Travis-CI Build Status](https://travis-ci.org/vimc/jenner.svg?branch=master)](https://travis-ci.org/vimc/jenner)
+<!-- badges: start -->
+[![R-CMD-check](https://github.com/vimc/jenner/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/vimc/jenner/actions/workflows/R-CMD-check.yaml)
+[![Codecov test coverage](https://codecov.io/gh/vimc/jenner/graph/badge.svg)](https://app.codecov.io/gh/vimc/jenner)
+<!-- badges: end -->
 
 This is our set of science-team facing helper functions for montagu.  It holds things for using the database from R (not the API, which is done by the [montagu](https://github.com/vimc/montagu-r) R client package).
 

@@ -3,8 +3,16 @@ Title: Internal Montagu Helpers
 Version: 0.0.27
 Description: Helpers for Montagu.
 License: MIT + file LICENSE
-Author: Rich FitzJohn
-Maintainer: Rich FitzJohn <rich.fitzjohn@gmail.com>
+Authors@R:
+    c(person(given = "Xiang",
+             family = "Li",
+             role = c("aut", "cre"),
+             email = "x.li@imperial.ac.uk"),
+      person(given = "Katy", family = "Gaythorpe", role = "aut"),
+      person(given = "Rich", family = "FitzJohn", role = "aut"),
+      person(given = "Wes", family = "Hinsley", role = "aut"),
+      person("Imperial College of Science, Technology and Medicine",
+             role = "cph"))
 Imports:
     DBI,
     RcppRoll,
